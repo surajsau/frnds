@@ -1,4 +1,6 @@
-package com.halfplatepoha.frnds;
+package com.halfplatepoha.frnds.network.servicegenerators;
+
+import com.halfplatepoha.frnds.IConstants;
 
 import java.io.IOException;
 
@@ -15,7 +17,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 /**
  * Created by surajkumarsau on 24/08/16.
  */
-public class ServiceGenerator {
+public class SoundCloudServiceGenerator {
 
     private static Interceptor apiKeyInterceptor = new Interceptor() {
          @Override

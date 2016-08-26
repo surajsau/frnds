@@ -1,7 +1,10 @@
-package com.halfplatepoha.frnds;
+package com.halfplatepoha.frnds.network;
+
+import java.util.List;
 
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import rx.Observable;
 
 /**
@@ -11,4 +14,7 @@ public interface SoundCloudClient {
 
     @GET("tracks/{id}")
     Observable<TrackResponse> getTrackDetails(@Path("id") String id);
+
+    @GET("tracks")
+    Observable<List<TrackDetails>> getSearchResult(@Query("q") String searchString);
 }

@@ -11,10 +11,28 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    signingConfigs {
+        releaseKey {
+            keyAlias 'frnds'
+            keyPassword 'suraj264'
+            storeFile file('../frnds.jks')
+            storePassword 'suraj264'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable true
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.releaseKey
+            debuggable true
         }
     }
 }
@@ -32,5 +50,9 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.0'
+    compile 'com.jakewharton.rxbinding:rxbinding:0.4.0'
     compile 'com.android.support:support-v4:24.1.1'
+    compile 'com.google.firebase:firebase-database:9.4.0'
 }
+
+apply plugin: 'com.google.gms.google-services'
