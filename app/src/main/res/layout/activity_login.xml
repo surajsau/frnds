@@ -9,10 +9,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.halfplatepoha.frnds.LoginActivity">
 
-    <Button android:id="@+id/btnLogin"
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/btnFbLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login"
         android:layout_centerInParent="true"/>
 
 </RelativeLayout>

@@ -7,7 +7,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.EditText;
 
-import com.batch.android.Batch;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -85,27 +84,4 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
     @Override
     public void onCancelled(DatabaseError databaseError) {}
 
-    @Override
-    protected void onStop() {
-        Batch.onStop(this);
-        super.onStop();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Batch.onStart(this);
-    }
-
-    @Override
-    protected void onDestroy() {
-        Batch.onDestroy(this);
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        Batch.onNewIntent(this, intent);
-        super.onNewIntent(intent);
-    }
 }
