@@ -14,5 +14,6 @@ public class FrndsApplication extends Application {
     public void onCreate() {
         super.onCreate();
         FacebookSdk.sdkInitialize(this);
+        FrndsPreference.init(this, IConstants.PREFERNCE_FILE);
     }
 }

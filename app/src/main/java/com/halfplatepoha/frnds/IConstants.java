@@ -14,4 +14,6 @@ public interface IConstants {
     String TRACK_TITLE = "track_title";
 
     String USER_ID = "user_id";
+
+    String PREFERNCE_FILE = "preference_file";
 }
