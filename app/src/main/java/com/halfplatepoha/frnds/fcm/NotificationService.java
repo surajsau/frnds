@@ -24,6 +24,7 @@ public class NotificationService extends FirebaseMessagingService {
 
     private ObjectMapper mMapper;
     private String mUsername;
+    private NotificationManager mManager;
 
     @Override
     public void onCreate() {
