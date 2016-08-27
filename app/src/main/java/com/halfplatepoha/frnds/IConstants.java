@@ -16,4 +16,6 @@ public interface IConstants {
     String USER_ID = "user_id";
 
     String PREFERNCE_FILE = "preference_file";
+
+    int NOTIFICATION_ID = 1;
 }

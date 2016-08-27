@@ -11,9 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.halfplatepoha.frnds.FrndsLog;
-import com.halfplatepoha.frnds.FrndsPreference;
-import com.halfplatepoha.frnds.IPrefConstants;
+import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.NotificationModel;
+import com.halfplatepoha.frnds.R;
 
 import java.io.IOException;
 
@@ -23,7 +23,6 @@ import java.io.IOException;
 public class NotificationService extends FirebaseMessagingService {
 
     private ObjectMapper mMapper;
-    private String mUsername;
     private NotificationManager mManager;
 
     @Override
@@ -33,7 +32,7 @@ public class NotificationService extends FirebaseMessagingService {
         mMapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
         mMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-        mUsername = FrndsPreference.getFromPref(IPrefConstants.USER_NAME, "there");
+        mManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
     }
 
     @Override
@@ -45,23 +44,31 @@ public class NotificationService extends FirebaseMessagingService {
         try {
             NotificationModel model = mMapper.readValue(remoteMessage.getNotification().getBody(), NotificationModel.class);
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                                                    .setContentText(model.getFriendName()
-                                                            + " is listening to "
-                                                            + model.getTrackName()
-                                                            + (model.isLastSongPlayedByUser() ? " which you played last" : "")
-                                                            + ". Join "
-                                                            + (model.isMale() ? "him" : "her")
-                                                            + "!")
-                                                    .setContentTitle("Hey " + mUsername + " ...")
+                                                    .setStyle(new NotificationCompat.BigTextStyle().bigText(getMessageFromModel(model)))
+                                                    .setSmallIcon(R.mipmap.ic_launcher)
+                                                    .setContentTitle("Hey " + model.getName() + " ...")
                                                     .setAutoCancel(true)
                                                     .setDefaults(Notification.DEFAULT_LIGHTS
                                                             | Notification.DEFAULT_SOUND
                                                             | Notification.FLAG_AUTO_CANCEL);
 
-            builder.build();
+            mManager.notify(IConstants.NOTIFICATION_ID, builder.build());
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private String getMessageFromModel(NotificationModel model) {
+        if(model == null)
+            return null;
+
+        return model.getFriendName()
+                + " is listening to "
+                + model.getTrackName()
+                + (model.isLastSongPlayedByUser() ? " which you played last" : "")
+                + ". Join "
+                + (model.isFriendMale() ? "him" : "her")
+                + "!";
     }
 }

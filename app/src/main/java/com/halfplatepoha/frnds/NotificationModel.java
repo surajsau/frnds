@@ -5,11 +5,12 @@ package com.halfplatepoha.frnds;
  */
 public class NotificationModel {
 
+    private String name;
     private String friendName;
     private String trackName;
     private boolean isLastSongPlayedByUser;
     private String message;
-    private boolean male;
+    private boolean isFriendMale;
 
     public String getFriendName() {
         return friendName;
@@ -43,11 +44,19 @@ public class NotificationModel {
         this.message = message;
     }
 
-    public boolean isMale() {
-        return male;
+    public boolean isFriendMale() {
+        return isFriendMale;
     }
 
-    public void setMale(boolean male) {
-        this.male = male;
+    public void setFriendMale(boolean friendMale) {
+        this.isFriendMale = friendMale;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
