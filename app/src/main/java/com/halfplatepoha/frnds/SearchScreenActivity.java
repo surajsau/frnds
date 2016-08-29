@@ -15,6 +15,7 @@ import com.halfplatepoha.frnds.network.models.response.SearchResponse;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import com.halfplatepoha.frnds.network.clients.SoundCloudClient;
 import com.halfplatepoha.frnds.network.models.response.TrackDetails;
+import com.jakewharton.rxbinding.widget.RxTextView;
 
 import java.util.List;
 
@@ -53,6 +54,14 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
 
         rlSearchResult.setLayoutManager(new LinearLayoutManager(this));
         rlSearchResult.setAdapter(mAdapter);
+
+        setupTextwatcherForEditText();
+    }
+
+    private void setupTextwatcherForEditText() {
+        RxTextView.textChanges(etSearch)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.newThread());
     }
 
     private void callSearchApi(String s) {

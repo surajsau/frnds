@@ -8,4 +8,5 @@ public interface IPrefConstants {
     String USER_NAME = "user_name";
     String FB_USER_ID = "fb_user_id";
     String FCM_REFRESH_TOKEN_REGISTERED = "fcm_refresh_token_registered";
+    String IS_REGISTERED = "is_registered";
 }

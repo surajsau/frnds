@@ -13,6 +13,7 @@ public interface IConstants {
     String TRACK_ID = "track_id";
     String ICON_URL = "icon_url";
     String TRACK_TITLE = "track_title";
+    String TRACK_URL = "track_url";
 
     String USER_ID = "user_id";
 
