@@ -8,9 +8,9 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.halfplatepoha.frnds.network.servicegenerators.SoundCloudServiceGenerator;
-import com.halfplatepoha.frnds.network.SoundCloudClient;
-import com.halfplatepoha.frnds.network.TrackResponse;
+import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
+import com.halfplatepoha.frnds.network.clients.SoundCloudClient;
+import com.halfplatepoha.frnds.network.models.response.TrackResponse;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         getDataFromBundle();
         prepareMediaPlayer();
 
-        mClient = SoundCloudServiceGenerator.createService(SoundCloudClient.class);
+//        mClient = ClientGenerator.createSoundCloudClient(SoundCloudClient.class);
 
         setUI();
 

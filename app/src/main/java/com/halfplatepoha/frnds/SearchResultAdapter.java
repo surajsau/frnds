@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.halfplatepoha.frnds.network.TrackDetails;
+import com.halfplatepoha.frnds.network.models.response.TrackDetails;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

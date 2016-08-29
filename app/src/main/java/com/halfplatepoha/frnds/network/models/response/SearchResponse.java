@@ -1,4 +1,4 @@
-package com.halfplatepoha.frnds.network;
+package com.halfplatepoha.frnds.network.models.response;
 
 /**
  * Created by surajkumarsau on 26/08/16.

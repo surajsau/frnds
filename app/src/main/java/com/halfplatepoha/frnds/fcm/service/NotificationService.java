@@ -1,4 +1,4 @@
-package com.halfplatepoha.frnds.fcm;
+package com.halfplatepoha.frnds.fcm.service;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -12,8 +12,8 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.IConstants;
-import com.halfplatepoha.frnds.NotificationModel;
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.fcm.NotificationModel;
 
 import java.io.IOException;
 
@@ -66,9 +66,6 @@ public class NotificationService extends FirebaseMessagingService {
         return model.getFriendName()
                 + " is listening to "
                 + model.getTrackName()
-                + (model.isLastSongPlayedByUser() ? " which you played last" : "")
-                + ". Join "
-                + (model.isFriendMale() ? "him" : "her")
-                + "!";
+                + ". Join in!";
     }
 }

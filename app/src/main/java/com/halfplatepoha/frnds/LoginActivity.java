@@ -4,16 +4,12 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -23,9 +19,15 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.halfplatepoha.frnds.network.BaseSubscriber;
+import com.halfplatepoha.frnds.network.clients.FrndsClient;
+import com.halfplatepoha.frnds.network.models.request.RegisterGCMRequest;
+import com.halfplatepoha.frnds.network.models.response.RegisterGCMResponse;
+import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import rx.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener,
         FacebookCallback<LoginResult>, OnCompleteListener<AuthResult>{
@@ -34,6 +36,10 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
 
     private FirebaseAuth mAuth;
     private CallbackManager mCallbackManager;
+
+    private FrndsClient mClient;
+
+    private int gcmRetryCount = 5;
 
     @Bind(R.id.btnFbLogin) LoginButton btnLogin;
 
@@ -45,6 +51,11 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
 
         mAuth = FirebaseAuth.getInstance();
         mCallbackManager = CallbackManager.Factory.create();
+        mClient = new ClientGenerator.Builder()
+                                .setBaseUrl(IConstants.FRNDS_BASE_URL)
+                                .setLoggingInterceptor()
+                                .setClientClass(FrndsClient.class)
+                                .buildClient();
 
         initFbButton();
     }
@@ -70,31 +81,27 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if(user != null) {
-            startSearchScreenActivity(user.getUid());
+            callRegisterGCMApi();
+            startSearchScreenActivity();
         } else {
             Toast.makeText(this, "You've logged out", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void startSearchScreenActivity(String userId) {
+    private void startSearchScreenActivity() {
         Intent startScreenIntent = new Intent(this, SearchScreenActivity.class);
-        startScreenIntent.putExtra(IConstants.USER_ID, userId);
         startActivity(startScreenIntent);
     }
 
     @Override
     public void onSuccess(LoginResult loginResult) {
-        FrndsLog.d(loginResult.getAccessToken().getUserId());
+        FrndsLog.d(loginResult.getAccessToken().getToken());
         handleAccessToken(loginResult.getAccessToken());
-        registerGCM();
-    }
-
-    private void registerGCM() {
-
     }
 
     private void handleAccessToken(AccessToken accessToken) {
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
+        FrndsPreference.setInPref(IPrefConstants.FB_USER_ID, accessToken.getUserId());
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, this);
     }
@@ -116,6 +123,25 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
         } else {
             FrndsLog.d("signInWithCredential " + task.isSuccessful());
         }
+    }
+
+    private void callRegisterGCMApi() {
+        RegisterGCMRequest req = new RegisterGCMRequest();
+        req.setDeviceId(FrndsPreference.getFromPref(IPrefConstants.FCM_REFRESH_TOKEN, ""));
+        req.setFbId(FrndsPreference.getFromPref(IPrefConstants.FB_USER_ID, ""));
+
+        mClient.updateGCM(req)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(Schedulers.newThread())
+                .subscribe(new BaseSubscriber<RegisterGCMResponse>() {
+                    @Override
+                    public void onObjectReceived(RegisterGCMResponse registerGCMResponse) {
+                        if(!registerGCMResponse.isSuccessful() && gcmRetryCount > 0)
+                            callRegisterGCMApi();
+                        else
+                            FrndsPreference.setInPref(IPrefConstants.FCM_REFRESH_TOKEN_REGISTERED, true);
+                    }
+                });
     }
 
     @Override

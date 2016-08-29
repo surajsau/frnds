@@ -1,4 +1,4 @@
-package com.halfplatepoha.frnds;
+package com.halfplatepoha.frnds.network;
 
 import rx.Subscriber;
 

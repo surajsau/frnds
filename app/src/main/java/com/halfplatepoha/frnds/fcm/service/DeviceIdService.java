@@ -1,4 +1,4 @@
-package com.halfplatepoha.frnds.fcm;
+package com.halfplatepoha.frnds.fcm.service;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
@@ -10,6 +10,12 @@ import com.halfplatepoha.frnds.IPrefConstants;
  * Created by surajkumarsau on 27/08/16.
  */
 public class DeviceIdService extends FirebaseInstanceIdService {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        FrndsLog.e("DeviceIdService onCreate");
+    }
 
     @Override
     public void onTokenRefresh() {

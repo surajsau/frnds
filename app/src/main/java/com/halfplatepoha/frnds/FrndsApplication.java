@@ -3,7 +3,6 @@ package com.halfplatepoha.frnds;
 import android.app.Application;
 
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 
 /**
  * Created by surajkumarsau on 26/08/16.

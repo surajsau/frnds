@@ -1,16 +1,18 @@
-package com.halfplatepoha.frnds;
+package com.halfplatepoha.frnds.fcm;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * Created by surajkumarsau on 27/08/16.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationModel {
 
     private String name;
     private String friendName;
     private String trackName;
-    private boolean isLastSongPlayedByUser;
     private String message;
-    private boolean isFriendMale;
+    private String trackUrl;
 
     public String getFriendName() {
         return friendName;
@@ -28,14 +30,6 @@ public class NotificationModel {
         this.trackName = trackName;
     }
 
-    public boolean isLastSongPlayedByUser() {
-        return isLastSongPlayedByUser;
-    }
-
-    public void setLastSongPlayedByUser(boolean lastSongPlayedByUser) {
-        isLastSongPlayedByUser = lastSongPlayedByUser;
-    }
-
     public String getMessage() {
         return message;
     }
@@ -44,19 +38,19 @@ public class NotificationModel {
         this.message = message;
     }
 
-    public boolean isFriendMale() {
-        return isFriendMale;
-    }
-
-    public void setFriendMale(boolean friendMale) {
-        this.isFriendMale = friendMale;
-    }
-
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getTrackUrl() {
+        return trackUrl;
+    }
+
+    public void setTrackUrl(String trackUrl) {
+        this.trackUrl = trackUrl;
     }
 }

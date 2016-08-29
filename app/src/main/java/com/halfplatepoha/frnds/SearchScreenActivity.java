@@ -1,6 +1,5 @@
 package com.halfplatepoha.frnds;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,10 +9,12 @@ import android.widget.EditText;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.halfplatepoha.frnds.network.SearchResponse;
-import com.halfplatepoha.frnds.network.servicegenerators.SoundCloudServiceGenerator;
-import com.halfplatepoha.frnds.network.SoundCloudClient;
-import com.halfplatepoha.frnds.network.TrackDetails;
+import com.halfplatepoha.frnds.network.BaseSubscriber;
+import com.halfplatepoha.frnds.network.clients.FrndsClient;
+import com.halfplatepoha.frnds.network.models.response.SearchResponse;
+import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
+import com.halfplatepoha.frnds.network.clients.SoundCloudClient;
+import com.halfplatepoha.frnds.network.models.response.TrackDetails;
 
 import java.util.List;
 
@@ -41,7 +42,12 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mClient = SoundCloudServiceGenerator.createService(SoundCloudClient.class);
+        mClient = new ClientGenerator.Builder()
+                        .setBaseUrl(IConstants.SOUNDCLOUD_BASE_URL)
+                        .setLoggingInterceptor()
+                        .setApiKeyInterceptor(IConstants.API_KEY_PARAM, IConstants.API_KEY_VALUE)
+                        .setClientClass(SoundCloudClient.class)
+                        .buildClient();
 
         mAdapter = new SearchResultAdapter(this);
 
