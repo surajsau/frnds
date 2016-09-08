@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/ivFrndAvatar"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/warriors"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_gravity="center_vertical">
+
+        <com.halfplatepoha.frnds.ui.OpenSansTextView
+            android:id="@+id/tvFrndName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Swapnil Gupta"
+            android:text="Sample user"
+            android:textSize="15sp"/>
+
+        <com.halfplatepoha.frnds.ui.OpenSansTextView
+            android:id="@+id/tvFrndStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Kya kar rha hai abhi ?"
+            android:text="Sample text message"
+            android:textSize="12sp"/>
+
+    </LinearLayout>
+
+</LinearLayout>

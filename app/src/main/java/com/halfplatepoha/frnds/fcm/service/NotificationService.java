@@ -11,7 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.halfplatepoha.frnds.FrndsLog;
+import com.halfplatepoha.frnds.FrndsPreference;
 import com.halfplatepoha.frnds.IConstants;
+import com.halfplatepoha.frnds.IPrefConstants;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.fcm.NotificationModel;
 
@@ -24,6 +26,7 @@ public class NotificationService extends FirebaseMessagingService {
 
     private ObjectMapper mMapper;
     private NotificationManager mManager;
+    private String username;
 
     @Override
     public void onCreate() {
@@ -33,6 +36,7 @@ public class NotificationService extends FirebaseMessagingService {
         mMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         mManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        username = FrndsPreference.getFromPref(IPrefConstants.USER_NAME, "there");
     }
 
     @Override
@@ -46,7 +50,7 @@ public class NotificationService extends FirebaseMessagingService {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
                                                     .setStyle(new NotificationCompat.BigTextStyle().bigText(getMessageFromModel(model)))
                                                     .setSmallIcon(R.mipmap.ic_launcher)
-                                                    .setContentTitle("Hey " + model.getName() + " ...")
+                                                    .setContentTitle("Hey " + username + " ...")
                                                     .setAutoCancel(true)
                                                     .setDefaults(Notification.DEFAULT_LIGHTS
                                                             | Notification.DEFAULT_SOUND

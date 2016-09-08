@@ -1,19 +1,92 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.halfplatepoha.frnds.SongDetailActivity">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true">
 
-    <ImageView android:id="@+id/ivIcon"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="30dp" />
+    <ImageView android:id="@+id/ivAlbumBg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/warriors"
+        android:scaleType="centerCrop"/>
 
-    <TextView android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <LinearLayout android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:fitsSystemWindows="true"
+        android:background="@drawable/chat_header_gradient">
 
-</LinearLayout>
+        <LinearLayout android:id="@+id/headerBackground"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize">
+
+                <ImageButton
+                    android:id="@+id/back"
+                    android:layout_width="?android:actionBarSize"
+                    android:layout_height="?android:actionBarSize"
+                    android:src="@drawable/arrow_back"
+                    android:background="@null"
+                    android:layout_gravity="start|center_vertical"/>
+
+                <com.halfplatepoha.frnds.ui.OpenSansTextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Swapnil Gupta"
+                    android:text="Swampnil Gupta"
+                    android:layout_gravity="start|center_vertical"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:layout_marginLeft="?android:actionBarSize"/>
+
+            </FrameLayout>
+
+            <!--<LinearLayout android:id="@+id/colorBackground"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:background="@drawable/chat_header_gradient">-->
+
+                <!--<android.support.v7.widget.RecyclerView-->
+                    <!--android:id="@+id/rlAlbums"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="200dp" />-->
+
+            <!--</LinearLayout>-->
+
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rlChat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/chatMessageLayout"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="48sp"
+        android:layout_gravity="bottom"
+        android:background="@color/chatMessageBackground">
+
+        <com.halfplatepoha.frnds.ui.OpenSansEditText
+            android:id="@+id/etMessage"
+            android:layout_width="0dp"
+            android:layout_weight="5"
+            android:background="@null"
+            android:layout_height="wrap_content" />
+
+        <com.halfplatepoha.frnds.ui.OpenSansButton
+            android:id="@+id/btnSend"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Send"/>
+
+    </LinearLayout>
+</FrameLayout>

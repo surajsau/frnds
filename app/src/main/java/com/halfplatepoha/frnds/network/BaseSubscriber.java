@@ -1,5 +1,7 @@
 package com.halfplatepoha.frnds.network;
 
+import com.halfplatepoha.frnds.FrndsLog;
+
 import rx.Subscriber;
 
 /**
@@ -10,7 +12,9 @@ public abstract class BaseSubscriber<Res> extends Subscriber<Res> {
     public void onCompleted() {}
 
     @Override
-    public void onError(Throwable e) {}
+    public void onError(Throwable e) {
+        FrndsLog.d(e.getMessage());
+    }
 
     @Override
     public void onNext(Res res) {

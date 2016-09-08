@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="11"
+    android:layout_marginLeft="5dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="2dp">
+
+    <ImageView
+        android:id="@+id/ivFrndAvatar"
+        android:layout_width="0dp"
+        android:layout_weight="0.8"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:gravity="center"
+        android:layout_marginBottom="2dp"
+        tools:text="VK"
+        android:text="VK"
+        android:layout_gravity="bottom"/>
+
+    <RelativeLayout android:layout_width="0dp"
+        android:layout_weight="8"
+        android:layout_marginLeft="8dp"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:gravity="start">
+
+            <TextView
+                android:id="@+id/tvFrndMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/ivFrndAvatar"
+                android:textSize="12sp"
+                tools:text="hello there whats up ? dfsdfsdsd fsd fd ssdfsdfsdfsdfllklklkllklklklklk" />
+
+            <TextView
+                android:id="@+id/tvFrndTimeStamp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="10:00 AM"
+                android:layout_gravity="start"
+                android:textColor="#b9b8b8"
+                android:layout_marginTop="3dp"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

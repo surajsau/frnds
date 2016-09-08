@@ -1,7 +1,7 @@
 package com.halfplatepoha.frnds.network.clients;
 
-import com.halfplatepoha.frnds.network.models.response.TrackDetails;
-import com.halfplatepoha.frnds.network.models.response.TrackResponse;
+import com.halfplatepoha.frnds.models.response.TrackDetails;
+import com.halfplatepoha.frnds.models.response.TrackResponse;
 
 import java.util.List;
 

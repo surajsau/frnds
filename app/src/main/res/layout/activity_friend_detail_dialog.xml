@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    tools:context="com.halfplatepoha.frnds.friendslist.activity.FriendDetailDialogActivity">
+
+    <ImageView android:id="@+id/ivFrndAvatar"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:src="@drawable/warriors"/>
+
+    <com.halfplatepoha.frnds.ui.OpenSansTextView
+        android:id="@+id/tvFrndName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Swapnil Gupta"
+        android:text="Sample user"
+        android:textColor="@android:color/white"
+        android:layout_margin="10dp"
+        android:layout_gravity="center_horizontal"
+        android:textSize="16sp"
+        app:typeface="open_sans_bold"/>
+
+</LinearLayout>

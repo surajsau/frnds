@@ -8,8 +8,8 @@ import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.IPrefConstants;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.network.clients.FrndsClient;
-import com.halfplatepoha.frnds.network.models.request.RegisterGCMRequest;
-import com.halfplatepoha.frnds.network.models.response.RegisterGCMResponse;
+import com.halfplatepoha.frnds.models.request.RegisterGCMRequest;
+import com.halfplatepoha.frnds.models.response.RegisterGCMResponse;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 
 import rx.schedulers.Schedulers;
