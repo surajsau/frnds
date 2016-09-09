@@ -1,11 +1,18 @@
 package com.halfplatepoha.frnds.search.activity;
 
+import android.animation.Animator;
+import android.graphics.Point;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,26 +32,32 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.codetail.animation.ViewAnimationUtils;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class SearchScreenActivity extends AppCompatActivity implements ValueEventListener {
+public class SearchScreenActivity extends AppCompatActivity implements ValueEventListener,
+        View.OnTouchListener, View.OnClickListener {
 
     private static final String TAG = SearchScreenActivity.class.getSimpleName();
+
+    private int mToolbarLength;
 
     private SoundCloudClient mClient;
 
     private SearchResultAdapter mAdapter;
 
+    @Bind(R.id.searchBar) ViewGroup searchBar;
     @Bind(R.id.etSearch) EditText etSearch;
     @Bind(R.id.rlSearchResult) RecyclerView rlSearchResult;
+    @Bind(R.id.back) ImageButton back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_search_screen);
         ButterKnife.bind(this);
 
         mClient = new ClientGenerator.Builder()
@@ -54,15 +67,26 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
                         .setClientClass(SoundCloudClient.class)
                         .buildClient();
 
-        mAdapter = new SearchResultAdapter(this);
+        mToolbarLength = Math.max(searchBar.getHeight(), searchBar.getWidth());
 
-        rlSearchResult.setLayoutManager(new LinearLayoutManager(this));
-        rlSearchResult.setAdapter(mAdapter);
+        setupRecyclerView();
 
-        setupTextwatcherForEditText();
+        setupSearchEditText();
+
+        back.setOnClickListener(this);
     }
 
-    private void setupTextwatcherForEditText() {
+    private void setupRecyclerView() {
+        mAdapter = new SearchResultAdapter(this);
+        mAdapter.setHasStableIds(true);
+        rlSearchResult.setLayoutManager(new LinearLayoutManager(this));
+        rlSearchResult.setAdapter(mAdapter);
+    }
+
+    private void setupSearchEditText() {
+        etSearch.clearFocus();
+        etSearch.setOnTouchListener(this);
+
         RxTextView.textChanges(etSearch)
                 .filter(new Func1<CharSequence, Boolean>() {
                     @Override
@@ -116,4 +140,44 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
         }
     };
 
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+            //--by default taking first view (darkToolbar)
+            View nextView = searchBar.getChildAt(0);
+
+            //--choosing lightToolbar when etSearch is in focus
+            if(view.hasFocus())
+                nextView = searchBar.getChildAt(1);
+
+            nextView.setVisibility(View.VISIBLE);
+
+            final float finalRadius = (float) Math.hypot(nextView.getWidth() / 2f, nextView.getHeight() / 2f) + hypo(motionEvent);
+
+            Animator reveal =
+                    ViewAnimationUtils.createCircularReveal(nextView, (int) motionEvent.getX(), (int) motionEvent.getY(), 0,
+                            finalRadius, View.LAYER_TYPE_HARDWARE);
+            reveal.setDuration(300);
+            reveal.setInterpolator(new FastOutLinearInInterpolator());
+            reveal.start();
+        }
+        return false;
+    }
+
+    private float hypo(MotionEvent event) {
+        Point p1 = new Point((int) event.getX(), (int) event.getY());
+        Point p2 = new Point(searchBar.getWidth() / 2, searchBar.getHeight() / 2);
+
+        return (float) Math.sqrt(Math.pow(p1.y - p2.y, 2) + Math.pow(p1.x - p2.x, 2));
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.back:{
+                onBackPressed();
+            }
+            break;
+        }
+    }
 }

@@ -16,4 +16,10 @@ public interface IDetailsConstants {
 
     int TYPE_ME = 1;
     int TYPE_FRND = 2;
+
+    String SOURCE_TYPE = "source_type";
+    String SOURCE_FAB = "source_fab";
+    String SOURCE_LIST = "source_list";
+
+    int SONG_DETAILS_REQUEST = 101;
 }

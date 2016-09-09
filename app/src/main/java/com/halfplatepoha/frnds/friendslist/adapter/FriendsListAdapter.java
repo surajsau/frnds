@@ -2,26 +2,25 @@ package com.halfplatepoha.frnds.friendslist.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.friendslist.IFrndsConstants;
-import com.halfplatepoha.frnds.friendslist.activity.FriendDetailDialogActivity;
+import com.halfplatepoha.frnds.friendslist.fragment.FriendDetailDialogFragment;
+import com.halfplatepoha.frnds.friendslist.activity.FriendsListActivity;
 import com.halfplatepoha.frnds.models.User;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
@@ -31,10 +30,12 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
     private Context mContext;
     private ArrayList<User> mFriends;
+    private FragmentManager mFragmentManager;
 
     public FriendsListAdapter(Context context) {
         mContext = context;
         mFriends = new ArrayList<>();
+        mFragmentManager = ((FriendsListActivity)mContext).getSupportFragmentManager();
     }
 
     @Override
@@ -71,7 +72,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         return 10;
     }
 
-    public class FriendViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class FriendViewHolder extends RecyclerView.ViewHolder{
 
         @Bind(R.id.ivFrndAvatar) CircleImageView ivFrndAvatar;
         @Bind(R.id.tvFrndName) OpenSansTextView tvFrndName;
@@ -80,25 +81,20 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         public FriendViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
-
-            ivFrndAvatar.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View view) {
-            switch (view.getId()) {
-                case R.id.ivFrndAvatar:{
-                    Intent detailsIntent = new Intent(mContext, FriendDetailDialogActivity.class);
-                    ActivityOptionsCompat activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                            (AppCompatActivity)mContext,
-                            new Pair<View, String>(ivFrndAvatar, IFrndsConstants.FRIEND_AVATAR_TRANSITION),
-                            new Pair<View, String>(tvFrndName, IFrndsConstants.FRIEND_NAME_TRANSITION)
-                    );
-                    ActivityCompat.startActivity((AppCompatActivity)mContext, detailsIntent, activityOptions.toBundle());
-                }
-                break;
-            }
+        @OnClick(R.id.rowFriend)
+        public void openSongDetails() {
+            Intent songDetailsIntent = new Intent(mContext, SongDetailActivity.class);
+            ((FriendsListActivity)mContext).startActivityForResult(songDetailsIntent, IFrndsConstants.FRIEND_LIST_REQUEST);
         }
+
+        @OnClick(R.id.ivFrndAvatar)
+        public void openDetailDialog() {
+            FriendDetailDialogFragment dlgDetail = new FriendDetailDialogFragment();
+            dlgDetail.show(mFragmentManager, IFrndsConstants.DETAIL_DIALOG_TAG);
+        }
+
     }
 
 }

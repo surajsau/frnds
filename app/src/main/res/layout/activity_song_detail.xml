@@ -10,83 +10,126 @@
         android:src="@drawable/warriors"
         android:scaleType="centerCrop"/>
 
-    <LinearLayout android:layout_height="match_parent"
+    <io.codetail.widget.RevealLinearLayout
+        android:id="@+id/detailsGroup"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:fitsSystemWindows="true"
+        android:layout_marginBottom="48dp"
         android:background="@drawable/chat_header_gradient">
 
-        <LinearLayout android:id="@+id/headerBackground"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:orientation="vertical">
+            android:layout_height="?attr/actionBarSize">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize">
+            <ImageButton
+                android:id="@+id/back"
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:src="@drawable/arrow_back"
+                android:background="@null"
+                android:layout_gravity="start|center_vertical"/>
 
-                <ImageButton
-                    android:id="@+id/back"
-                    android:layout_width="?android:actionBarSize"
-                    android:layout_height="?android:actionBarSize"
-                    android:src="@drawable/arrow_back"
-                    android:background="@null"
-                    android:layout_gravity="start|center_vertical"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:layout_marginLeft="?android:actionBarSize"
+                android:layout_gravity="start|center_vertical">
 
-                <com.halfplatepoha.frnds.ui.OpenSansTextView
-                    android:id="@+id/tvTitle"
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/ivFrndAvatar"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    tools:src="@drawable/warriors"
+                    android:src="@drawable/warriors"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="12dp"/>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="Swapnil Gupta"
-                    android:text="Swampnil Gupta"
-                    android:layout_gravity="start|center_vertical"
-                    android:textColor="@android:color/white"
-                    android:textSize="18sp"
-                    android:layout_marginLeft="?android:actionBarSize"/>
+                    android:layout_gravity="center_vertical"
+                    android:orientation="vertical">
 
-            </FrameLayout>
+                    <com.halfplatepoha.frnds.ui.OpenSansTextView
+                        android:id="@+id/tvTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Swapnil Gupta"
+                        android:text="Swampnil Gupta"
+                        android:textColor="@color/colorPrimaryVeryLight"
+                        android:textSize="18sp" />
 
-            <!--<LinearLayout android:id="@+id/colorBackground"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:background="@drawable/chat_header_gradient">-->
+                    <com.halfplatepoha.frnds.ui.OpenSansTextView
+                        android:id="@+id/tvStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Swapnil Gupta"
+                        android:text="Swampnil Gupta"
+                        android:textColor="@color/colorPrimaryVeryLight"
+                        android:textSize="13sp" />
 
-                <!--<android.support.v7.widget.RecyclerView-->
-                    <!--android:id="@+id/rlAlbums"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="200dp" />-->
+                </LinearLayout>
 
-            <!--</LinearLayout>-->
+            </LinearLayout>
 
-        </LinearLayout>
+            <ImageButton android:id="@+id/btnPlaylist"
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:layout_gravity="end|center_vertical"
+                android:background="@null"
+                android:src="@drawable/playlist"/>
+        </FrameLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rlAlbums"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:listitem="@layout/row_album_art"
+            android:visibility="gone"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rlChat"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            tools:listitem="@layout/row_chat_me"/>
 
-    </LinearLayout>
+    </io.codetail.widget.RevealLinearLayout>
 
     <LinearLayout android:id="@+id/chatMessageLayout"
         android:layout_width="match_parent"
         android:orientation="horizontal"
         android:layout_height="48sp"
         android:layout_gravity="bottom"
-        android:background="@color/chatMessageBackground">
+        android:background="@color/colorPrimaryDark">
+
+        <ImageButton
+            android:id="@+id/btnMusic"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:src="@drawable/music_play"
+            android:scaleType="center"/>
 
         <com.halfplatepoha.frnds.ui.OpenSansEditText
             android:id="@+id/etMessage"
             android:layout_width="0dp"
             android:layout_weight="5"
             android:background="@null"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"/>
 
-        <com.halfplatepoha.frnds.ui.OpenSansButton
+        <ImageButton
             android:id="@+id/btnSend"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Send"/>
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:src="@drawable/send"
+            android:scaleType="center"/>
 
     </LinearLayout>
 </FrameLayout>

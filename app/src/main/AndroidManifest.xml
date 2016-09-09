@@ -42,8 +42,6 @@
         </service>
 
         <activity android:name=".friendslist.activity.FriendsListActivity" />
-        <activity android:name=".friendslist.activity.FriendDetailDialogActivity"
-            android:theme="@style/AppDialogTheme"/>
     </application>
 
 </manifest>

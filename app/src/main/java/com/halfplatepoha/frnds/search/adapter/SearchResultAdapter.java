@@ -1,5 +1,6 @@
 package com.halfplatepoha.frnds.search.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,7 @@ import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.models.response.TrackDetails;
+import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -95,10 +97,11 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     }
 
     private void openSongDetailsActivity(TrackDetails trackDetails) {
-        Intent songDetail = new Intent(mContext, SongDetailActivity.class);
+        Intent songDetail = new Intent();
         songDetail.putExtra(IConstants.TRACK_ID, trackDetails.getId());
         songDetail.putExtra(IConstants.ICON_URL, trackDetails.getArtwork_url());
         songDetail.putExtra(IConstants.TRACK_TITLE, trackDetails.getTitle());
-        mContext.startActivity(songDetail);
+        ((SearchScreenActivity)mContext).setResult(Activity.RESULT_OK);
+        ((SearchScreenActivity)mContext).finish();
     }
 }

@@ -19,4 +19,8 @@ public interface IFrndsConstants {
 
     String FRIEND_AVATAR_TRANSITION = "friend_avatar_transition";
     String FRIEND_NAME_TRANSITION = "friend_name_transition";
+
+    String DETAIL_DIALOG_TAG = "detail_dialog_tag";
+
+    int FRIEND_LIST_REQUEST = 201;
 }

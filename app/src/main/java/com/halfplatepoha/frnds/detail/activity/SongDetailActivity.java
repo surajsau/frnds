@@ -1,5 +1,6 @@
 package com.halfplatepoha.frnds.detail.activity;
 
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
@@ -9,8 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
 
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.R;
@@ -23,17 +22,17 @@ import com.halfplatepoha.frnds.network.clients.FrndsClient;
 import com.halfplatepoha.frnds.models.request.UpdateTrackRequest;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import com.halfplatepoha.frnds.models.response.TrackResponse;
-import com.halfplatepoha.frnds.ui.OpenSansButton;
+import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
 import com.halfplatepoha.frnds.ui.OpenSansEditText;
 
 import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import rx.schedulers.Schedulers;
 
-public class SongDetailActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener,
-                                                    View.OnClickListener{
+public class SongDetailActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener {
 
     private static final String TAG = SongDetailActivity.class.getSimpleName();
 
@@ -42,17 +41,17 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
     private long mDuration;
 
-    @Bind(R.id.ivAlbumBg) ImageView ivAlbumBg;
+    private boolean isPlaylistVisible;
+
     @Bind(R.id.etMessage) OpenSansEditText etMessage;
-    @Bind(R.id.btnSend) OpenSansButton btnSend;
-//    @Bind(R.id.colorBackground) View colorBackground;
-//    @Bind(R.id.toolbar) Toolbar mToolbar;
-//    @Bind(R.id.rlAlbums) RecyclerView rlAlbums;
+    @Bind(R.id.rlAlbums) RecyclerView rlAlbums;
     @Bind(R.id.rlChat) RecyclerView rlChat;
 
     private String mTrackUrl;
     private String mTrackTitle;
     private String mIconUrl;
+
+    private String mSource;
 
     private AlbumListAdapter mAlbumListAdapter;
     private ChatAdapter mChatAdapter;
@@ -67,11 +66,13 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
         getDataFromBundle();
 
-        setupToolbar();
-        
-        setupRecyclerViews();
+        if(IDetailsConstants.SOURCE_FAB.equalsIgnoreCase(mSource)) {
+            startSearchActivity();
+        }
 
-        setupOnClickListener();
+        setupToolbar();
+
+        setupRecyclerViews();
 
         prepareMediaPlayer();
 
@@ -80,8 +81,10 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         callUpdateTracksApi();
     }
 
-    private void setupOnClickListener() {
-        btnSend.setOnClickListener(this);
+    private void startSearchActivity() {
+        Intent searchIntent = new Intent(this, SearchScreenActivity.class);
+        searchIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivityForResult(searchIntent, IDetailsConstants.SONG_DETAILS_REQUEST);
     }
 
     private void setupRecyclerViews() {
@@ -95,8 +98,8 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
         rlChat.setAdapter(mChatAdapter);
         rlChat.setLayoutManager(mChatLayoutManager);
-//        rlAlbums.setAdapter(mAlbumListAdapter);
-//        rlAlbums.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        rlAlbums.setAdapter(mAlbumListAdapter);
+        rlAlbums.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
     }
 
     private void setupToolbar() {
@@ -134,6 +137,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         mTrackTitle = getIntent().getStringExtra(IConstants.TRACK_TITLE);
         mTrackUrl = getIntent().getStringExtra(IConstants.TRACK_URL);
         mIconUrl = getIntent().getStringExtra(IConstants.ICON_URL);
+        mSource = getIntent().getStringExtra(IDetailsConstants.SOURCE_TYPE);
     }
 
     private void updateTrackAlbum(String imageUrl) {
@@ -198,24 +202,52 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         }
     };
 
+    @OnClick(R.id.btnMusic)
+    public void addMusic() {
+        Intent searchScreenIntent = new Intent(this, SearchScreenActivity.class);
+        startActivityForResult(searchScreenIntent, IDetailsConstants.SONG_DETAILS_REQUEST);
+    }
+
+    @OnClick(R.id.back)
+    public void back() {
+        Intent resultIntent = new Intent();
+        setResult(RESULT_OK, resultIntent);
+        finish();
+    }
+
+    @OnClick(R.id.btnSend)
+    public void addMessage() {
+        if(!TextUtils.isEmpty(etMessage.getText())) {
+            Message.Builder msgBuilder = new Message.Builder()
+                    .setMessage(etMessage.getText().toString())
+                    .setTimestamp(System.currentTimeMillis())
+                    .setUserType(IDetailsConstants.TYPE_ME);
+            mChatAdapter.addMessage(msgBuilder.build());
+            rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
+
+            etMessage.setText("");
+        }
+    }
+
+    @OnClick(R.id.btnPlaylist)
+    public void togglePlaylist() {
+        if(isPlaylistVisible) {
+
+        } else {
+
+        }
+    }
+
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btnSend: {
-                if(!TextUtils.isEmpty(etMessage.getText())) {
-                    Message.Builder msgBuilder = new Message.Builder()
-                            .setMessage(etMessage.getText().toString())
-                            .setTimestamp(System.currentTimeMillis())
-                            .setUserType(IDetailsConstants.TYPE_ME);
-                    addMessage(msgBuilder.build());
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case IDetailsConstants.SONG_DETAILS_REQUEST:{
+                if(resultCode == RESULT_OK){
+
                 }
             }
             break;
         }
-    }
-
-    private void addMessage(Message message) {
-        mChatAdapter.addMessage(message);
-        rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

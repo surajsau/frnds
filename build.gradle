@@ -19,6 +19,9 @@ allprojects {
         maven {
             url 'http://maven.batch.com/release'
         }
+        maven {
+            url "https://jitpack.io"
+        }
     }
 }
 
