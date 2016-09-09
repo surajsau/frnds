@@ -7,16 +7,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TrackDetails {
-    private String id;
+    private String stream_url;
     private String title;
     private String artwork_url;
+    private User user;
 
-    public String getId() {
-        return id;
+    public String getStream_url() {
+        return stream_url;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setStream_url(String stream_url) {
+        this.stream_url = stream_url;
     }
 
     public String getTitle() {
@@ -33,5 +34,26 @@ public class TrackDetails {
 
     public void setArtwork_url(String artwork_url) {
         this.artwork_url = artwork_url;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class User {
+        private String username;
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
     }
 }

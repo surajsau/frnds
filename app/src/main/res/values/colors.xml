@@ -2,10 +2,14 @@
 <resources>
     <color name="colorPrimary">#1a2327</color>
     <color name="colorPrimaryDark">#13191c</color>
-    <color name="colorPrimaryDarkTranslucent">#DF13191c</color>
+    <color name="colorPrimaryVeryDark">#0f1416</color>
+    <color name="colorPrimaryDarkTranslucent">#A013191c</color>
     <color name="colorPrimaryLight">#3b464b</color>
     <color name="colorPrimaryVeryLight">#e9eaeb</color>
     <color name="colorAccent">#EF5350</color>
+
+    <color name="colorMeBubble">#4e585d</color>
+    <color name="colorFrndBubble">#757d81</color>
 
     <color name="dark_gray">#141414</color>
     <color name="white">#FFFFFF</color>

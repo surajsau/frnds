@@ -78,14 +78,12 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
 
     private void setupRecyclerView() {
         mAdapter = new SearchResultAdapter(this);
-        mAdapter.setHasStableIds(true);
         rlSearchResult.setLayoutManager(new LinearLayoutManager(this));
         rlSearchResult.setAdapter(mAdapter);
     }
 
     private void setupSearchEditText() {
         etSearch.clearFocus();
-//        etSearch.setOnTouchListener(this);
 
         RxTextView.textChanges(etSearch)
                 .filter(new Func1<CharSequence, Boolean>() {

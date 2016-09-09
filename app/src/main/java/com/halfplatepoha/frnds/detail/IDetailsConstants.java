@@ -22,4 +22,12 @@ public interface IDetailsConstants {
     String SOURCE_LIST = "source_list";
 
     int SONG_DETAILS_REQUEST = 101;
+
+    String TRACK_URL = "track_url";
+    String TRACK_IMAGE_URL = "track_image_url";
+    String TRACK_TITLE = "track_title";
+    String TRACK_ARTIST = "track_artist";
+
+    String SERVICE_STREAM_URL = "service_stream_url";
+    String NOTIFICATION_SERVICE_TRACK_TITLE = "notification_track_title";
 }

@@ -20,4 +20,8 @@ public interface IConstants {
     String PREFERNCE_FILE = "preference_file";
 
     int NOTIFICATION_ID = 1;
+
+    int NOTIFICATION_PLAY_PENDING_INTENT_REQUEST = 501;
+    int NOTIFICATION_STOP_PLAYING_INTENT_REQUEST = 502;
+    int PLAY_NOTIFICATION_ID = 401;
 }

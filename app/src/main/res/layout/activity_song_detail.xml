@@ -10,7 +10,7 @@
         android:src="@drawable/warriors"
         android:scaleType="centerCrop"/>
 
-    <io.codetail.widget.RevealLinearLayout
+    <io.codetail.widget.RevealFrameLayout
         android:id="@+id/detailsGroup"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -19,91 +19,119 @@
         android:layout_marginBottom="48dp"
         android:background="@drawable/chat_header_gradient">
 
-        <FrameLayout
+        <LinearLayout android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize">
+            android:layout_height="match_parent">
 
-            <ImageButton
-                android:id="@+id/back"
-                android:layout_width="?android:actionBarSize"
-                android:layout_height="?android:actionBarSize"
-                android:src="@drawable/arrow_back"
-                android:background="@null"
-                android:layout_gravity="start|center_vertical"/>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="?android:actionBarSize">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:layout_marginLeft="?android:actionBarSize"
-                android:layout_gravity="start|center_vertical">
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/ivFrndAvatar"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    tools:src="@drawable/warriors"
-                    android:src="@drawable/warriors"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginRight="12dp"/>
+                <ImageButton
+                    android:id="@+id/back"
+                    android:layout_width="?android:actionBarSize"
+                    android:layout_height="?android:actionBarSize"
+                    android:src="@drawable/arrow_back"
+                    android:background="@null"
+                    android:layout_gravity="start|center_vertical"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:orientation="vertical">
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_marginRight="?android:actionBarSize"
+                    android:layout_marginLeft="?android:actionBarSize"
+                    android:layout_gravity="start|center_vertical">
 
-                    <com.halfplatepoha.frnds.ui.OpenSansTextView
-                        android:id="@+id/tvTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="Swapnil Gupta"
-                        android:text="Swampnil Gupta"
-                        android:textColor="@color/colorPrimaryVeryLight"
-                        android:textSize="18sp" />
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/ivFrndAvatar"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        tools:src="@drawable/warriors"
+                        android:src="@drawable/pappi"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="12dp"/>
 
-                    <com.halfplatepoha.frnds.ui.OpenSansTextView
-                        android:id="@+id/tvStatus"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:text="Swapnil Gupta"
-                        android:text="Swampnil Gupta"
-                        android:textColor="@color/colorPrimaryVeryLight"
-                        android:textSize="13sp" />
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical">
+
+                        <com.halfplatepoha.frnds.ui.OpenSansTextView
+                            android:id="@+id/tvTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="Swapnil Gupta"
+                            android:text="Swapnil Gupta"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:textColor="@color/colorPrimaryVeryLight"
+                            android:textSize="18sp" />
+
+                        <com.halfplatepoha.frnds.ui.OpenSansTextView
+                            android:id="@+id/tvStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            tools:text="Listening to Ae Dil hai Mushkil"
+                            android:text="Listening to Ae Dil hai Mushkil"
+                            android:textColor="@color/colorPrimaryVeryLight"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-            </LinearLayout>
+                <ImageButton android:id="@+id/btnPlaylist"
+                    android:layout_width="?android:actionBarSize"
+                    android:layout_height="?android:actionBarSize"
+                    android:layout_gravity="end|center_vertical"
+                    android:background="@null"
+                    android:src="@drawable/playlist"/>
+            </FrameLayout>
 
-            <ImageButton android:id="@+id/btnPlaylist"
-                android:layout_width="?android:actionBarSize"
-                android:layout_height="?android:actionBarSize"
-                android:layout_gravity="end|center_vertical"
-                android:background="@null"
-                android:src="@drawable/playlist"/>
-        </FrameLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rlChat"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/row_chat_me"/>
+        </LinearLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rlAlbums"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:listitem="@layout/row_album_art"
-            android:visibility="gone"/>
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rlChat"
+        <LinearLayout android:id="@+id/playlist"
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:listitem="@layout/row_chat_me"/>
+            android:layout_height="wrap_content">
 
-    </io.codetail.widget.RevealLinearLayout>
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rlAlbums"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/row_album_art"
+                android:visibility="visible"
+                android:layout_marginTop="?android:actionBarSize"
+                android:background="@color/colorPrimaryDark"/>
+
+            <com.halfplatepoha.frnds.ui.OpenSansTextView
+                android:id="@+id/tvTrackTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <com.halfplatepoha.frnds.ui.OpenSansTextView
+                android:id="@+id/tvTrackArtist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+    </io.codetail.widget.RevealFrameLayout>
 
     <LinearLayout android:id="@+id/chatMessageLayout"
         android:layout_width="match_parent"
         android:orientation="horizontal"
         android:layout_height="48sp"
         android:layout_gravity="bottom"
-        android:background="@color/colorPrimaryDark">
+        android:background="@color/colorPrimaryVeryDark">
 
         <ImageButton
             android:id="@+id/btnMusic"
@@ -114,13 +142,22 @@
             android:src="@drawable/music_play"
             android:scaleType="center"/>
 
-        <com.halfplatepoha.frnds.ui.OpenSansEditText
-            android:id="@+id/etMessage"
+        <LinearLayout
             android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="5"
-            android:background="@null"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"/>
+            android:background="@color/colorPrimaryLight"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:padding="5dp">
+
+            <com.halfplatepoha.frnds.ui.OpenSansEditText
+                android:id="@+id/etMessage"
+                android:layout_width="match_parent"
+                android:background="@null"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"/>
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/btnSend"

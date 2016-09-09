@@ -69,7 +69,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        return mMessages.get(position).getUserType();
+        if(position % 3 == 0)
+            return IDetailsConstants.TYPE_FRND;
+        else
+            return IDetailsConstants.TYPE_ME;
+//        return mMessages.get(position).getUserType();
     }
 
     public class MeChatViewHolder extends RecyclerView.ViewHolder {

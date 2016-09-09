@@ -1,21 +1,28 @@
 package com.halfplatepoha.frnds.detail.activity;
 
+import android.animation.Animator;
 import android.content.Intent;
+import android.graphics.Point;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.detail.adapter.AlbumListAdapter;
 import com.halfplatepoha.frnds.detail.adapter.ChatAdapter;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
+import com.halfplatepoha.frnds.mediaplayer.PlayerService;
 import com.halfplatepoha.frnds.models.Message;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.network.clients.FrndsClient;
@@ -24,12 +31,14 @@ import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import com.halfplatepoha.frnds.models.response.TrackResponse;
 import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
 import com.halfplatepoha.frnds.ui.OpenSansEditText;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.codetail.animation.ViewAnimationUtils;
 import rx.schedulers.Schedulers;
 
 public class SongDetailActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener {
@@ -39,17 +48,19 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     private MediaPlayer mPlayer;
     private FrndsClient mFrndsClient;
 
-    private long mDuration;
-
-    private boolean isPlaylistVisible;
-
     @Bind(R.id.etMessage) OpenSansEditText etMessage;
     @Bind(R.id.rlAlbums) RecyclerView rlAlbums;
     @Bind(R.id.rlChat) RecyclerView rlChat;
+    @Bind(R.id.ivAlbumBg) ImageView ivAlbumBg;
+    @Bind(R.id.playlist) View playlist;
+
+    private int[] btnPlaylistCoordinates;
 
     private String mTrackUrl;
+    private String mTrackImageUrl;
     private String mTrackTitle;
     private String mIconUrl;
+    private String mTrackArtist;
 
     private String mSource;
 
@@ -77,8 +88,19 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         prepareMediaPlayer();
 
         buildApiClients();
+//        callUpdateTracksApi();
+    }
 
-        callUpdateTracksApi();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(btnPlaylistCoordinates == null) {
+            btnPlaylistCoordinates = new int[2];
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            btnPlaylistCoordinates[0] = metrics.widthPixels;
+            btnPlaylistCoordinates[1] = 0;
+        }
     }
 
     private void startSearchActivity() {
@@ -90,7 +112,6 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     private void setupRecyclerViews() {
         mAlbumListAdapter = new AlbumListAdapter(this);
         mChatAdapter = new ChatAdapter(this);
-        mChatAdapter.setHasStableIds(true);
 
         mChatLayoutManager = new LinearLayoutManager(this);
         mChatLayoutManager.setStackFromEnd(true);
@@ -196,7 +217,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     private BaseSubscriber<TrackResponse> tracksResponseSubscriber = new BaseSubscriber<TrackResponse>() {
         @Override
         public void onObjectReceived(TrackResponse trackResponse) {
-            mDuration = trackResponse.getDuration();
+//            mDuration = trackResponse.getDuration();
             updateTrackAlbum(trackResponse.getArtwork_url());
             playMusic(trackResponse.getStream_url());
         }
@@ -231,11 +252,55 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
     @OnClick(R.id.btnPlaylist)
     public void togglePlaylist() {
-        if(isPlaylistVisible) {
+        if(playlist.getVisibility() == View.VISIBLE) {
+            Animator anim = ViewAnimationUtils.createCircularReveal(playlist,
+                    btnPlaylistCoordinates[0],
+                    btnPlaylistCoordinates[1],
+                    getfFinalRadius(playlist, btnPlaylistCoordinates[0], btnPlaylistCoordinates[1]),
+                    0,
+                    View.LAYER_TYPE_HARDWARE);
+            anim.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {}
 
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    playlist.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {}
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {}
+            });
+            anim.setDuration(300);
+            anim.setInterpolator(new FastOutLinearInInterpolator());
+            anim.start();
         } else {
-
+            playlist.setVisibility(View.VISIBLE);
+            Animator anim = ViewAnimationUtils.createCircularReveal(playlist,
+                    btnPlaylistCoordinates[0],
+                    btnPlaylistCoordinates[1],
+                    0,
+                    getfFinalRadius(playlist, btnPlaylistCoordinates[0], btnPlaylistCoordinates[1]),
+                    View.LAYER_TYPE_HARDWARE);
+            anim.setDuration(300);
+            anim.setInterpolator(new FastOutLinearInInterpolator());
+            anim.start();
         }
+    }
+
+    private float getfFinalRadius(View view, int centerX, int centerY) {
+        return (float) Math.hypot(view.getWidth() / 2f, view.getHeight() / 2f)
+                + hypo(view, centerX, centerY);
+    }
+
+    private float hypo(View view, float x, float y) {
+        Point p1 = new Point((int)x, (int)y);
+        Point p2 = new Point(view.getWidth() / 2, view.getHeight() / 2);
+
+        return (float) Math.sqrt(Math.pow(p1.y - p2.y, 2) + Math.pow(p1.x - p2.x, 2));
     }
 
     @Override
@@ -243,11 +308,34 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         switch (requestCode) {
             case IDetailsConstants.SONG_DETAILS_REQUEST:{
                 if(resultCode == RESULT_OK){
+                    mTrackUrl = data.getExtras().getString(IDetailsConstants.TRACK_URL);
+                    mTrackImageUrl = data.getExtras().getString(IDetailsConstants.TRACK_IMAGE_URL);
+                    mTrackTitle = data.getExtras().getString(IDetailsConstants.TRACK_TITLE);
+                    mTrackArtist = data.getExtras().getString(IDetailsConstants.TRACK_URL);
 
+                    addAlbumToPlaylist();
+
+                    startPlayingTrack();
+
+                    //--setting background image of activity
+                    Picasso.with(this).load(mTrackImageUrl.replace("large", "t500x500")).into(ivAlbumBg);
                 }
             }
             break;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    private void startPlayingTrack() {
+        Intent playerServiceIntent = new Intent(this, PlayerService.class);
+        playerServiceIntent.setAction(PlayerService.ACTION_PLAY);
+        playerServiceIntent.putExtra(IDetailsConstants.NOTIFICATION_SERVICE_TRACK_TITLE, mTrackTitle);
+        playerServiceIntent.putExtra(IDetailsConstants.SERVICE_STREAM_URL, mTrackUrl);
+        startService(playerServiceIntent);
+    }
+
+    private void addAlbumToPlaylist() {
+        //TODO: add song to DB and adapter
+    }
+
 }

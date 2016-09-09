@@ -7,7 +7,7 @@
     tools:context=".search.activity.SearchScreenActivity"
     android:background="@color/colorPrimary">
 
-    <io.codetail.widget.RevealFrameLayout
+    <FrameLayout
         android:id="@+id/searchBar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize">
@@ -58,7 +58,7 @@
             android:layout_gravity="end|center_vertical"/>
         </LinearLayout>
 
-    </io.codetail.widget.RevealFrameLayout>
+    </FrameLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rlSearchResult"

@@ -6,6 +6,6 @@ package com.halfplatepoha.frnds.utils;
 public class AppUtil {
 
     public static String getTimestampFromUTC(long timestamp) {
-        return "10:00 AM";
+        return "10:00 am";
     }
 }
