@@ -39,7 +39,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class SearchScreenActivity extends AppCompatActivity implements ValueEventListener,
-        View.OnTouchListener, View.OnClickListener {
+        View.OnClickListener {
 
     private static final String TAG = SearchScreenActivity.class.getSimpleName();
 
@@ -85,7 +85,7 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
 
     private void setupSearchEditText() {
         etSearch.clearFocus();
-        etSearch.setOnTouchListener(this);
+//        etSearch.setOnTouchListener(this);
 
         RxTextView.textChanges(etSearch)
                 .filter(new Func1<CharSequence, Boolean>() {
@@ -140,29 +140,29 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
         }
     };
 
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-            //--by default taking first view (darkToolbar)
-            View nextView = searchBar.getChildAt(0);
-
-            //--choosing lightToolbar when etSearch is in focus
-            if(view.hasFocus())
-                nextView = searchBar.getChildAt(1);
-
-            nextView.setVisibility(View.VISIBLE);
-
-            final float finalRadius = (float) Math.hypot(nextView.getWidth() / 2f, nextView.getHeight() / 2f) + hypo(motionEvent);
-
-            Animator reveal =
-                    ViewAnimationUtils.createCircularReveal(nextView, (int) motionEvent.getX(), (int) motionEvent.getY(), 0,
-                            finalRadius, View.LAYER_TYPE_HARDWARE);
-            reveal.setDuration(300);
-            reveal.setInterpolator(new FastOutLinearInInterpolator());
-            reveal.start();
-        }
-        return false;
-    }
+//    @Override
+//    public boolean onTouch(View view, MotionEvent motionEvent) {
+//        if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+//            //--by default taking first view (darkToolbar)
+//            View nextView = searchBar.getChildAt(0);
+//
+//            //--choosing lightToolbar when etSearch is in focus
+//            if(view.hasFocus())
+//                nextView = searchBar.getChildAt(1);
+//
+//            nextView.setVisibility(View.VISIBLE);
+//
+//            final float finalRadius = (float) Math.hypot(nextView.getWidth() / 2f, nextView.getHeight() / 2f) + hypo(motionEvent);
+//
+//            Animator reveal =
+//                    ViewAnimationUtils.createCircularReveal(nextView, (int) motionEvent.getX(), (int) motionEvent.getY(), 0,
+//                            finalRadius, View.LAYER_TYPE_HARDWARE);
+//            reveal.setDuration(300);
+//            reveal.setInterpolator(new FastOutLinearInInterpolator());
+//            reveal.start();
+//        }
+//        return false;
+//    }
 
     private float hypo(MotionEvent event) {
         Point p1 = new Point((int) event.getX(), (int) event.getY());
