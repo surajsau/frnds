@@ -13,13 +13,13 @@ import android.widget.ImageView;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
-import com.halfplatepoha.frnds.friendslist.IFrndsConstants;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class FriendDetailDialogFragment extends DialogFragment implements View.OnClickListener{
+public class FriendDetailDialogFragment extends DialogFragment {
 
     @Bind(R.id.ivFrndAvatar) ImageView ivFrndAvatar;
     @Bind(R.id.tvFrndName) OpenSansTextView tvFrndName;
@@ -31,27 +31,22 @@ public class FriendDetailDialogFragment extends DialogFragment implements View.O
         setStyle(STYLE_NO_FRAME, R.style.AppDialogTheme);
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btnPlay: {
-                Intent searchIntent = new Intent(getActivity(), SongDetailActivity.class);
-                searchIntent.putExtra(IDetailsConstants.SOURCE_TYPE, IDetailsConstants.SOURCE_FAB);
-                startActivity(searchIntent);
-            }
-        }
+    @OnClick(R.id.btnPlay)
+    public void openSearchScreen() {
+        Intent searchIntent = new Intent(getActivity(), SongDetailActivity.class);
+        searchIntent.putExtra(IDetailsConstants.SOURCE_TYPE, IDetailsConstants.SOURCE_FAB);
+        startActivity(searchIntent);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View dlgView  = inflater.inflate(R.layout.activity_friend_detail_dialog, container, false);
+        View dlgView  = inflater.inflate(R.layout.fragment_friend_detail_dialog, container, false);
         return dlgView;
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         ButterKnife.bind(this, view);
-        btnPlay.setOnClickListener(this);
     }
 }

@@ -11,11 +11,15 @@ import android.widget.ImageView;
 
 import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.detail.IDetailsConstants;
+import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
+import com.halfplatepoha.frnds.detail.fragment.ShareSongFragment;
 
 import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by surajkumarsau on 31/08/16.
@@ -24,6 +28,8 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
 
     private Context mContext;
     private ArrayList<String> albums;
+
+    private int mPlayingPosition;
 
     public AlbumListAdapter(Context context) {
         mContext = context;
@@ -53,6 +59,14 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
         public AlbumListViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+
+        @OnClick(R.id.ivAlbum)
+        public void openSongDetailsDialog() {
+            ShareSongFragment shareSong = new ShareSongFragment();
+            ((SongDetailActivity)mContext).getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.home, shareSong, IDetailsConstants.SONG_SHARE_TAG);
         }
     }
 }

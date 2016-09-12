@@ -30,4 +30,6 @@ public interface IDetailsConstants {
 
     String SERVICE_STREAM_URL = "service_stream_url";
     String NOTIFICATION_SERVICE_TRACK_TITLE = "notification_track_title";
+
+    String SONG_SHARE_TAG = "song_share";
 }
