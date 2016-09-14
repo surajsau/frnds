@@ -32,6 +32,7 @@
             android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:textSize="12sp"
+            android:textColor="@color/textMe"
             tools:text="hello there whats up ?" />
 
         <com.halfplatepoha.frnds.ui.OpenSansButton

@@ -1,15 +1,13 @@
 package com.halfplatepoha.frnds.detail.adapter;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
@@ -29,11 +27,14 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
     private Context mContext;
     private ArrayList<String> albums;
 
+    private FragmentManager mFragmentManager;
+
     private int mPlayingPosition;
 
     public AlbumListAdapter(Context context) {
         mContext = context;
         albums = new ArrayList<>();
+        mFragmentManager = ((SongDetailActivity)mContext).getSupportFragmentManager();
     }
 
     @Override
@@ -64,9 +65,10 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
         @OnClick(R.id.ivAlbum)
         public void openSongDetailsDialog() {
             ShareSongFragment shareSong = new ShareSongFragment();
-            ((SongDetailActivity)mContext).getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.home, shareSong, IDetailsConstants.SONG_SHARE_TAG);
+            mFragmentManager.beginTransaction()
+                    .replace(R.id.home, shareSong)
+                    .addToBackStack(IDetailsConstants.SONG_SHARE_TAG)
+                    .commit();
         }
     }
 }

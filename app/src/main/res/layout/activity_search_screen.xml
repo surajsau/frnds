@@ -47,7 +47,8 @@
             android:background="@null"
             android:hint="Search"
             android:focusableInTouchMode="true"
-            android:textColorHint="@color/colorPrimaryLight"/>
+            android:textColorHint="@color/textSecondary"
+            android:textColor="@color/textPrimary"/>
 
         <ImageButton
             android:id="@+id/cross"

@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:fitsSystemWindows="true"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="42dp"
         android:background="@drawable/chat_header_gradient">
 
         <LinearLayout android:orientation="vertical"
@@ -67,7 +67,7 @@
                             android:text="Swapnil Gupta"
                             android:maxLines="1"
                             android:ellipsize="end"
-                            android:textColor="@color/colorPrimaryVeryLight"
+                            android:textColor="@color/textPrimary"
                             android:textSize="18sp" />
 
                         <com.halfplatepoha.frnds.ui.OpenSansTextView
@@ -78,7 +78,7 @@
                             android:ellipsize="end"
                             tools:text="Listening to Ae Dil hai Mushkil"
                             android:text="Listening to Ae Dil hai Mushkil"
-                            android:textColor="@color/colorPrimaryVeryLight"
+                            android:textColor="@color/textPrimary"
                             android:textSize="13sp" />
 
                     </LinearLayout>
@@ -88,8 +88,9 @@
                 <ImageButton android:id="@+id/btnPlaylist"
                     android:layout_width="?android:actionBarSize"
                     android:layout_height="?android:actionBarSize"
-                    android:layout_gravity="end|center_vertical"
                     android:background="@null"
+                    android:tint="@color/colorAccent"
+                    android:layout_gravity="end|center_vertical"
                     android:src="@drawable/playlist"/>
             </FrameLayout>
 
@@ -103,26 +104,37 @@
         <LinearLayout android:id="@+id/playlist"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="?android:actionBarSize"
+            android:background="@color/colorPrimaryLight">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rlAlbums"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:listitem="@layout/row_album_art"
-                android:visibility="visible"
-                android:layout_marginTop="?android:actionBarSize"
-                android:background="@color/colorPrimaryDark"/>
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:visibility="visible"/>
 
             <com.halfplatepoha.frnds.ui.OpenSansTextView
                 android:id="@+id/tvTrackTitle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Warriors"
+                android:textSize="15sp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/textPrimary"/>
 
             <com.halfplatepoha.frnds.ui.OpenSansTextView
                 android:id="@+id/tvTrackArtist"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Imagine Dragons"
+                android:textSize="13sp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="10dp"/>
         </LinearLayout>
 
     </io.codetail.widget.RevealFrameLayout>
@@ -130,9 +142,9 @@
     <LinearLayout android:id="@+id/chatMessageLayout"
         android:layout_width="match_parent"
         android:orientation="horizontal"
-        android:layout_height="48sp"
+        android:layout_height="42sp"
         android:layout_gravity="bottom"
-        android:background="@color/colorPrimaryVeryDark">
+        android:background="@color/colorPrimaryDark">
 
         <ImageButton
             android:id="@+id/btnMusic"
@@ -141,21 +153,24 @@
             android:layout_height="match_parent"
             android:background="@null"
             android:src="@drawable/music_play"
-            android:scaleType="center"/>
+            android:scaleType="center"
+            android:tint="@color/colorAccent"/>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="5"
             android:background="@color/colorPrimaryLight"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
             android:padding="5dp">
 
             <com.halfplatepoha.frnds.ui.OpenSansEditText
                 android:id="@+id/etMessage"
                 android:layout_width="match_parent"
                 android:background="@null"
+                android:textSize="13sp"
+                android:textColor="@color/textPrimary"
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"/>
         </LinearLayout>

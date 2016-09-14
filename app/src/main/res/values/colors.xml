@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#1a2327</color>
-    <color name="colorPrimaryDark">#13191c</color>
-    <color name="colorPrimaryVeryDark">#0f1416</color>
-    <color name="colorPrimaryDark_a0">#A013191c</color>
-    <color name="colorPrimaryDark_50">#5013191c</color>
-    <color name="colorPrimaryLight">#3b464b</color>
-    <color name="colorPrimaryVeryLight">#e9eaeb</color>
-    <color name="colorAccent">#EF5350</color>
+    <color name="colorPrimary">#fbfafa</color>
+    <color name="colorPrimaryDark">#f0f0f0</color>
+    <color name="colorPrimaryLight">#ffffff</color>
+    <color name="colorPrimaryLight_a0">#a0ffffff</color>
+    <color name="colorAccent">#e5143d</color>
 
-    <color name="colorMeBubble">#4e585d</color>
-    <color name="colorFrndBubble">#757d81</color>
+    <color name="colorIcons">#160206</color>
+
+    <color name="textPrimary">#221f23</color>
+    <color name="textSecondary">#a6a5a7</color>
+
+    <color name="colorFrndBubble">#f0f0f0</color>
+    <color name="colorMeBubble">#f9d0d8</color>
+    <color name="textMe">#5b0818</color>
+    <color name="textFrnd">#160206</color>
 
     <color name="dark_gray">#141414</color>
     <color name="white">#FFFFFF</color>

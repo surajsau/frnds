@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.detail.adapter.AlbumListAdapter;
@@ -31,7 +32,6 @@ import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import com.halfplatepoha.frnds.models.response.TrackResponse;
 import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
 import com.halfplatepoha.frnds.ui.OpenSansEditText;
-import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 
@@ -89,6 +89,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
         buildApiClients();
 //        callUpdateTracksApi();
+
     }
 
     @Override
@@ -318,7 +319,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                     startPlayingTrack();
 
                     //--setting background image of activity
-                    Picasso.with(this).load(mTrackImageUrl.replace("large", "t500x500")).into(ivAlbumBg);
+                    Glide.with(this).load(mTrackImageUrl.replace("large", "t500x500")).into(ivAlbumBg);
                 }
             }
             break;

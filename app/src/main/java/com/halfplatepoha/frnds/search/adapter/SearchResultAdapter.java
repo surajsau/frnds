@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.R;
@@ -17,7 +18,6 @@ import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.models.response.TrackDetails;
 import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -48,7 +48,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapte
     public void onBindViewHolder(SearchResultViewHolder holder, int position) {
         if(mList.get(position) != null) {
             holder.tvTitle.setText(mList.get(position).getTitle());
-            Picasso.with(mContext)
+            Glide.with(mContext)
                     .load(mList.get(position).getArtwork_url())
                     .into(holder.ivResultIcon);
             holder.row.setTag(mList.get(position));

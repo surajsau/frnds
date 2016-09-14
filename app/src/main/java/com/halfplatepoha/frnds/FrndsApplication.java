@@ -1,6 +1,7 @@
 package com.halfplatepoha.frnds;
 
 import android.app.Application;
+import android.support.v7.app.AppCompatDelegate;
 
 import com.facebook.FacebookSdk;
 
@@ -14,5 +15,7 @@ public class FrndsApplication extends Application {
         super.onCreate();
         FacebookSdk.sdkInitialize(this);
         FrndsPreference.init(this, IConstants.PREFERNCE_FILE);
+
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 }

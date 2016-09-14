@@ -28,7 +28,7 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:textSize="16sp"
-            android:textColor="@android:color/white"/>
+            android:textColor="@color/textPrimary"/>
 
         <com.halfplatepoha.frnds.ui.OpenSansTextView
             android:id="@+id/tvAuthor"
@@ -37,6 +37,7 @@
             tools:text="Sample author name"
             android:maxLines="1"
             android:ellipsize="end"
+            android:textColor="@color/textSecondary"
             android:textSize="13sp"/>
 
     </LinearLayout>

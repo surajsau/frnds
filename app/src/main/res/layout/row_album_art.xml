@@ -5,9 +5,10 @@
     android:orientation="vertical"
     android:layout_width="196dp"
     android:layout_height="196dp"
-    app:cardElevation="20dp"
+    app:cardElevation="5dp"
     app:cardCornerRadius="0dp"
-    android:layout_margin="10dp">
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp">
 
     <ImageView android:id="@+id/ivAlbum"
         android:layout_width="match_parent"

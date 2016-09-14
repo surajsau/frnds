@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             tools:text="Swapnil Gupta"
             android:text="Sample user"
+            android:textColor="@color/textPrimary"
             android:textSize="15sp"/>
 
         <com.halfplatepoha.frnds.ui.OpenSansTextView
@@ -33,6 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="Kya kar rha hai abhi ?"
+            android:textColor="@color/textSecondary"
             android:text="Sample text message"
             android:textSize="12sp"/>
 
