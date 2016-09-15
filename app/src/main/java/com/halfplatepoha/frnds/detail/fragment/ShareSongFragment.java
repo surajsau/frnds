@@ -10,9 +10,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.halfplatepoha.frnds.R;
-import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.adapter.FrndsShareSuggestionListAdapter;
 import com.halfplatepoha.frnds.utils.AppUtil;
 
@@ -26,6 +26,7 @@ import butterknife.OnClick;
 public class ShareSongFragment extends Fragment {
 
     @Bind(R.id.rlFrndsSuggestion) RecyclerView rlFrndsSuggestion;
+    @Bind(R.id.ivAlbum) ImageView ivAlbum;
 
     private FrndsShareSuggestionListAdapter mAdapter;
 

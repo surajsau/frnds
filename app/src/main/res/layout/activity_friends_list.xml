@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -23,10 +23,34 @@
 
     </FrameLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rlFrnds"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/row_frnds_list"/>
+        android:orientation="vertical"
+        android:layout_marginTop="?android:actionBarSize"
+        android:layout_marginBottom="?android:actionBarSize">
 
-</LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/colorDivider_chat"/>
+
+        <FrameLayout android:id="@+id/fragmentHome"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </FrameLayout>
+    </LinearLayout>
+
+    <com.roughike.bottombar.BottomBar
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="?android:actionBarSize"
+        android:layout_gravity="bottom"
+        app:bb_tabXmlResource="@xml/tabs_bottom"
+        app:bb_behavior="shifting|underNavbar"
+        app:bb_inActiveTabColor="@color/colorPrimaryLight"
+        app:bb_activeTabColor="@color/colorPrimaryLight"
+        app:bb_showShadow="false"/>
+
+</FrameLayout>

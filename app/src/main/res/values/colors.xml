@@ -6,6 +6,13 @@
     <color name="colorPrimaryLight_a0">#a0ffffff</color>
     <color name="colorAccent">#e5143d</color>
 
+    <color name="colorDivider_search">#ffc599</color>
+    <color name="colorDivider_chat">#f4a1b1</color>
+    <color name="colorDivider_tracks">#ffaa7f</color>
+
+    <color name="soundCloud">#ff7000</color>
+    <color name="recentTracks">#ffaa7f</color>
+
     <color name="colorIcons">#160206</color>
 
     <color name="textPrimary">#221f23</color>

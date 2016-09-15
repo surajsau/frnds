@@ -35,37 +35,72 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical">
 
-        <com.halfplatepoha.frnds.ui.OpenSansEditText
-            android:id="@+id/etSearch"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="?android:actionBarSize"
-            android:layout_gravity="center_vertical"
-            android:background="@null"
-            android:hint="Search"
-            android:focusableInTouchMode="true"
-            android:textColorHint="@color/textSecondary"
-            android:textColor="@color/textPrimary"/>
+            <com.halfplatepoha.frnds.ui.OpenSansEditText
+                android:id="@+id/etSearch"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="?android:actionBarSize"
+                android:background="@null"
+                android:hint="Search your track"
+                android:focusableInTouchMode="true"
+                android:textColorHint="@color/textSecondary"
+                android:textColor="@color/textPrimary"/>
 
-        <ImageButton
-            android:id="@+id/cross"
-            android:layout_width="?android:actionBarSize"
-            android:layout_height="?android:actionBarSize"
-            android:src="@drawable/close"
-            android:background="@null"
-            android:layout_gravity="end|center_vertical"/>
+            <ImageButton
+                android:id="@+id/cross"
+                android:layout_width="?android:actionBarSize"
+                android:layout_height="?android:actionBarSize"
+                android:src="@drawable/close"
+                android:background="@null"
+                android:layout_gravity="end"/>
         </LinearLayout>
 
     </FrameLayout>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rlSearchResult"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:listitem="@layout/row_search_result"
-        android:layout_margin="10dp"/>
+        android:layout_height="2dp"
+        android:background="@color/colorDivider_search"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp">
+
+            <com.halfplatepoha.frnds.ui.OpenSansTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="powered by"
+                android:textColor="@color/textPrimary"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tint="@color/soundCloud"
+                android:src="@drawable/powered_by_soundcloud"
+                android:layout_marginLeft="5dp"/>
+
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rlSearchResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:listitem="@layout/row_search_result"
+            android:layout_margin="10dp"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
 </LinearLayout>
