@@ -1,18 +1,21 @@
-package com.halfplatepoha.frnds.friendslist.adapter;
+package com.halfplatepoha.frnds.home.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.db.models.Chat;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
-import com.halfplatepoha.frnds.friendslist.IFrndsConstants;
-import com.halfplatepoha.frnds.friendslist.fragment.FriendDetailDialogFragment;
-import com.halfplatepoha.frnds.friendslist.activity.FriendsListActivity;
+import com.halfplatepoha.frnds.home.IFrndsConstants;
+import com.halfplatepoha.frnds.home.fragment.FriendDetailDialogFragment;
+import com.halfplatepoha.frnds.home.activity.HomeActivity;
 import com.halfplatepoha.frnds.models.User;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 
@@ -29,13 +32,15 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.FriendViewHolder>{
 
     private Context mContext;
-    private ArrayList<User> mFriends;
+    private ArrayList<Chat> mFriends;
     private FragmentManager mFragmentManager;
 
     public FriendsListAdapter(Context context) {
         mContext = context;
+
         mFriends = new ArrayList<>();
-        mFragmentManager = ((FriendsListActivity)mContext).getSupportFragmentManager();
+
+        mFragmentManager = ((HomeActivity)mContext).getSupportFragmentManager();
     }
 
     @Override
@@ -46,13 +51,15 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
     @Override
     public void onBindViewHolder(FriendViewHolder holder, int position) {
-//        if(mFriends.get(position) != null){
-//            Picasso.with(mContext)
-//                    .load(mFriends.get(position).getImageUrl())
-//                    .into(holder.ivFrndAvatar);
-//
-//            holder.tvFrndName.setText(mFriends.get(position).getName());
-//
+        if(mFriends.get(position) != null){
+            Glide.with(mContext)
+                    .load(mFriends.get(position).getFrndImageUrl())
+                    .error(R.drawable.pappi)
+                    .into(holder.ivFrndAvatar);
+
+            holder.tvFrndName.setText(mFriends.get(position).getFrndName());
+            holder.ivFrndAvatar.setTag(mFriends.get(position).getFrndImageUrl());
+
 //            switch (mFriends.get(position).getStatus()) {
 //                case IFrndsConstants.STATUS_PLAYING:{
 //                    holder.tvFrndStatus.setText(mFriends.get(position).getLastMessage());
@@ -64,12 +71,19 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 //                }
 //                break;
 //            }
-//        }
+        }
+    }
+
+    public void addChat(Chat chat) {
+        mFriends.add(chat);
+        notifyItemInserted(mFriends.size() - 1);
     }
 
     @Override
     public int getItemCount() {
-        return 10;
+        if(mFriends == null)
+            return 0;
+        return mFriends.size();
     }
 
     public class FriendViewHolder extends RecyclerView.ViewHolder{
@@ -86,12 +100,16 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         @OnClick(R.id.rowFriend)
         public void openSongDetails() {
             Intent songDetailsIntent = new Intent(mContext, SongDetailActivity.class);
-            ((FriendsListActivity)mContext).startActivityForResult(songDetailsIntent, IFrndsConstants.FRIEND_LIST_REQUEST);
+            ((HomeActivity)mContext).startActivityForResult(songDetailsIntent, IFrndsConstants.FRIEND_LIST_REQUEST);
         }
 
         @OnClick(R.id.ivFrndAvatar)
         public void openDetailDialog() {
             FriendDetailDialogFragment dlgDetail = new FriendDetailDialogFragment();
+            Bundle dlgBundle = new Bundle();
+            dlgBundle.putString(IFrndsConstants.FRIEND_NAME, tvFrndName.getText().toString());
+            dlgBundle.putString(IFrndsConstants.FRIEND_IMAGE_URL, ivFrndAvatar.getTag().toString());
+            dlgDetail.setArguments(dlgBundle);
             dlgDetail.show(mFragmentManager, IFrndsConstants.DETAIL_DIALOG_TAG);
         }
 

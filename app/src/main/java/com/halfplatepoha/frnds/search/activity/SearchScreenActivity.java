@@ -1,8 +1,6 @@
 package com.halfplatepoha.frnds.search.activity;
 
-import android.animation.Animator;
 import android.graphics.Point;
-import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +19,8 @@ import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.models.response.SearchResponse;
+import com.halfplatepoha.frnds.network.Pagination;
+import com.halfplatepoha.frnds.network.PaginationListener;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import com.halfplatepoha.frnds.network.clients.SoundCloudClient;
 import com.halfplatepoha.frnds.models.response.TrackDetails;
@@ -32,8 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import io.codetail.animation.ViewAnimationUtils;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -43,16 +43,19 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
 
     private static final String TAG = SearchScreenActivity.class.getSimpleName();
 
-    private int mToolbarLength;
-
     private SoundCloudClient mClient;
 
     private SearchResultAdapter mAdapter;
+
+    private Subscription mPaginationSubscription;
+
+    private SearchResultPagination pagination;
 
     @Bind(R.id.searchBar) ViewGroup searchBar;
     @Bind(R.id.etSearch) EditText etSearch;
     @Bind(R.id.rlSearchResult) RecyclerView rlSearchResult;
     @Bind(R.id.back) ImageButton back;
+    @Bind(R.id.llPoweredBySoundcloud) View llPoweredBySoundCloud;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +69,6 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
                         .setApiKeyInterceptor(IConstants.API_KEY_PARAM, IConstants.API_KEY_VALUE)
                         .setClientClass(SoundCloudClient.class)
                         .buildClient();
-
-        mToolbarLength = Math.max(searchBar.getHeight(), searchBar.getWidth());
 
         setupRecyclerView();
 
@@ -97,12 +98,20 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
     }
 
     private void callSearchApi(String s) {
-        mClient.getSearchResult(s)
+        if(pagination == null)
+            pagination = new SearchResultPagination();
+
+        pagination.setSearchString(s);
+        mPaginationSubscription = Pagination.paging(rlSearchResult, pagination)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.newThread())
-                .observeOn(Schedulers.newThread())
                 .subscribe(new BaseSubscriber<List<TrackDetails>>() {
                     @Override
                     public void onObjectReceived(List<TrackDetails> trackDetails) {
+                        if(trackDetails != null && !trackDetails.isEmpty()) {
+                            rlSearchResult.setVisibility(View.VISIBLE);
+                            llPoweredBySoundCloud.setVisibility(View.GONE);
+                        }
                         Observable.just(trackDetails)
                                 .flatMap(new Func1<List<TrackDetails>, Observable<TrackDetails>>() {
                                     @Override
@@ -177,5 +186,26 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
             }
             break;
         }
+    }
+
+    private class SearchResultPagination implements PaginationListener<TrackDetails> {
+
+        private String mSearchString;
+
+        public void setSearchString(String searchString) {
+            mSearchString = searchString;
+        }
+
+        @Override
+        public Observable<List<TrackDetails>> onNextPage(int offset) {
+            return mClient.getSearchResult(mSearchString, IConstants.PAGE_SIZE, offset + 1);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        if(!mPaginationSubscription.isUnsubscribed())
+//            mPaginationSubscription.unsubscribe();
     }
 }

@@ -1,4 +1,4 @@
-package com.halfplatepoha.frnds.friendslist;
+package com.halfplatepoha.frnds.home;
 
 import android.support.annotation.IntDef;
 
@@ -23,4 +23,7 @@ public interface IFrndsConstants {
     String DETAIL_DIALOG_TAG = "detail_dialog_tag";
 
     int FRIEND_LIST_REQUEST = 201;
+
+    String FRIEND_IMAGE_URL = "friend_image_url";
+    String FRIEND_NAME = "friend_name";
 }

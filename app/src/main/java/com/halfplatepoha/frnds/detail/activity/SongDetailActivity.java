@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Point;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,11 +21,14 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.db.IDbConstants;
+import com.halfplatepoha.frnds.db.models.Chat;
+import com.halfplatepoha.frnds.db.models.Song;
 import com.halfplatepoha.frnds.detail.adapter.AlbumListAdapter;
 import com.halfplatepoha.frnds.detail.adapter.ChatAdapter;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.mediaplayer.PlayerService;
-import com.halfplatepoha.frnds.models.Message;
+import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.network.clients.FrndsClient;
 import com.halfplatepoha.frnds.models.request.UpdateTrackRequest;
@@ -39,6 +43,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.codetail.animation.ViewAnimationUtils;
+import io.realm.Realm;
 import rx.schedulers.Schedulers;
 
 public class SongDetailActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener {
@@ -59,8 +64,9 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     private String mTrackUrl;
     private String mTrackImageUrl;
     private String mTrackTitle;
-    private String mIconUrl;
     private String mTrackArtist;
+
+    private long mFrndId;
 
     private String mSource;
 
@@ -69,13 +75,21 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
     private LinearLayoutManager mChatLayoutManager;
 
+    private Realm mRealm;
+
+    private Chat mChat;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_detail);
         ButterKnife.bind(this);
 
+        mRealm = Realm.getDefaultInstance();
+
         getDataFromBundle();
+
+        getChatObjectFromDb();
 
         if(IDetailsConstants.SOURCE_FAB.equalsIgnoreCase(mSource)) {
             startSearchActivity();
@@ -88,7 +102,10 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         prepareMediaPlayer();
 
         buildApiClients();
-//        callUpdateTracksApi();
+
+    }
+
+    private void getChatObjectFromDb() {
 
     }
 
@@ -156,10 +173,11 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     }
 
     private void getDataFromBundle() {
-        mTrackTitle = getIntent().getStringExtra(IConstants.TRACK_TITLE);
-        mTrackUrl = getIntent().getStringExtra(IConstants.TRACK_URL);
-        mIconUrl = getIntent().getStringExtra(IConstants.ICON_URL);
+        mTrackTitle = getIntent().getStringExtra(IDetailsConstants.TRACK_TITLE);
+        mTrackUrl = getIntent().getStringExtra(IDetailsConstants.TRACK_URL);
+        mTrackImageUrl = getIntent().getStringExtra(IDetailsConstants.TRACK_IMAGE_URL);
         mSource = getIntent().getStringExtra(IDetailsConstants.SOURCE_TYPE);
+        mFrndId = getIntent().getLongExtra(IDetailsConstants.FRND_ID, -1);
     }
 
     private void updateTrackAlbum(String imageUrl) {
@@ -241,8 +259,9 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     public void addMessage() {
         if(!TextUtils.isEmpty(etMessage.getText())) {
             Message.Builder msgBuilder = new Message.Builder()
-                    .setMessage(etMessage.getText().toString())
-                    .setTimestamp(System.currentTimeMillis())
+                    .setMsgBody(etMessage.getText().toString())
+                    .setMsgTimestamp(System.currentTimeMillis())
+                    .setMsgType(IDbConstants.TYPE_MESSAGE)
                     .setUserType(IDetailsConstants.TYPE_ME);
             mChatAdapter.addMessage(msgBuilder.build());
             rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
@@ -314,12 +333,14 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                     mTrackTitle = data.getExtras().getString(IDetailsConstants.TRACK_TITLE);
                     mTrackArtist = data.getExtras().getString(IDetailsConstants.TRACK_URL);
 
-                    addAlbumToPlaylist();
-
-                    startPlayingTrack();
-
                     //--setting background image of activity
-                    Glide.with(this).load(mTrackImageUrl.replace("large", "t500x500")).into(ivAlbumBg);
+                    Glide.with(this).load(mTrackImageUrl.replace(IDetailsConstants.IMG_LARGE_SUFFIX, IDetailsConstants.IMG_500_X_500_SUGGIX)).into(ivAlbumBg);
+
+                    addSongToPlaylist();
+
+//                    startPlayingTrack();
+
+//                    callUpdateTracksApi();
                 }
             }
             break;
@@ -335,8 +356,65 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         startService(playerServiceIntent);
     }
 
-    private void addAlbumToPlaylist() {
-        //TODO: add song to DB and adapter
+    private void addSongToPlaylist() {
+        mRealm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Song song = realm.createObject(Song.class);
+                song.setSongId(getNextSongId());
+                song.setSongArtist(mTrackArtist);
+                song.setSongImgUrl(mTrackImageUrl);
+                song.setSongTimestamp(System.currentTimeMillis());
+                song.setSongTitle(mTrackTitle);
+                song.setSongUrl(mTrackUrl);
+                song.setFrndId(mFrndId);
+
+                Message message = realm.createObject(Message.class);
+                message.setMsgBody(String.format(getString(R.string.music_chat_message), "You", mTrackTitle));
+                message.setMsgTimestamp(System.currentTimeMillis());
+                message.setUserType(IDetailsConstants.TYPE_ME);
+                message.setMsgType(IDbConstants.TYPE_MUSIC);
+
+//                mChat.frndMessages.add(message);
+//                mChat.frndSongs.add(song);
+
+                mAlbumListAdapter.addSong(realm.copyFromRealm(song));
+                mChatAdapter.addMessage(realm.copyFromRealm(message));
+            }
+        });
     }
+
+    private int getNextSongId() {
+        if(mRealm.where(Song.class).max(IDbConstants.SONG_ID_KEY) == null)
+            return 1;
+        return mRealm.where(Song.class).max(IDbConstants.SONG_ID_KEY).intValue() + 1;
+    }
+
+//    private class AddSongToDbTask extends AsyncTask<Song, Void, Song> {
+//
+//        @Override
+//        protected Song doInBackground(Song... songs) {
+//            return null;
+//        }
+//    }
+//
+//    private class FetchChatFromDbTask extends AsyncTask<Void, Void, Chat> {
+//
+//        @Override
+//        protected Chat doInBackground(Void... voids) {
+//            if(mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, mFrndId) == null) {
+//                Chat chat = mRealm.createObject(Chat.class);
+//                chat.setFrndId(mFrndId);
+//                return chat;
+//            } else {
+//                return mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, mFrndId).findFirst();
+//            }
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Chat chat) {
+//            mChat = chat;
+//        }
+//    }
 
 }

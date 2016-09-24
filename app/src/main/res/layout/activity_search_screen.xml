@@ -47,6 +47,7 @@
                 android:layout_marginLeft="?android:actionBarSize"
                 android:background="@null"
                 android:hint="Search your track"
+                android:cursorVisible="true"
                 android:focusableInTouchMode="true"
                 android:textColorHint="@color/textSecondary"
                 android:textColor="@color/textPrimary"/>
@@ -76,7 +77,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_horizontal"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="10dp"
+            android:id="@+id/llPoweredBySoundcloud">
 
             <com.halfplatepoha.frnds.ui.OpenSansTextView
                 android:layout_width="wrap_content"

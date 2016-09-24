@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    tools:context="com.halfplatepoha.frnds.friendslist.activity.FriendsListActivity"
+    tools:context=".home.activity.HomeActivity"
     android:background="@color/colorPrimary">
 
     <FrameLayout
@@ -48,7 +48,7 @@
         android:layout_height="?android:actionBarSize"
         android:layout_gravity="bottom"
         app:bb_tabXmlResource="@xml/tabs_bottom"
-        app:bb_behavior="shifting|underNavbar"
+        app:bb_behavior="shifting"
         app:bb_inActiveTabColor="@color/colorPrimaryLight"
         app:bb_activeTabColor="@color/colorPrimaryLight"
         app:bb_showShadow="false"/>

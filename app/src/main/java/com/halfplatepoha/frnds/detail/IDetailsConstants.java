@@ -27,9 +27,13 @@ public interface IDetailsConstants {
     String TRACK_IMAGE_URL = "track_image_url";
     String TRACK_TITLE = "track_title";
     String TRACK_ARTIST = "track_artist";
+    String FRND_ID = "frnd_id";
 
     String SERVICE_STREAM_URL = "service_stream_url";
     String NOTIFICATION_SERVICE_TRACK_TITLE = "notification_track_title";
 
     String SONG_SHARE_TAG = "song_share";
+
+    String IMG_LARGE_SUFFIX = "large";
+    String IMG_500_X_500_SUGGIX = "t500x500";
 }

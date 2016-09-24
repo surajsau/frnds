@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
-import com.halfplatepoha.frnds.models.Message;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 import com.halfplatepoha.frnds.utils.AppUtil;
 
@@ -51,11 +51,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(mMessages.get(position) != null) {
             if(holder instanceof MeChatViewHolder) {
-                ((MeChatViewHolder) holder).tvMeMsg.setText(mMessages.get(position).getMessage());
-                ((MeChatViewHolder) holder).tvMeTimeStamp.setText(AppUtil.getTimestampFromUTC(mMessages.get(position).getTimestamp()));
+                ((MeChatViewHolder) holder).tvMeMsg.setText(mMessages.get(position).getMsgBody());
+                ((MeChatViewHolder) holder).tvMeTimeStamp.setText(AppUtil.getTimestampFromUTC(mMessages.get(position).getMsgTimestamp()));
             } else if(holder instanceof FrndChatViewHolder) {
-                ((FrndChatViewHolder) holder).tvFrndMessage.setText(mMessages.get(position).getMessage());
-                ((FrndChatViewHolder) holder).tvFrndTimeStamp.setText(AppUtil.getTimestampFromUTC(mMessages.get(position).getTimestamp()));
+                ((FrndChatViewHolder) holder).tvFrndMessage.setText(mMessages.get(position).getMsgBody());
+                ((FrndChatViewHolder) holder).tvFrndTimeStamp.setText(AppUtil.getTimestampFromUTC(mMessages.get(position).getMsgTimestamp()));
             }
         }
     }
@@ -69,11 +69,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(int position) {
-        if(position % 3 == 0)
-            return IDetailsConstants.TYPE_FRND;
-        else
-            return IDetailsConstants.TYPE_ME;
-//        return mMessages.get(position).getUserType();
+        return mMessages.get(position).getUserType();
     }
 
     public class MeChatViewHolder extends RecyclerView.ViewHolder {

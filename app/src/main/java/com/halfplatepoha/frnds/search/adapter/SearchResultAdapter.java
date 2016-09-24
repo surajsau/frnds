@@ -18,6 +18,7 @@ import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.models.response.TrackDetails;
 import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
+import com.halfplatepoha.frnds.ui.AutoLoadingRecyclerAdapter;
 
 import java.util.ArrayList;
 
@@ -27,7 +28,7 @@ import butterknife.ButterKnife;
 /**
  * Created by surajkumarsau on 25/08/16.
  */
-public class SearchResultAdapter extends RecyclerView.Adapter<SearchResultAdapter.SearchResultViewHolder> {
+public class SearchResultAdapter extends AutoLoadingRecyclerAdapter<TrackDetails, SearchResultAdapter.SearchResultViewHolder> {
 
     private Context mContext;
 

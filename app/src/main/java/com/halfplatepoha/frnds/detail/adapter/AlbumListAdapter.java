@@ -8,7 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.db.models.Song;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.detail.fragment.ShareSongFragment;
@@ -25,7 +27,7 @@ import butterknife.OnClick;
 public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.AlbumListViewHolder>{
 
     private Context mContext;
-    private ArrayList<String> albums;
+    private ArrayList<Song> albums;
 
     private FragmentManager mFragmentManager;
 
@@ -45,7 +47,17 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
 
     @Override
     public void onBindViewHolder(AlbumListViewHolder holder, int position) {
-        holder.ivAlbum.setBackgroundResource(R.drawable.warriors);
+//        if (albums.get(position) != null) {
+//            Glide.with(mContext)
+//                    .load(albums.get(position).getSongImgUrl())
+//                    .into(holder.ivAlbum);
+//            holder.ivAlbum.setTag(albums.get(position));
+//        }
+    }
+
+    public void addSong(Song song) {
+        albums.add(song);
+        notifyItemInserted(albums.size() - 1);
     }
 
     @Override

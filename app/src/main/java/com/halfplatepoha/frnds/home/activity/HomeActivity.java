@@ -1,25 +1,31 @@
-package com.halfplatepoha.frnds.friendslist.activity;
+package com.halfplatepoha.frnds.home.activity;
 
 import android.content.Intent;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.halfplatepoha.frnds.R;
-import com.halfplatepoha.frnds.friendslist.IFrndsConstants;
-import com.halfplatepoha.frnds.friendslist.adapter.FriendsListAdapter;
-import com.halfplatepoha.frnds.friendslist.fragment.FriendsListFragment;
-import com.halfplatepoha.frnds.friendslist.fragment.SoundCloudSearchFragment;
-import com.halfplatepoha.frnds.friendslist.fragment.TracksListFragment;
+import com.halfplatepoha.frnds.TokenTracker;
+import com.halfplatepoha.frnds.home.IFrndsConstants;
+import com.halfplatepoha.frnds.home.fragment.FriendsListFragment;
+import com.halfplatepoha.frnds.home.fragment.SoundCloudSearchFragment;
+import com.halfplatepoha.frnds.home.fragment.TracksListFragment;
+import com.halfplatepoha.frnds.models.InstalledFrnds;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
+
+import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class FriendsListActivity extends AppCompatActivity implements OnTabSelectListener {
+public class HomeActivity extends AppCompatActivity implements OnTabSelectListener {
 
     @Bind(R.id.bottomBar) BottomBar bottomBar;
 
@@ -36,6 +42,12 @@ public class FriendsListActivity extends AppCompatActivity implements OnTabSelec
         bottomBar.setDefaultTab(R.id.tabChat);
         bottomBar.setOnTabSelectListener(this);
 
+    }
+
+    private void updateFrndsList(InstalledFrnds frnds) {
+        if(frnds != null && frnds.getData() != null && frnds.getData().size() > 0) {
+
+        }
     }
 
     @Override

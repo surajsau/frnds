@@ -1,4 +1,4 @@
-package com.halfplatepoha.frnds.friendslist.fragment;
+package com.halfplatepoha.frnds.home.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

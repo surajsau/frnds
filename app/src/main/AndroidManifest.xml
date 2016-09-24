@@ -17,13 +17,7 @@
 
         <activity android:name=".search.activity.SearchScreenActivity" />
         <activity android:name=".detail.activity.SongDetailActivity" />
-        <activity android:name=".login.activity.LoginActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+        <activity android:name=".login.activity.LoginActivity"/>
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
@@ -41,10 +35,17 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".friendslist.activity.FriendsListActivity" />
+        <activity android:name=".home.activity.HomeActivity" />
 
-        <service android:name=".mediaplayer.PlayerService"/>
+        <service android:name=".mediaplayer.PlayerService" />
 
+        <activity android:name=".home.activity.SplashScreenActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

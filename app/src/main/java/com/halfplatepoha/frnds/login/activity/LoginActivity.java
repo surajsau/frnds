@@ -12,8 +12,12 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -26,7 +30,11 @@ import com.halfplatepoha.frnds.FrndsPreference;
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.IPrefConstants;
 import com.halfplatepoha.frnds.R;
-import com.halfplatepoha.frnds.friendslist.activity.FriendsListActivity;
+import com.halfplatepoha.frnds.TokenTracker;
+import com.halfplatepoha.frnds.db.IDbConstants;
+import com.halfplatepoha.frnds.db.models.Chat;
+import com.halfplatepoha.frnds.home.activity.HomeActivity;
+import com.halfplatepoha.frnds.models.InstalledFrnds;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.network.clients.FrndsClient;
 import com.halfplatepoha.frnds.models.request.RegisterGCMRequest;
@@ -34,13 +42,15 @@ import com.halfplatepoha.frnds.models.request.RegisterRequest;
 import com.halfplatepoha.frnds.models.response.RegisterGCMResponse;
 import com.halfplatepoha.frnds.models.response.RegisterResponse;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
-import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.realm.Realm;
 import rx.schedulers.Schedulers;
 
 public class LoginActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener,
@@ -59,6 +69,8 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
     private String fbId;
     private String name;
 
+    private Realm mRealm;
+
     @Bind(R.id.btnFbLogin) LoginButton btnLogin;
 
     @Override
@@ -67,6 +79,7 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
+        mRealm = Realm.getDefaultInstance();
         mAuth = FirebaseAuth.getInstance();
         mCallbackManager = CallbackManager.Factory.create();
         mClient = new ClientGenerator.Builder()
@@ -101,21 +114,14 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
         if(user != null) {
             callRegisterApi();
             callRegisterGCMApi();
-            startSearchScreenActivity();
-        } else {
-            Toast.makeText(this, "You've logged out", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void startSearchScreenActivity() {
-        Intent startScreenIntent = new Intent(this, FriendsListActivity.class);
-        startActivity(startScreenIntent);
     }
 
     @Override
     public void onSuccess(LoginResult loginResult) {
         FrndsLog.d(loginResult.getAccessToken().getToken());
         getFacebookName(loginResult.getAccessToken());
+        getFriendsWhoInstalledApp(loginResult.getAccessToken());
         handleAccessToken(loginResult.getAccessToken());
     }
 
@@ -208,4 +214,57 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 callRegisterApi();
         }
     };
+
+    private void getFriendsWhoInstalledApp(AccessToken token) {
+
+        Bundle params = new Bundle();
+        params.putString("fields", "installed, id, name, picture.type(large)");
+
+        new GraphRequest(token, "/me/friends", params, HttpMethod.GET, new GraphRequest.Callback() {
+            @Override
+            public void onCompleted(GraphResponse response) {
+                if(response.getError() == null) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    try {
+                        FrndsLog.e(response.getRawResponse());
+                        InstalledFrnds frnds = mapper.readValue(response.getRawResponse(), InstalledFrnds.class);
+                        updateFrndsList(frnds);
+                        startHomeActivity();
+                    }  catch (JsonMappingException e) {
+                        e.printStackTrace();
+                    } catch (JsonParseException e) {
+                        e.printStackTrace();
+                    }catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+
+                }
+            }
+        }).executeAsync();
+    }
+
+    private void startHomeActivity() {
+        Intent homeIntent = new Intent(this, HomeActivity.class);
+        startActivity(homeIntent);
+    }
+
+    private void updateFrndsList(final InstalledFrnds frnds) {
+        if(frnds != null && frnds.getData() != null && !frnds.getData().isEmpty()) {
+            mRealm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    for(InstalledFrnds.Frnd frnd : frnds.getData()) {
+                        if(realm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, frnd.getId()).findFirst() == null) {
+                            Chat chat = new Chat();
+                            chat.setFrndId(frnd.getId());
+                            chat.setFrndName(frnd.getName());
+                            chat.setFrndImageUrl(frnd.getPicture().getData().getUrl());
+                            realm.insert(chat);
+                        }
+                    }
+                }
+            });
+        }
+    }
 }

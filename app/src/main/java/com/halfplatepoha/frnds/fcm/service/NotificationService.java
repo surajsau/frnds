@@ -42,8 +42,8 @@ public class NotificationService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         FrndsLog.e("From: " + remoteMessage.getFrom());
-        FrndsLog.e("Message payload: " + remoteMessage.getData());
-        FrndsLog.e("Message body: " +  remoteMessage.getNotification().getBody());
+        FrndsLog.e("ChatMessage payload: " + remoteMessage.getData());
+        FrndsLog.e("ChatMessage body: " +  remoteMessage.getNotification().getBody());
 
         try {
             NotificationModel model = mMapper.readValue(remoteMessage.getNotification().getBody(), NotificationModel.class);
