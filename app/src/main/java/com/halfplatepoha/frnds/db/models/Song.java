@@ -8,23 +8,12 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Song extends RealmObject {
 
-    @PrimaryKey
-    private long         songId;
-
     private String      songUrl;
     private String      songImgUrl;
     private String      songTitle;
     private String      songArtist;
-    private long        frndId;
+    private String      frndId;
     private long        songTimestamp;
-
-    public long getSongId() {
-        return songId;
-    }
-
-    public void setSongId(int songId) {
-        this.songId = songId;
-    }
 
     public String getSongUrl() {
         return songUrl;
@@ -58,11 +47,11 @@ public class Song extends RealmObject {
         this.songArtist = songArtist;
     }
 
-    public long getFrndId() {
+    public String getFrndId() {
         return frndId;
     }
 
-    public void setFrndId(long frndId) {
+    public void setFrndId(String frndId) {
         this.frndId = frndId;
     }
 

@@ -23,6 +23,7 @@ public interface IDetailsConstants {
 
     int SONG_DETAILS_REQUEST = 101;
 
+    String TRACK_ID = "track_id";
     String TRACK_URL = "track_url";
     String TRACK_IMAGE_URL = "track_image_url";
     String TRACK_TITLE = "track_title";
@@ -35,5 +36,8 @@ public interface IDetailsConstants {
     String SONG_SHARE_TAG = "song_share";
 
     String IMG_LARGE_SUFFIX = "large";
-    String IMG_500_X_500_SUGGIX = "t500x500";
+    String IMG_500_X_500_SUFFIX = "t500x500";
+    String IMG_300_X_300_SUFFIX = "t300x300";
+    String STRING_HTTPS = "https";
+    String STRING_HTTP = "http";
 }

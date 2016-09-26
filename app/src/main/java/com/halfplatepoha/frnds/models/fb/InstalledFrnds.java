@@ -1,4 +1,4 @@
-package com.halfplatepoha.frnds.models;
+package com.halfplatepoha.frnds.models.fb;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

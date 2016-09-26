@@ -39,15 +39,19 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         FrndsLog.e(intent.getStringExtra(IDetailsConstants.SERVICE_STREAM_URL));
         try {
             if (intent.getAction().equals(ACTION_PLAY)) {
-                mPlayer = new MediaPlayer();
-                mPlayer.setOnPreparedListener(this);
-                mPlayer.setOnErrorListener(this);
+                if(mPlayer == null) {
+                    mPlayer = new MediaPlayer();
+                    mPlayer.setOnPreparedListener(this);
+                    mPlayer.setOnErrorListener(this);
+                }
 
                 mStreamUrl = intent.getStringExtra(IDetailsConstants.SERVICE_STREAM_URL);
                 String title = intent.getStringExtra(IDetailsConstants.NOTIFICATION_SERVICE_TRACK_TITLE);
 
                 if(!TextUtils.isEmpty(mStreamUrl)) {
                     mStreamUrl = mStreamUrl.concat("?" + IConstants.API_KEY_PARAM + "=" + IConstants.API_KEY_VALUE);
+
+                    mPlayer.reset();
                     mPlayer.setDataSource(mStreamUrl);
                     mPlayer.prepareAsync();
 

@@ -26,4 +26,5 @@ public interface IFrndsConstants {
 
     String FRIEND_IMAGE_URL = "friend_image_url";
     String FRIEND_NAME = "friend_name";
+    String FRIEND_ID = "friend_id";
 }

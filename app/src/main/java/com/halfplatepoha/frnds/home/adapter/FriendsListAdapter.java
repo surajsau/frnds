@@ -12,11 +12,13 @@ import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.db.models.Chat;
+import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.home.IFrndsConstants;
 import com.halfplatepoha.frnds.home.fragment.FriendDetailDialogFragment;
 import com.halfplatepoha.frnds.home.activity.HomeActivity;
 import com.halfplatepoha.frnds.models.User;
+import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 
 import java.util.ArrayList;
@@ -79,6 +81,10 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         notifyItemInserted(mFriends.size() - 1);
     }
 
+    public ArrayList<Chat> getFrndsList() {
+        return mFriends;
+    }
+
     @Override
     public int getItemCount() {
         if(mFriends == null)
@@ -99,7 +105,9 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
         @OnClick(R.id.rowFriend)
         public void openSongDetails() {
+            Chat frnd = mFriends.get(getAdapterPosition());
             Intent songDetailsIntent = new Intent(mContext, SongDetailActivity.class);
+            songDetailsIntent.putExtra(IDetailsConstants.FRND_ID, frnd.getFrndId());
             ((HomeActivity)mContext).startActivityForResult(songDetailsIntent, IFrndsConstants.FRIEND_LIST_REQUEST);
         }
 

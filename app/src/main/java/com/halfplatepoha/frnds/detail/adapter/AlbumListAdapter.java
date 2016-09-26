@@ -1,6 +1,8 @@
 package com.halfplatepoha.frnds.detail.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,11 +11,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.db.models.Song;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.detail.fragment.ShareSongFragment;
+import com.halfplatepoha.frnds.ui.GlideImageView;
 
 import java.util.ArrayList;
 
@@ -24,7 +28,7 @@ import butterknife.OnClick;
 /**
  * Created by surajkumarsau on 31/08/16.
  */
-public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.AlbumListViewHolder>{
+public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.AlbumListViewHolder> {
 
     private Context mContext;
     private ArrayList<Song> albums;
@@ -47,27 +51,27 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
 
     @Override
     public void onBindViewHolder(AlbumListViewHolder holder, int position) {
-//        if (albums.get(position) != null) {
-//            Glide.with(mContext)
-//                    .load(albums.get(position).getSongImgUrl())
-//                    .into(holder.ivAlbum);
-//            holder.ivAlbum.setTag(albums.get(position));
-//        }
+        if (albums.get(position) != null) {
+            FrndsLog.e(albums.get(position).getSongImgUrl());
+            holder.ivAlbum.setImageUrl(mContext, albums.get(position).getSongImgUrl());
+        }
     }
 
     public void addSong(Song song) {
+        if(albums == null)
+            albums = new ArrayList<>();
         albums.add(song);
         notifyItemInserted(albums.size() - 1);
     }
 
     @Override
     public int getItemCount() {
-        return 10;
+        return albums.size();
     }
 
     public class AlbumListViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.ivAlbum) ImageView ivAlbum;
+        @Bind(R.id.ivAlbum) GlideImageView ivAlbum;
 
         public AlbumListViewHolder(View itemView) {
             super(itemView);

@@ -4,6 +4,7 @@ package com.halfplatepoha.frnds.home.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,26 +12,34 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.facebook.AccessToken;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.TokenTracker;
+import com.halfplatepoha.frnds.db.ChatDAO;
+import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Chat;
 import com.halfplatepoha.frnds.home.adapter.FriendsListAdapter;
-import com.halfplatepoha.frnds.models.InstalledFrnds;
-import com.halfplatepoha.frnds.models.User;
+import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 
-import java.util.ArrayList;
+import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
 import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
-public class FriendsListFragment extends Fragment {
+public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
+        ChatDAO.OnTransactionCompletedListener{
 
     @Bind(R.id.rlFrnds) RecyclerView rlFrnds;
     @Bind(R.id.refreshLayout) SwipeRefreshLayout refreshLayout;
@@ -38,6 +47,8 @@ public class FriendsListFragment extends Fragment {
     private FriendsListAdapter mAdapter;
 
     private Realm mRealm;
+
+    private ChatDAO helper;
 
     public FriendsListFragment() {
         // Required empty public constructor
@@ -47,6 +58,8 @@ public class FriendsListFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mRealm = Realm.getDefaultInstance();
+        helper = new ChatDAO(mRealm);
+        helper.setOnTransactionCompletedListener(this);
     }
 
     @Override
@@ -66,14 +79,10 @@ public class FriendsListFragment extends Fragment {
     }
 
     private void getListFromDb() {
-        mRealm.where(Chat.class).findAll().asObservable()
-                .flatMap(new Func1<RealmResults<Chat>, Observable<Chat>>() {
-                    @Override
-                    public Observable<Chat> call(RealmResults<Chat> chats) {
-                        return Observable.from(chats);
-                    }
-                })
-                .subscribe(chatSubscriber);
+        RealmResults<Chat> chats = mRealm.where(Chat.class).findAll();
+        for(Chat chat: chats) {
+            mAdapter.addChat(chat);
+        }
     }
 
     private void setupRecyclerView() {
@@ -82,6 +91,9 @@ public class FriendsListFragment extends Fragment {
         rlFrnds.setAdapter(mAdapter);
 
         refreshLayout.setEnabled(true);
+        refreshLayout.setColorSchemeColors(ContextCompat.getColor(getActivity(), R.color.colorAccent)
+                , ContextCompat.getColor(getActivity(), R.color.soundCloud));
+        refreshLayout.setOnRefreshListener(this);
     }
 
     private BaseSubscriber<Chat> chatSubscriber = new BaseSubscriber<Chat>() {
@@ -91,4 +103,53 @@ public class FriendsListFragment extends Fragment {
         }
     };
 
+    @Override
+    public void onRefresh() {
+        updateFrndsList();
+    }
+
+    private void updateFrndsList() {
+        AccessToken token = AccessToken.getCurrentAccessToken();
+        if(token == null)
+            token = TokenTracker.getInstance().getCurrentAccessToken();
+
+        Bundle params = new Bundle();
+        params.putString("fields", "installed, id, name, picture.type(large)");
+
+        new GraphRequest(token, "/me/friends", params, HttpMethod.GET, new GraphRequest.Callback() {
+            @Override
+            public void onCompleted(GraphResponse response) {
+                if(response.getError() == null) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    try {
+                        FrndsLog.e(response.getRawResponse());
+                        InstalledFrnds frnds = mapper.readValue(response.getRawResponse(), InstalledFrnds.class);
+                        helper.updateChatList(frnds, IDbConstants.UPDATE_FRND_LIST_TRANSACTION_ID);
+                    }  catch (JsonMappingException e) {
+                        e.printStackTrace();
+                    } catch (JsonParseException e) {
+                        e.printStackTrace();
+                    }catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    //TODO: error case
+                }
+            }
+        }).executeAsync();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mRealm.close();
+    }
+
+    @Override
+    public void onTransactionComplete(int transcationId) {
+        switch (transcationId) {
+            case IDbConstants.UPDATE_FRND_LIST_TRANSACTION_ID:
+                refreshLayout.setRefreshing(false);
+        }
+    }
 }

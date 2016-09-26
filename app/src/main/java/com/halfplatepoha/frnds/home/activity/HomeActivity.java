@@ -5,22 +5,14 @@ import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.halfplatepoha.frnds.R;
-import com.halfplatepoha.frnds.TokenTracker;
 import com.halfplatepoha.frnds.home.IFrndsConstants;
 import com.halfplatepoha.frnds.home.fragment.FriendsListFragment;
 import com.halfplatepoha.frnds.home.fragment.SoundCloudSearchFragment;
 import com.halfplatepoha.frnds.home.fragment.TracksListFragment;
-import com.halfplatepoha.frnds.models.InstalledFrnds;
+import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.roughike.bottombar.BottomBar;
 import com.roughike.bottombar.OnTabSelectListener;
-
-import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;

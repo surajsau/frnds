@@ -7,10 +7,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TrackDetails {
+    private long id;
     private String stream_url;
     private String title;
     private String artwork_url;
     private User user;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getStream_url() {
         return stream_url;

@@ -18,7 +18,7 @@ import rx.Observable;
 public interface SoundCloudClient {
 
     @GET("tracks/{id}")
-    Observable<TrackResponse> getTrackDetails(@Path("id") String id);
+    Observable<TrackDetails> getTrackDetails(@Path("id") String id);
 
     @GET("tracks")
     Observable<List<TrackDetails>> getSearchResult(@Query("q") String searchString,

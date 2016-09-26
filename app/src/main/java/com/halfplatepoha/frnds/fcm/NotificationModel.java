@@ -8,10 +8,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NotificationModel {
 
+    private String friendId;
     private String friendName;
     private String trackName;
     private String message;
     private String trackUrl;
+    private String trackId;
+    private String type;
+
+    public String getFriendId() {
+        return friendId;
+    }
+
+    public void setFriendId(String friendId) {
+        this.friendId = friendId;
+    }
 
     public String getFriendName() {
         return friendName;
@@ -43,5 +54,21 @@ public class NotificationModel {
 
     public void setTrackUrl(String trackUrl) {
         this.trackUrl = trackUrl;
+    }
+
+    public String getTrackId() {
+        return trackId;
+    }
+
+    public void setTrackId(String trackId) {
+        this.trackId = trackId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

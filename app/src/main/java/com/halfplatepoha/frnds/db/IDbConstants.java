@@ -12,6 +12,7 @@ public interface IDbConstants {
 
     String SONG_ID_KEY = "songId";
     String FRND_ID_KEY = "frndId";
+    String USER_FB_ID_KEY = "userFbId";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_MESSAGE, TYPE_MUSIC})
@@ -19,4 +20,6 @@ public interface IDbConstants {
 
     int TYPE_MUSIC = 1;
     int TYPE_MESSAGE = 2;
+
+    int UPDATE_FRND_LIST_TRANSACTION_ID = 101;
 }

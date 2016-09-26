@@ -16,21 +16,21 @@ import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.TokenTracker;
 import com.halfplatepoha.frnds.db.IDbConstants;
-import com.halfplatepoha.frnds.db.models.Chat;
+import com.halfplatepoha.frnds.db.ChatDAO;
 import com.halfplatepoha.frnds.login.activity.LoginActivity;
-import com.halfplatepoha.frnds.models.InstalledFrnds;
-import com.halfplatepoha.frnds.models.User;
+import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 
 import java.io.IOException;
 
-import io.realm.Case;
 import io.realm.Realm;
 
-public class SplashScreenActivity extends AppCompatActivity {
+public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.OnTransactionCompletedListener{
 
     private Realm mRealm;
 
     private FirebaseAuth mAuth;
+
+    private ChatDAO helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +41,9 @@ public class SplashScreenActivity extends AppCompatActivity {
 
         if(mAuth.getCurrentUser() != null) {
             mRealm = Realm.getDefaultInstance();
+            helper = new ChatDAO(mRealm);
+            helper.setOnTransactionCompletedListener(this);
+
             getFriendsWhoInstalledApp();
         } else {
             startLoginActivity();
@@ -67,8 +70,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                     try {
                         FrndsLog.e(response.getRawResponse());
                         InstalledFrnds frnds = mapper.readValue(response.getRawResponse(), InstalledFrnds.class);
-                        updateFrndsList(frnds);
-                        startHomeActivity();
+                        helper.updateChatList(frnds, IDbConstants.UPDATE_FRND_LIST_TRANSACTION_ID);
                     }  catch (JsonMappingException e) {
                         e.printStackTrace();
                     } catch (JsonParseException e) {
@@ -77,7 +79,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 } else {
-
+                    //TODO: error case
                 }
             }
         }).executeAsync();
@@ -88,22 +90,12 @@ public class SplashScreenActivity extends AppCompatActivity {
         startActivity(homeIntent);
     }
 
-    private void updateFrndsList(final InstalledFrnds frnds) {
-        if(frnds != null && frnds.getData() != null && !frnds.getData().isEmpty()) {
-            mRealm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    for(InstalledFrnds.Frnd frnd : frnds.getData()) {
-                        if(realm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, frnd.getId()).findFirst() == null) {
-                            Chat chat = new Chat();
-                            chat.setFrndId(frnd.getId());
-                            chat.setFrndName(frnd.getName());
-                            chat.setFrndImageUrl(frnd.getPicture().getData().getUrl());
-                            realm.insert(chat);
-                        }
-                    }
-                }
-            });
+    @Override
+    public void onTransactionComplete(int transcationId) {
+        switch (transcationId) {
+            case IDbConstants.UPDATE_FRND_LIST_TRANSACTION_ID:
+                startHomeActivity();
+                break;
         }
     }
 }

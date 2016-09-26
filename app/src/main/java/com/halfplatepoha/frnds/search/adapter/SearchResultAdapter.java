@@ -101,6 +101,7 @@ public class SearchResultAdapter extends AutoLoadingRecyclerAdapter<TrackDetails
 
     private void openSongDetailsActivity(TrackDetails trackDetails) {
         Intent songDetail = new Intent();
+        songDetail.putExtra(IDetailsConstants.TRACK_ID, trackDetails.getId());
         songDetail.putExtra(IDetailsConstants.TRACK_ARTIST, trackDetails.getUser().getUsername());
         songDetail.putExtra(IDetailsConstants.TRACK_URL, trackDetails.getStream_url());
         songDetail.putExtra(IDetailsConstants.TRACK_IMAGE_URL, trackDetails.getArtwork_url());

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -30,11 +29,10 @@ import com.halfplatepoha.frnds.FrndsPreference;
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.IPrefConstants;
 import com.halfplatepoha.frnds.R;
-import com.halfplatepoha.frnds.TokenTracker;
 import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Chat;
 import com.halfplatepoha.frnds.home.activity.HomeActivity;
-import com.halfplatepoha.frnds.models.InstalledFrnds;
+import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.network.clients.FrndsClient;
 import com.halfplatepoha.frnds.models.request.RegisterGCMRequest;
@@ -266,5 +264,12 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
                 }
             });
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(!mRealm.isClosed())
+            mRealm.close();
     }
 }
