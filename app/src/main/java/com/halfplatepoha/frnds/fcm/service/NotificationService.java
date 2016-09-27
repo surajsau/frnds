@@ -2,7 +2,9 @@ package com.halfplatepoha.frnds.fcm.service;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -23,7 +25,6 @@ import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.fcm.IFCMConstants;
 import com.halfplatepoha.frnds.fcm.NotificationModel;
 import com.halfplatepoha.frnds.models.response.TrackDetails;
-import com.halfplatepoha.frnds.models.response.TrackResponse;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.network.clients.SoundCloudClient;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
@@ -31,7 +32,9 @@ import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import java.io.IOException;
 
 import io.realm.Realm;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
@@ -80,7 +83,6 @@ public class NotificationService extends FirebaseMessagingService {
             e.printStackTrace();
         }
 
-
     }
 
     private void constructNotification(final NotificationModel model) {
@@ -97,13 +99,7 @@ public class NotificationService extends FirebaseMessagingService {
 
                 mManager.notify(IConstants.NOTIFICATION_ID, builder.build());
 
-                Message message = new Message();
-                message.setMsgBody(getMessageFromModel(model));
-                message.setMsgTimestamp(System.currentTimeMillis());
-                message.setUserType(IDetailsConstants.TYPE_FRND);
-                message.setMsgType(IDbConstants.TYPE_MUSIC);
-
-                helper.insertMessageToChat(model.getFriendId(), message);
+                FrndsLog.e(model.getTrackId());
 
                 mSoundcloudClient.getTrackDetails(model.getTrackId())
                             .subscribeOn(Schedulers.newThread())
@@ -111,6 +107,12 @@ public class NotificationService extends FirebaseMessagingService {
                             .subscribe(new BaseSubscriber<TrackDetails>() {
                                 @Override
                                 public void onObjectReceived(TrackDetails trackDetails) {
+                                    Message message = new Message();
+                                    message.setMsgBody(getMessageFromModel(model));
+                                    message.setMsgTimestamp(System.currentTimeMillis());
+                                    message.setUserType(IDetailsConstants.TYPE_FRND);
+                                    message.setMsgType(IDbConstants.TYPE_MUSIC);
+
                                     Song song = new Song();
                                     song.setSongUrl(model.getTrackUrl());
                                     song.setFrndId(model.getFriendId());
@@ -120,7 +122,9 @@ public class NotificationService extends FirebaseMessagingService {
                                                             .replace(IDetailsConstants.STRING_HTTPS, IDetailsConstants.STRING_HTTP)
                                                             .replace(IDetailsConstants.IMG_LARGE_SUFFIX, IDetailsConstants.IMG_500_X_500_SUFFIX));
 
+                                    FrndsLog.e(model.getFriendId());
                                     helper.insertSongToChat(model.getFriendId(), song);
+                                    helper.insertMessageToChat(model.getFriendId(), message);
                                 }
                             });
 
@@ -132,19 +136,34 @@ public class NotificationService extends FirebaseMessagingService {
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(model.getMessage()))
                         .setContentTitle(model.getFriendName() + " says")
                         .setAutoCancel(true)
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         .setDefaults(Notification.DEFAULT_LIGHTS
                                 | Notification.DEFAULT_SOUND
                                 | Notification.FLAG_AUTO_CANCEL);
 
                 mManager.notify(IConstants.NOTIFICATION_ID, builder.build());
 
-                Message message = new Message();
-                message.setMsgBody(model.getMessage());
-                message.setMsgType(IDbConstants.TYPE_MESSAGE);
-                message.setUserType(IDetailsConstants.TYPE_FRND);
-                message.setMsgTimestamp(System.currentTimeMillis());
+                Observable.just(model)
+                        .subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .filter(new Func1<NotificationModel, Boolean>() {
+                            @Override
+                            public Boolean call(NotificationModel model) {
+                                return (model != null && !TextUtils.isEmpty(model.getMessage()));
+                            }
+                        })
+                        .subscribe(new BaseSubscriber<NotificationModel>() {
+                            @Override
+                            public void onObjectReceived(NotificationModel model) {
+                                Message message = new Message();
+                                message.setMsgBody(model.getMessage());
+                                message.setMsgType(IDbConstants.TYPE_MESSAGE);
+                                message.setUserType(IDetailsConstants.TYPE_FRND);
+                                message.setMsgTimestamp(System.currentTimeMillis());
 
-                helper.insertMessageToChat(model.getFriendId(), message);
+                                helper.insertMessageToChat(model.getFriendId(), message);
+                            }
+                        });
             }
             break;
         }
@@ -156,7 +175,6 @@ public class NotificationService extends FirebaseMessagingService {
 
         return model.getFriendName()
                 + " is listening to "
-                + model.getTrackName()
-                + ". Join in!";
+                + model.getTrackName();
     }
 }

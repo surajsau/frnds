@@ -31,6 +31,7 @@ import com.halfplatepoha.frnds.detail.adapter.ChatAdapter;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.mediaplayer.PlayerService;
 import com.halfplatepoha.frnds.db.models.Message;
+import com.halfplatepoha.frnds.models.request.SendMessageRequest;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.network.clients.FrndsClient;
 import com.halfplatepoha.frnds.models.request.UpdateTrackRequest;
@@ -51,6 +52,7 @@ import io.codetail.animation.ViewAnimationUtils;
 import io.realm.Realm;
 import io.realm.RealmList;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -232,7 +234,29 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         mFrndsClient.updateTrack(req)
             .subscribeOn(Schedulers.newThread())
             .observeOn(Schedulers.newThread())
-            .subscribe();
+            .subscribe(new BaseSubscriber<Void>() {
+                @Override
+                public void onObjectReceived(Void aVoid) {
+
+                }
+            });
+    }
+
+    private void callSendMessageApi(String message) {
+        SendMessageRequest req  = new SendMessageRequest();
+        req.setFbId(mFbId);
+        req.setMessage(message);
+        req.setTo(mFrndId);
+
+        mFrndsClient.sendMessage(req)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new BaseSubscriber<Void>() {
+                    @Override
+                    public void onObjectReceived(Void aVoid) {
+
+                    }
+                });
     }
 
     private void buildApiClients() {
@@ -343,6 +367,8 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                     .setUserType(IDetailsConstants.TYPE_ME);
             mChatAdapter.addMessage(msgBuilder.build());
             rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
+
+            callSendMessageApi(etMessage.getText().toString());
 
             etMessage.setText("");
 

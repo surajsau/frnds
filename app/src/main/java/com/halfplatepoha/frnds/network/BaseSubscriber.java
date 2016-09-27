@@ -13,7 +13,7 @@ public abstract class BaseSubscriber<Res> extends Subscriber<Res> {
 
     @Override
     public void onError(Throwable e) {
-        FrndsLog.d(e.getMessage());
+//        FrndsLog.d(e.getMessage());
     }
 
     @Override

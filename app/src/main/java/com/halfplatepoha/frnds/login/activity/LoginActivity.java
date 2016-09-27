@@ -101,17 +101,11 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        mAuth.removeAuthStateListener(this);
-    }
-
-    @Override
     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         if(user != null) {
+            FrndsLog.e(user.getUid());
             callRegisterApi();
-            callRegisterGCMApi();
         }
     }
 
@@ -210,6 +204,8 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
         public void onObjectReceived(RegisterResponse registerResponse) {
             if(!registerResponse.isSuccessful() && gcmRetryCount > 0)
                 callRegisterApi();
+            else
+                callRegisterGCMApi();
         }
     };
 
@@ -269,7 +265,7 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!mRealm.isClosed())
-            mRealm.close();
+        mRealm.close();
+        mAuth.removeAuthStateListener(this);
     }
 }

@@ -1,5 +1,6 @@
 package com.halfplatepoha.frnds.db;
 
+import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.db.models.Chat;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.db.models.Song;
@@ -42,23 +43,27 @@ public class ChatDAO {
     }
 
     public void insertMessageToChat(String chatId, Message message) {
-        Chat chatResult = mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, chatId).findFirst();
-        try {
+        try{
+            Chat chatResult = mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, chatId).findFirst();
+
             mRealm.beginTransaction();
-            chatResult.frndMessages.add(message);
+            chatResult.getFrndMessages().add(message);
             mRealm.commitTransaction();
         }catch (Exception e) {
+            FrndsLog.e("Message Transaction cancelled : " + e.getMessage());
             mRealm.cancelTransaction();
         }
     }
 
     public void insertSongToChat(String chatId, Song song) {
-        Chat chatResult = mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, chatId).findFirst();
         try {
+            Chat chatResult = mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, chatId).findFirst();
+
             mRealm.beginTransaction();
-            chatResult.frndSongs.add(song);
+            chatResult.getFrndSongs().add(song);
             mRealm.commitTransaction();
         } catch (Exception e) {
+            FrndsLog.e("Song Transaction cancelled : " + e.getMessage());
             mRealm.cancelTransaction();
         }
     }
