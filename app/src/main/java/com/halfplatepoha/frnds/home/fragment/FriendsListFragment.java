@@ -80,8 +80,17 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
 
     private void getListFromDb() {
         RealmResults<Chat> chats = mRealm.where(Chat.class).findAll();
-        for(Chat chat: chats) {
-            mAdapter.addChat(chat);
+        for(int i=0; i<chats.size(); i++) {
+            try {
+                if(chats.get(i).getFrndPosition() == null ) {
+                    mRealm.beginTransaction();
+                    chats.get(i).setFrndPosition(i);
+                    mRealm.commitTransaction();
+                }
+            } catch (Exception e) {
+                mRealm.cancelTransaction();
+            }
+            mAdapter.addChat(chats.get(i));
         }
     }
 

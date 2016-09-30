@@ -81,7 +81,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
     }
 
     public void addChat(Chat chat) {
-        mFriends.add(chat);
+        mFriends.add(chat.getFrndPosition(), chat);
         notifyItemInserted(mFriends.size() - 1);
     }
 
@@ -102,12 +102,14 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
             Chat chat = mFriends.remove(position);
             try {
                 mRealm.beginTransaction();
+                chat.setFrndPosition(0);
                 chat.setFrndLastMessage(message);
                 mRealm.commitTransaction();
             }catch (Exception e) {
                 e.printStackTrace();
             }
-            mFriends.add(0, chat);
+
+            mFriends.add(chat.getFrndPosition(), chat);
             notifyItemMoved(position, 0);
             notifyItemChanged(0);
         }

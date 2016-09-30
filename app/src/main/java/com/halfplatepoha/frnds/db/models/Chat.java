@@ -12,7 +12,7 @@ public class Chat extends RealmObject {
     @PrimaryKey
     private String         frndId;
 
-    private int            frndPosition;
+    private Integer        frndPosition;
 
     private String         frndName;
     private String         frndImageUrl;
@@ -70,11 +70,11 @@ public class Chat extends RealmObject {
         this.frndLastMessage = frndLastMessage;
     }
 
-    public int getFrndPosition() {
+    public Integer getFrndPosition() {
         return frndPosition;
     }
 
-    public void setFrndPosition(int frndPosition) {
+    public void setFrndPosition(Integer frndPosition) {
         this.frndPosition = frndPosition;
     }
 
