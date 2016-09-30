@@ -12,4 +12,6 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="music_chat_message" formatted="false">%s played %s</string>
+
+    <string name="app_name_transition">sync_transition</string>
 </resources>

@@ -15,4 +15,10 @@
         icon="@drawable/music_play"
         title="Tracks"
         barColorWhenSelected="@color/recentTracks"/>
+
+    <tab
+        id="@+id/tabSettings"
+        icon="@drawable/chat"
+        title="Settings"
+        barColorWhenSelected="@color/colorAccent"/>
 </tabs>

@@ -29,13 +29,31 @@
                 android:layout_width="match_parent"
                 android:layout_height="?android:actionBarSize">
 
-                <ImageButton
-                    android:id="@+id/back"
-                    android:layout_width="?android:actionBarSize"
-                    android:layout_height="?android:actionBarSize"
-                    android:src="@drawable/arrow_back"
-                    android:background="@null"
-                    android:layout_gravity="start|center_vertical"/>
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical">
+
+                    <ImageButton
+                        android:id="@+id/back"
+                        android:layout_width="?android:actionBarSize"
+                        android:layout_height="?android:actionBarSize"
+                        android:src="@drawable/arrow_back"
+                        android:background="@null"/>
+
+                    <View
+                        android:id="@+id/pendingChat"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:background="@drawable/pending_messages_background"
+                        android:padding="3dp"
+                        android:textSize="10sp"
+                        android:layout_gravity="right"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="15dp"
+                        android:visibility="gone"/>
+
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="wrap_content"

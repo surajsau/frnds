@@ -91,6 +91,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
         notifyItemInserted(mMessages.size() - 1);
     }
 
+    public void refresh() {
+        if(mMessages != null) {
+            mMessages.clear();
+        }
+        notifyDataSetChanged();
+    }
+
     public class FrndChatViewHolder extends RecyclerView.ViewHolder {
 
         @Bind(R.id.ivFrndAvatar) ImageView tvFrndAvatar;

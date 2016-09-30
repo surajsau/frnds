@@ -26,4 +26,16 @@ public interface IConstants {
     int PLAY_NOTIFICATION_ID = 401;
 
     int PAGE_SIZE = 10;
+
+    int SCREEN_CHAT = 1001;
+    int SCREEN_LISTING = 1002;
+    int SCREEN_NONE = 1003;
+
+    String CHAT_BROADCAST = "sync_chat_broadcast";
+    String FRND_MESSAGE = "frnd_message";
+    String FRND_MESSAGE_TYPE = "frnd_message_type";
+    String FRND_ID = "frnd_id";
+    String FRND_TRACK_ID = "frnd_track_id";
+    String FRND_TRACK_TITLE = "frnd_track_title";
+    String FRND_TRACK_URL = "frnd_track_image_url";
 }

@@ -27,6 +27,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.realm.Realm;
 
 /**
  * Created by surajkumarsau on 07/09/16.
@@ -36,9 +37,11 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
     private Context mContext;
     private ArrayList<Chat> mFriends;
     private FragmentManager mFragmentManager;
+    private Realm mRealm;
 
-    public FriendsListAdapter(Context context) {
+    public FriendsListAdapter(Context context, Realm realm) {
         mContext = context;
+        mRealm = realm;
 
         mFriends = new ArrayList<>();
 
@@ -60,7 +63,8 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
                     .into(holder.ivFrndAvatar);
 
             holder.tvFrndName.setText(mFriends.get(position).getFrndName());
-            holder.ivFrndAvatar.setTag(mFriends.get(position).getFrndImageUrl());
+//            holder.ivFrndAvatar.setTag(mFriends.get(position).getFrndImageUrl());
+            holder.tvFrndStatus.setText(mFriends.get(position).getFrndLastMessage());
 
 //            switch (mFriends.get(position).getStatus()) {
 //                case IFrndsConstants.STATUS_PLAYING:{
@@ -90,6 +94,31 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         if(mFriends == null)
             return 0;
         return mFriends.size();
+    }
+
+    public void refreshChat(String frndId, int messageType, String message) {
+        int position = getPositionFromId(frndId);
+        if(position != -1) {
+            Chat chat = mFriends.remove(position);
+            try {
+                mRealm.beginTransaction();
+                chat.setFrndLastMessage(message);
+                mRealm.commitTransaction();
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+            mFriends.add(0, chat);
+            notifyItemMoved(position, 0);
+            notifyItemChanged(0);
+        }
+    }
+
+    public int getPositionFromId(String frndId) {
+        for(int i=0; i<mFriends.size(); i++) {
+            if(mFriends.get(i).getFrndId().equalsIgnoreCase(frndId))
+                return i;
+        }
+        return -1;
     }
 
     public class FriendViewHolder extends RecyclerView.ViewHolder{

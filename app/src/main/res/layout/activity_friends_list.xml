@@ -13,9 +13,11 @@
         android:layout_height="?android:actionBarSize">
 
         <com.halfplatepoha.frnds.ui.OpenSansTextView
+            android:id="@+id/appName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/app_name"
+            android:transitionName="@string/app_name_transition"
             android:textColor="@color/colorAccent"
             android:layout_gravity="center"
             app:typeface="open_sans_bold"

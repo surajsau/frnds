@@ -1,6 +1,8 @@
 package com.halfplatepoha.frnds;
 
+import android.app.Activity;
 import android.app.Application;
+import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
 
 import com.facebook.FacebookSdk;

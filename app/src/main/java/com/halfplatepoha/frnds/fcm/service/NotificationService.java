@@ -2,7 +2,7 @@ package com.halfplatepoha.frnds.fcm.service;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.os.Handler;
+import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
@@ -86,20 +86,26 @@ public class NotificationService extends FirebaseMessagingService {
     }
 
     private void constructNotification(final NotificationModel model) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setAutoCancel(true)
+                .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_SOUND|Notification.FLAG_AUTO_CANCEL);
+
+        Intent chatIntent = new Intent(IConstants.CHAT_BROADCAST);
+        chatIntent.putExtra(IConstants.FRND_ID, model.getFriendId());
+
         switch (model.getType()){
             case IFCMConstants.SONG:{
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                        .setStyle(new NotificationCompat.BigTextStyle().bigText(getMessageFromModel(model)))
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setContentTitle("Hey " + username + " ...")
-                        .setAutoCancel(true)
-                        .setDefaults(Notification.DEFAULT_LIGHTS
-                                | Notification.DEFAULT_SOUND
-                                | Notification.FLAG_AUTO_CANCEL);
+                final String notificationMessage = getMessageFromModel(model);
 
-                mManager.notify(IConstants.NOTIFICATION_ID, builder.build());
+                chatIntent.putExtra(IConstants.FRND_MESSAGE, notificationMessage);
+                chatIntent.putExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MUSIC);
+                chatIntent.putExtra(IConstants.FRND_TRACK_ID, model.getTrackId());
+                chatIntent.putExtra(IConstants.FRND_TRACK_URL, model.getTrackUrl());
+                chatIntent.putExtra(IConstants.FRND_TRACK_TITLE, model.getTrackName());
 
-                FrndsLog.e(model.getTrackId());
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(notificationMessage))
+                        .setContentTitle("Hey " + username + " ...");
 
                 mSoundcloudClient.getTrackDetails(model.getTrackId())
                             .subscribeOn(Schedulers.newThread())
@@ -108,7 +114,7 @@ public class NotificationService extends FirebaseMessagingService {
                                 @Override
                                 public void onObjectReceived(TrackDetails trackDetails) {
                                     Message message = new Message();
-                                    message.setMsgBody(getMessageFromModel(model));
+                                    message.setMsgBody(notificationMessage);
                                     message.setMsgTimestamp(System.currentTimeMillis());
                                     message.setUserType(IDetailsConstants.TYPE_FRND);
                                     message.setMsgType(IDbConstants.TYPE_MUSIC);
@@ -132,16 +138,12 @@ public class NotificationService extends FirebaseMessagingService {
             break;
 
             case IFCMConstants.MESSAGE:{
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                        .setStyle(new NotificationCompat.BigTextStyle().bigText(model.getMessage()))
-                        .setContentTitle(model.getFriendName() + " says")
-                        .setAutoCancel(true)
-                        .setSmallIcon(R.mipmap.ic_launcher)
-                        .setDefaults(Notification.DEFAULT_LIGHTS
-                                | Notification.DEFAULT_SOUND
-                                | Notification.FLAG_AUTO_CANCEL);
 
-                mManager.notify(IConstants.NOTIFICATION_ID, builder.build());
+                chatIntent.putExtra(IConstants.FRND_MESSAGE, model.getMessage());
+                chatIntent.putExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MESSAGE);
+
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(model.getMessage()))
+                        .setContentTitle(model.getFriendName() + " says");
 
                 Observable.just(model)
                         .subscribeOn(Schedulers.newThread())
@@ -166,6 +168,19 @@ public class NotificationService extends FirebaseMessagingService {
                         });
             }
             break;
+        }
+
+        int screenType = FrndsPreference.getIntFromPref(IPrefConstants.SCREEN_TYPE, IConstants.SCREEN_NONE);
+
+        switch (screenType) {
+            case IConstants.SCREEN_CHAT:
+            case IConstants.SCREEN_LISTING:
+                sendBroadcast(chatIntent);
+                break;
+
+            case IConstants.SCREEN_NONE:
+                mManager.notify(IConstants.NOTIFICATION_ID, builder.build());
+                break;
         }
     }
 

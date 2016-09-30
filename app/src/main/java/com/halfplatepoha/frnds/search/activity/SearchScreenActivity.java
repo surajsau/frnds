@@ -15,6 +15,7 @@ import android.widget.ImageButton;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
@@ -93,7 +94,7 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
                         return (charSequence != null && !TextUtils.isEmpty(charSequence.toString()));
                     }
                 })
-                .debounce(900, TimeUnit.MILLISECONDS)
+                .debounce(500, TimeUnit.MILLISECONDS)
                 .subscribe(textWatcher);
     }
 
@@ -143,40 +144,37 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
     private BaseSubscriber<CharSequence> textWatcher = new BaseSubscriber<CharSequence>() {
         @Override
         public void onObjectReceived(CharSequence s) {
+            FrndsLog.e("Search term: " + s);
             callSearchApi(s.toString());
+            mClient.getSearchResult(s.toString(), 10, 0)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new BaseSubscriber<List<TrackDetails>>() {
+                        @Override
+                        public void onObjectReceived(List<TrackDetails> trackDetails) {
+                            if(trackDetails != null && !trackDetails.isEmpty()) {
+                                rlSearchResult.setVisibility(View.VISIBLE);
+                                llPoweredBySoundCloud.setVisibility(View.GONE);
+                            }
+                            Observable.just(trackDetails)
+                                    .flatMap(new Func1<List<TrackDetails>, Observable<TrackDetails>>() {
+                                        @Override
+                                        public Observable<TrackDetails> call(List<TrackDetails> trackDetails) {
+                                            return Observable.from(trackDetails);
+                                        }
+                                    })
+                                    .subscribeOn(Schedulers.newThread())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new BaseSubscriber<TrackDetails>() {
+                                        @Override
+                                        public void onObjectReceived(TrackDetails details) {
+                                            mAdapter.addItemToList(details);
+                                        }
+                                    });
+                        }
+                    });
         }
     };
-
-//    @Override
-//    public boolean onTouch(View view, MotionEvent motionEvent) {
-//        if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-//            //--by default taking first view (darkToolbar)
-//            View nextView = searchBar.getChildAt(0);
-//
-//            //--choosing lightToolbar when etSearch is in focus
-//            if(view.hasFocus())
-//                nextView = searchBar.getChildAt(1);
-//
-//            nextView.setVisibility(View.VISIBLE);
-//
-//            final float finalRadius = (float) Math.hypot(nextView.getWidth() / 2f, nextView.getHeight() / 2f) + hypo(motionEvent);
-//
-//            Animator reveal =
-//                    ViewAnimationUtils.createCircularReveal(nextView, (int) motionEvent.getX(), (int) motionEvent.getY(), 0,
-//                            finalRadius, View.LAYER_TYPE_HARDWARE);
-//            reveal.setDuration(300);
-//            reveal.setInterpolator(new FastOutLinearInInterpolator());
-//            reveal.start();
-//        }
-//        return false;
-//    }
-
-    private float hypo(MotionEvent event) {
-        Point p1 = new Point((int) event.getX(), (int) event.getY());
-        Point p2 = new Point(searchBar.getWidth() / 2, searchBar.getHeight() / 2);
-
-        return (float) Math.sqrt(Math.pow(p1.y - p2.y, 2) + Math.pow(p1.x - p2.x, 2));
-    }
 
     @Override
     public void onClick(View view) {
@@ -205,7 +203,5 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        if(!mPaginationSubscription.isUnsubscribed())
-//            mPaginationSubscription.unsubscribe();
     }
 }

@@ -9,4 +9,6 @@ public interface IPrefConstants {
     String FB_USER_ID = "fb_user_id";
     String FCM_REFRESH_TOKEN_REGISTERED = "fcm_refresh_token_registered";
     String IS_REGISTERED = "is_registered";
+
+    String SCREEN_TYPE = "screen_type";
 }

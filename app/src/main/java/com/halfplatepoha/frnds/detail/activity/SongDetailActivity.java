@@ -1,7 +1,10 @@
 package com.halfplatepoha.frnds.detail.activity;
 
 import android.animation.Animator;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Point;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -32,9 +35,11 @@ import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.mediaplayer.PlayerService;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.models.request.SendMessageRequest;
+import com.halfplatepoha.frnds.models.response.TrackDetails;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 import com.halfplatepoha.frnds.network.clients.FrndsClient;
 import com.halfplatepoha.frnds.models.request.UpdateTrackRequest;
+import com.halfplatepoha.frnds.network.clients.SoundCloudClient;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import com.halfplatepoha.frnds.models.response.TrackResponse;
 import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
@@ -43,6 +48,7 @@ import com.halfplatepoha.frnds.ui.OpenSansEditText;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -56,12 +62,14 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
+
 public class SongDetailActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener {
 
     private static final String TAG = SongDetailActivity.class.getSimpleName();
 
     private MediaPlayer mPlayer;
     private FrndsClient mFrndsClient;
+    private SoundCloudClient mSoundCloudClient;
 
     private ChatDAO helper;
 
@@ -72,6 +80,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @Bind(R.id.playlist) View playlist;
     @Bind(R.id.ivFrndAvatar) CircleImageView ivFrndAvatar;
     @Bind(R.id.tvTitle) OpenSansTextView tvTitle;
+    @Bind(R.id.pendingChat) View pendingChat;
 
     private int[] btnPlaylistCoordinates;
 
@@ -98,21 +107,14 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         ButterKnife.bind(this);
 
         mRealm = Realm.getDefaultInstance();
+
         helper = new ChatDAO(mRealm);
 
         getDataFromBundle();
 
-        getChatObjectFromDb();
-
         if(IDetailsConstants.SOURCE_FAB.equalsIgnoreCase(mSource)) {
             startSearchActivity();
         }
-
-        setupToolbar();
-
-        setupRecyclerViews();
-
-        addDataToAdapters();
 
         prepareMediaPlayer();
 
@@ -120,8 +122,17 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        registerReceiver(mNotificationReceiver, new IntentFilter(IConstants.CHAT_BROADCAST));
+    }
+
     private void addDataToAdapters() {
         //--adding songs to adapter
+        mAlbumListAdapter.refresh();
+        mChatAdapter.refresh();
+
         Observable.just(mChat.getFrndSongs())
                 .filter(new Func1<RealmList<Song>, Boolean>() {
                     @Override
@@ -188,6 +199,16 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @Override
     protected void onResume() {
         super.onResume();
+        FrndsPreference.setInPref(IPrefConstants.SCREEN_TYPE, IConstants.SCREEN_CHAT);
+
+        getChatObjectFromDb();
+
+        setupToolbar();
+
+        setupRecyclerViews();
+
+        addDataToAdapters();
+
         if(btnPlaylistCoordinates == null) {
             btnPlaylistCoordinates = new int[2];
             DisplayMetrics metrics = new DisplayMetrics();
@@ -195,6 +216,12 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
             btnPlaylistCoordinates[0] = metrics.widthPixels;
             btnPlaylistCoordinates[1] = 0;
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        FrndsPreference.setInPref(IPrefConstants.SCREEN_TYPE, IConstants.SCREEN_NONE);
     }
 
     private void startSearchActivity() {
@@ -264,6 +291,14 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                 .setLoggingInterceptor()
                 .setBaseUrl(IConstants.FRNDS_BASE_URL)
                 .setClientClass(FrndsClient.class)
+                .setConnectTimeout(5, TimeUnit.MINUTES)
+                .setReadTimeout(5, TimeUnit.MINUTES)
+                .buildClient();
+
+        mSoundCloudClient = new ClientGenerator.Builder()
+                .setLoggingInterceptor()
+                .setBaseUrl(IConstants.SOUNDCLOUD_BASE_URL)
+                .setClientClass(SoundCloudClient.class)
                 .buildClient();
     }
 
@@ -317,6 +352,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mNotificationReceiver);
 
         if(mPlayer != null) {
             mPlayer.stop();
@@ -497,5 +533,57 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
         helper.insertSongToChat(mFrndId, song);
         helper.insertMessageToChat(mFrndId, message);
+    }
+
+    private BroadcastReceiver mNotificationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent != null) {
+                String trackId = intent.getStringExtra(IConstants.FRND_TRACK_ID);
+                int messageType = intent.getIntExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MESSAGE);
+                String message = intent.getStringExtra(IConstants.FRND_MESSAGE);
+                String trackImageUrl = intent.getStringExtra(IConstants.FRND_TRACK_URL);
+                String frndId = intent.getStringExtra(IConstants.FRND_ID);
+                String trackTitle = intent.getStringExtra(IConstants.FRND_TRACK_TITLE);
+
+                refreshChatDetails(frndId, messageType, message, trackId, trackTitle, trackImageUrl);
+            }
+        }
+    };
+
+    private void refreshChatDetails(String frndId, int messageType, String message, String trackId,
+                                    String trackTitle, String trackImageUrl) {
+        if(mFrndId.equalsIgnoreCase(frndId)) {
+            if(messageType == IDbConstants.TYPE_MUSIC) {
+
+                //--getting song artist
+                mSoundCloudClient.getTrackDetails(trackId)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.newThread())
+                        .subscribe(new BaseSubscriber<TrackDetails>() {
+                            @Override
+                            public void onObjectReceived(TrackDetails trackDetails) {
+
+                            }
+                        });
+
+                Song song = new Song();
+                song.setSongImgUrl(trackImageUrl);
+                song.setSongTitle(trackTitle);
+                song.setSongTimestamp(System.currentTimeMillis());
+                song.setFrndId(mFrndId);
+                mAlbumListAdapter.addSong(song);
+            }
+
+            Message msg = new Message();
+            msg.setMsgTimestamp(System.currentTimeMillis());
+            msg.setMsgType(messageType);
+            msg.setUserType(IDetailsConstants.TYPE_FRND);
+            msg.setMsgBody(message);
+            mChatAdapter.addMessage(msg);
+
+        } else {
+            pendingChat.setVisibility(View.VISIBLE);
+        }
     }
 }

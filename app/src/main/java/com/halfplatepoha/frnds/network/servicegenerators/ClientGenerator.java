@@ -1,6 +1,7 @@
 package com.halfplatepoha.frnds.network.servicegenerators;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -32,6 +33,16 @@ public class ClientGenerator {
 
         public Builder setBaseUrl(String baseUrl) {
             builder.baseUrl(baseUrl);
+            return this;
+        }
+
+        public Builder setConnectTimeout(int time, TimeUnit timeUnit) {
+            httpClient.connectTimeout(time, timeUnit);
+            return this;
+        }
+
+        public Builder setReadTimeout(int time, TimeUnit timeUnit) {
+            httpClient.connectTimeout(time, timeUnit);
             return this;
         }
 

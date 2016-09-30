@@ -12,11 +12,15 @@ public class Chat extends RealmObject {
     @PrimaryKey
     private String         frndId;
 
+    private int            frndPosition;
+
     private String         frndName;
     private String         frndImageUrl;
 
     public RealmList<Song> frndSongs;
     public RealmList<Message> frndMessages;
+
+    public String           frndLastMessage;
 
     public String getFrndId() {
         return frndId;
@@ -56,5 +60,30 @@ public class Chat extends RealmObject {
 
     public void setFrndImageUrl(String frndImageUrl) {
         this.frndImageUrl = frndImageUrl;
+    }
+
+    public String getFrndLastMessage() {
+        return frndLastMessage;
+    }
+
+    public void setFrndLastMessage(String frndLastMessage) {
+        this.frndLastMessage = frndLastMessage;
+    }
+
+    public int getFrndPosition() {
+        return frndPosition;
+    }
+
+    public void setFrndPosition(int frndPosition) {
+        this.frndPosition = frndPosition;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj != null) {
+            Chat chat = (Chat)obj;
+            return frndId.equalsIgnoreCase(chat.getFrndId());
+        }
+        return false;
     }
 }
