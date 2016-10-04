@@ -151,7 +151,7 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
     @Override
     public void onStop() {
         super.onStop();
-        mRealm.close();
+//        mRealm.close();
     }
 
     @Override

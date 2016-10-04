@@ -1,13 +1,17 @@
 package com.halfplatepoha.frnds.home.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.R;
@@ -63,20 +67,9 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
                     .into(holder.ivFrndAvatar);
 
             holder.tvFrndName.setText(mFriends.get(position).getFrndName());
-//            holder.ivFrndAvatar.setTag(mFriends.get(position).getFrndImageUrl());
             holder.tvFrndStatus.setText(mFriends.get(position).getFrndLastMessage());
 
-//            switch (mFriends.get(position).getStatus()) {
-//                case IFrndsConstants.STATUS_PLAYING:{
-//                    holder.tvFrndStatus.setText(mFriends.get(position).getLastMessage());
-//                }
-//                break;
-//
-//                case IFrndsConstants.STATUS_TEXTING:{
-//                    holder.tvFrndStatus.setText(mFriends.get(position).getLastMessage());
-//                }
-//                break;
-//            }
+            holder.ivIndicator.setVisibility(mFriends.get(position).isMsgRead() ? View.GONE: View.VISIBLE);
         }
     }
 
@@ -104,6 +97,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
                 mRealm.beginTransaction();
                 chat.setFrndPosition(0);
                 chat.setFrndLastMessage(message);
+                chat.setMsgRead(false);
                 mRealm.commitTransaction();
             }catch (Exception e) {
                 e.printStackTrace();
@@ -128,6 +122,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         @Bind(R.id.ivFrndAvatar) CircleImageView ivFrndAvatar;
         @Bind(R.id.tvFrndName) OpenSansTextView tvFrndName;
         @Bind(R.id.tvFrndStatus) OpenSansTextView tvFrndStatus;
+        @Bind(R.id.ivIndicator) ImageView ivIndicator;
 
         public FriendViewHolder(View itemView) {
             super(itemView);
@@ -138,16 +133,23 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         public void openSongDetails() {
             Chat frnd = mFriends.get(getAdapterPosition());
             Intent songDetailsIntent = new Intent(mContext, SongDetailActivity.class);
+            Pair<View, String> avatarTransition = Pair.create((View)ivFrndAvatar, mContext.getString(R.string.frnd_avatar_transition));
+            Pair<View, String> nameTransition = Pair.create((View)tvFrndName, mContext.getString(R.string.frnd_name_transition));
+
+            ActivityOptionsCompat options = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation((Activity) mContext, avatarTransition, nameTransition);
+
             songDetailsIntent.putExtra(IDetailsConstants.FRND_ID, frnd.getFrndId());
-            ((HomeActivity)mContext).startActivityForResult(songDetailsIntent, IFrndsConstants.FRIEND_LIST_REQUEST);
+            ((HomeActivity)mContext).startActivityForResult(songDetailsIntent, IFrndsConstants.FRIEND_LIST_REQUEST, options.toBundle());
         }
 
         @OnClick(R.id.ivFrndAvatar)
         public void openDetailDialog() {
+            Chat frnd = mFriends.get(getAdapterPosition());
             FriendDetailDialogFragment dlgDetail = new FriendDetailDialogFragment();
             Bundle dlgBundle = new Bundle();
-            dlgBundle.putString(IFrndsConstants.FRIEND_NAME, tvFrndName.getText().toString());
-            dlgBundle.putString(IFrndsConstants.FRIEND_IMAGE_URL, ivFrndAvatar.getTag().toString());
+            dlgBundle.putString(IFrndsConstants.FRIEND_NAME, frnd.getFrndName());
+            dlgBundle.putString(IFrndsConstants.FRIEND_IMAGE_URL, frnd.getFrndImageUrl());
             dlgDetail.setArguments(dlgBundle);
             dlgDetail.show(mFragmentManager, IFrndsConstants.DETAIL_DIALOG_TAG);
         }

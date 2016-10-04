@@ -17,7 +17,7 @@
 
         <activity android:name=".search.activity.SearchScreenActivity" />
         <activity android:name=".detail.activity.SongDetailActivity" />
-        <activity android:name=".login.activity.LoginActivity"/>
+        <activity android:name=".login.activity.LoginActivity" />
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
@@ -45,6 +45,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".home.activity.ProfileAndSettingsActivity"></activity>
     </application>
 
 </manifest>

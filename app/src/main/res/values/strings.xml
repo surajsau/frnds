@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">sync</string>
+    <string name="app_name">Sync.</string>
     <string name="facebook_app_id">1667856836875482</string>
 
     <string name="lorem">
@@ -14,4 +14,6 @@
     <string name="music_chat_message" formatted="false">%s played %s</string>
 
     <string name="app_name_transition">sync_transition</string>
+    <string name="frnd_avatar_transition">frnd_avatar_transition</string>
+    <string name="frnd_name_transition">frnd_name_transition</string>
 </resources>

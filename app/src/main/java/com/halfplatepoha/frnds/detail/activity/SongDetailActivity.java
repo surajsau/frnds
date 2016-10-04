@@ -17,7 +17,16 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
 import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.FrndsLog;
@@ -63,7 +72,8 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 
-public class SongDetailActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener {
+public class SongDetailActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener,
+        View.OnFocusChangeListener, OnTouchListener{
 
     private static final String TAG = SongDetailActivity.class.getSimpleName();
 
@@ -73,6 +83,8 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
     private ChatDAO helper;
 
+    private int deltaX;
+
     @Bind(R.id.etMessage) OpenSansEditText etMessage;
     @Bind(R.id.rlAlbums) RecyclerView rlAlbums;
     @Bind(R.id.rlChat) RecyclerView rlChat;
@@ -81,6 +93,10 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @Bind(R.id.ivFrndAvatar) CircleImageView ivFrndAvatar;
     @Bind(R.id.tvTitle) OpenSansTextView tvTitle;
     @Bind(R.id.pendingChat) View pendingChat;
+    @Bind(R.id.btnPlaylist) ImageButton btnPlaylist;
+    @Bind(R.id.ivSOngPLayingIndicator) View songPlayedIndicator;
+    @Bind(R.id.messageContainer) FrameLayout messageContainer;
+    @Bind(R.id.btnSend) View btnSend;
 
     private int[] btnPlaylistCoordinates;
 
@@ -120,6 +136,19 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
         buildApiClients();
 
+        buildRotationAnimation();
+
+    }
+
+    private void buildRotationAnimation() {
+        RotateAnimation rotate = new RotateAnimation(0, 360,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f);
+        rotate.setDuration(1000);
+        rotate.setRepeatCount(Animation.INFINITE);
+
+        btnPlaylist.setAnimation(rotate);
+        btnPlaylist.getAnimation().start();
     }
 
     @Override
@@ -216,6 +245,14 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
             btnPlaylistCoordinates[0] = metrics.widthPixels;
             btnPlaylistCoordinates[1] = 0;
         }
+
+        etMessage.setOnFocusChangeListener(this);
+
+        if(messageContainer != null) {
+            deltaX = ((FrameLayout.LayoutParams)(messageContainer).getLayoutParams()).getMarginStart();
+        }
+
+        rlChat.setOnTouchListener(this);
     }
 
     @Override
@@ -585,5 +622,34 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         } else {
             pendingChat.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onFocusChange(View view, boolean isFocus) {
+        if(isFocus) {
+            Animation slide = new Animation() {
+                @Override
+                protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    FrameLayout.LayoutParams param = (FrameLayout.LayoutParams) messageContainer.getLayoutParams();
+                    param.leftMargin = deltaX - (int)(deltaX * interpolatedTime);
+                    param.rightMargin = (int)(deltaX * interpolatedTime);
+                    messageContainer.setLayoutParams(param);
+                }
+            };
+            slide.setInterpolator(new AccelerateDecelerateInterpolator());
+            slide.setDuration(300);
+            messageContainer.startAnimation(slide);
+        }
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        switch (view.getId()) {
+            case R.id.rlChat:{
+
+            }
+            break;
+        }
+        return false;
     }
 }

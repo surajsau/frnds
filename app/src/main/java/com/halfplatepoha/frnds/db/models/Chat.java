@@ -20,6 +20,8 @@ public class Chat extends RealmObject {
     public RealmList<Song> frndSongs;
     public RealmList<Message> frndMessages;
 
+    private boolean         msgRead;
+
     public String           frndLastMessage;
 
     public String getFrndId() {
@@ -85,5 +87,13 @@ public class Chat extends RealmObject {
             return frndId.equalsIgnoreCase(chat.getFrndId());
         }
         return false;
+    }
+
+    public boolean isMsgRead() {
+        return msgRead;
+    }
+
+    public void setMsgRead(boolean msgRead) {
+        this.msgRead = msgRead;
     }
 }

@@ -5,13 +5,25 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp">
+    android:padding="12dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/ivFrndAvatar"
+    <FrameLayout
         android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@drawable/warriors"/>
+        android:layout_height="48dp">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ivFrndAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/warriors"
+            android:transitionName="@string/frnd_avatar_transition"/>
+
+        <ImageView android:id="@+id/ivIndicator"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/unread_indicator"
+            android:visibility="gone"/>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +39,8 @@
             tools:text="Swapnil Gupta"
             android:text="Sample user"
             android:textColor="@color/textPrimary"
-            android:textSize="15sp"/>
+            android:textSize="15sp"
+            android:transitionName="@string/frnd_name_transition"/>
 
         <com.halfplatepoha.frnds.ui.OpenSansTextView
             android:id="@+id/tvFrndStatus"
@@ -36,8 +49,9 @@
             tools:text="Kya kar rha hai abhi ?"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textColor="@color/textSecondary"
+            android:textColor="@color/textUnread"
             android:text="Sample text message"
+            android:layout_marginTop="2dp"
             android:textSize="12sp"/>
 
     </LinearLayout>

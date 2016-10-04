@@ -9,6 +9,7 @@
         android:id="@+id/rlFrnds"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/row_frnds_list"/>
+        tools:listitem="@layout/row_frnds_list"
+        android:background="@color/colorPrimaryVeryDark"/>
 
 </android.support.v4.widget.SwipeRefreshLayout>

@@ -8,9 +8,10 @@
     tools:context=".home.activity.HomeActivity"
     android:background="@color/colorPrimary">
 
-    <FrameLayout
+    <FrameLayout android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?android:actionBarSize">
+        android:layout_height="?android:actionBarSize"
+        android:paddingLeft="16dp">
 
         <com.halfplatepoha.frnds.ui.OpenSansTextView
             android:id="@+id/appName"
@@ -18,41 +19,43 @@
             android:layout_height="wrap_content"
             android:text="@string/app_name"
             android:transitionName="@string/app_name_transition"
-            android:textColor="@color/colorAccent"
-            android:layout_gravity="center"
+            android:textColor="@color/colorPrimaryLight"
+            android:layout_gravity="left|center_vertical"
             app:typeface="open_sans_bold"
-            android:textSize="24sp"/>
+            android:textSize="20sp"/>
+
+        <ImageButton
+            android:id="@+id/btnProfile"
+            android:layout_width="?android:actionBarSize"
+            android:layout_height="?android:actionBarSize"
+            android:background="@null"
+            android:layout_gravity="right|center_vertical"
+            android:src="@drawable/profile_icon" />
 
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_marginTop="?android:actionBarSize"
-        android:layout_marginBottom="?android:actionBarSize">
+        android:orientation="vertical">
 
-        <View
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:background="@color/colorDivider_chat"/>
+            android:layout_height="?android:actionBarSize"
+            android:layout_marginTop="?android:actionBarSize"/>
 
-        <FrameLayout android:id="@+id/fragmentHome"
+        <android.support.v4.view.ViewPager
+            android:id="@+id/pager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"/>
 
-        </FrameLayout>
     </LinearLayout>
 
-    <com.roughike.bottombar.BottomBar
-        android:id="@+id/bottomBar"
-        android:layout_width="match_parent"
-        android:layout_height="?android:actionBarSize"
-        android:layout_gravity="bottom"
-        app:bb_tabXmlResource="@xml/tabs_bottom"
-        app:bb_behavior="shifting"
-        app:bb_inActiveTabColor="@color/colorPrimaryLight"
-        app:bb_activeTabColor="@color/colorPrimaryLight"
-        app:bb_showShadow="false"/>
+        <!--<FrameLayout android:id="@+id/fragmentHome"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent">-->
+
+        <!--</FrameLayout>-->
 
 </FrameLayout>

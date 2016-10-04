@@ -68,7 +68,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                     NotificationCompat.Builder playNotificationBuilder = new NotificationCompat.Builder(this)
                             .setStyle(new NotificationCompat.BigTextStyle().bigText("You\'re listening to " + title))
                             .setSmallIcon(R.mipmap.ic_launcher)
-                            .addAction(R.drawable.profile, "Profile", songDetailsIntent)
+                            .addAction(R.drawable.profile_icon, "Profile", songDetailsIntent)
                             .addAction(R.drawable.stop, "Stop", stopPlayService);
 
                     startForeground(IConstants.PLAY_NOTIFICATION_ID, playNotificationBuilder.build());

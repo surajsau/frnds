@@ -1,6 +1,9 @@
 package com.halfplatepoha.frnds.home;
 
+import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
+
+import com.halfplatepoha.frnds.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,4 +30,6 @@ public interface IFrndsConstants {
     String FRIEND_IMAGE_URL = "friend_image_url";
     String FRIEND_NAME = "friend_name";
     String FRIEND_ID = "friend_id";
+
+    @DrawableRes int[] tabDrawables = {R.drawable.chat, R.drawable.soundcloud, R.drawable.playlist};
 }
