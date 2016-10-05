@@ -5,6 +5,7 @@
     <color name="colorPrimaryVeryDark">#1d1f26</color>
     <color name="colorPrimaryLight">#ffffff</color>
     <color name="colorPrimaryLight_b0">#b0ffffff</color>
+    <color name="colorPrimary_a0">#a0343741</color>
     <color name="colorPrimary_b0">#b0343741</color>
     <color name="colorAccent">#fa4a4d</color>
 
@@ -23,10 +24,14 @@
     <color name="textRead">#ffffff</color>
     <color name="textUnread">#80ffffff</color>
 
-    <color name="colorFrndBubble">#f0f0f0</color>
-    <color name="colorMeBubble">#f9d0d8</color>
-    <color name="textMe">#5b0818</color>
-    <color name="textFrnd">#160206</color>
+    <color name="colorChatBackground">#96000000</color>
+
+    <color name="colorFrndBubble">#4f5362</color>
+    <color name="colorMeBubble">#fa4a4d</color>
+    <color name="textMe">#ffffff</color>
+    <color name="textFrnd">#ffffff</color>
+
+    <color name="colorBtnSend">#fa4a4d</color>
 
     <color name="dark_gray">#141414</color>
     <color name="white">#FFFFFF</color>

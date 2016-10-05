@@ -5,9 +5,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by surajkumarsau on 31/08/16.
@@ -52,10 +55,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if(mMessages.get(position) != null) {
             if(holder instanceof MeChatViewHolder) {
                 ((MeChatViewHolder) holder).tvMeMsg.setText(mMessages.get(position).getMsgBody());
-                ((MeChatViewHolder) holder).tvMeTimeStamp.setText(AppUtil.getTimestampFromUTC(mMessages.get(position).getMsgTimestamp()));
+                ((MeChatViewHolder) holder).btnPlayPause
+                        .setVisibility(mMessages.get(position).getMsgType() == IDbConstants.TYPE_MUSIC ?
+                                            View.VISIBLE : View.GONE);
             } else if(holder instanceof FrndChatViewHolder) {
                 ((FrndChatViewHolder) holder).tvFrndMessage.setText(mMessages.get(position).getMsgBody());
-                ((FrndChatViewHolder) holder).tvFrndTimeStamp.setText(AppUtil.getTimestampFromUTC(mMessages.get(position).getMsgTimestamp()));
+                ((FrndChatViewHolder) holder).btnPlayPause
+                        .setVisibility(mMessages.get(position).getMsgType() == IDbConstants.TYPE_MUSIC ?
+                                View.VISIBLE : View.GONE);
             }
         }
     }
@@ -74,13 +81,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public class MeChatViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.ivMeAvatar) ImageView ivMeAvatar;
         @Bind(R.id.tvMeMsg) OpenSansTextView tvMeMsg;
-        @Bind(R.id.tvMeTimeStamp) OpenSansTextView tvMeTimeStamp;
+        @Bind(R.id.btnPlayPause) ImageButton btnPlayPause;
+        @Bind(R.id.btnRetry) ImageButton btnRetry;
 
         public MeChatViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+
+        @OnClick(R.id.btnPlayPause)
+        public void onPlayPauseClicked() {
+
+        }
+
+        @OnClick(R.id.btnRetry)
+        public void retrySend() {
+
         }
     }
 
@@ -100,13 +117,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public class FrndChatViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.ivFrndAvatar) ImageView tvFrndAvatar;
         @Bind(R.id.tvFrndMsg) OpenSansTextView tvFrndMessage;
-        @Bind(R.id.tvFrndTimeStamp) OpenSansTextView tvFrndTimeStamp;
+        @Bind(R.id.btnPlayPause) ImageButton btnPlayPause;
 
         public FrndChatViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
+
+        @OnClick(R.id.btnPlayPause)
+        public void onPlayPauseClicked() {
+
+        }
+
     }
 }

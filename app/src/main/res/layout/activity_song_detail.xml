@@ -19,7 +19,7 @@
         android:orientation="vertical"
         android:fitsSystemWindows="true"
         android:layout_marginBottom="42dp"
-        android:background="@drawable/chat_header_gradient">
+        android:background="@color/colorPrimary">
 
         <LinearLayout android:orientation="vertical"
             android:layout_width="match_parent"
@@ -128,11 +128,22 @@
                 </FrameLayout>
             </FrameLayout>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rlChat"
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:listitem="@layout/row_chat_me"/>
+                android:background="@color/colorChatBackground">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rlChat"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:listitem="@layout/row_chat_me"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"/>
+
+
+
+            </FrameLayout>
         </LinearLayout>
 
         <LinearLayout android:id="@+id/playlist"
@@ -196,25 +207,24 @@
     <FrameLayout android:id="@+id/chatMessageLayout"
         android:layout_width="match_parent"
         android:orientation="horizontal"
-        android:layout_height="42sp"
+        android:layout_height="?android:actionBarSize"
         android:layout_gravity="bottom"
         android:background="@color/colorPrimaryDark">
 
         <ImageButton
             android:id="@+id/btnMusic"
-            android:layout_width="42dp"
+            android:layout_width="?android:actionBarSize"
             android:layout_height="match_parent"
             android:background="@null"
             android:src="@drawable/music_play_icon"
             android:scaleType="center"
-            android:layout_gravity="start"
-            android:tint="@color/colorAccent"/>
+            android:layout_gravity="start"/>
 
         <ImageButton
             android:id="@+id/btnSend"
-            android:layout_width="42dp"
+            android:layout_width="?android:actionBarSize"
             android:layout_height="match_parent"
-            android:background="@null"
+            android:background="@color/colorBtnSend"
             android:layout_gravity="end"
             android:src="@drawable/send_icon"
             android:scaleType="center"/>
@@ -222,9 +232,9 @@
         <FrameLayout android:id="@+id/messageContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="5dp"
+            android:padding="10dp"
             android:layout_gravity="end"
-            android:layout_marginLeft="42dp"
+            android:layout_marginLeft="?android:actionBarSize"
             android:background="@color/colorPrimary">
 
             <com.halfplatepoha.frnds.ui.OpenSansEditText
@@ -233,7 +243,21 @@
                 android:background="@null"
                 android:textSize="13sp"
                 android:textColor="@color/textPrimary"
-                android:layout_height="match_parent"/>
+                android:textColorHint="@color/textSecondary"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:hint="Type a message"/>
+
+            <ImageButton
+                android:id="@+id/btnMessageBoxMusic"
+                android:layout_width="42dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:src="@drawable/music_play_icon"
+                android:scaleType="center"
+                android:layout_gravity="end"
+                android:visibility="gone"
+                android:alpha="0.0"/>
         </FrameLayout>
 
     </FrameLayout>

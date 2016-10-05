@@ -24,7 +24,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.view.animation.Transformation;
-import android.view.animation.TranslateAnimation;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
@@ -55,6 +55,7 @@ import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
 import com.halfplatepoha.frnds.ui.GlideImageView;
 import com.halfplatepoha.frnds.ui.OpenSansEditText;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
+import com.halfplatepoha.frnds.utils.AppUtil;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -97,6 +98,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @Bind(R.id.ivSOngPLayingIndicator) View songPlayedIndicator;
     @Bind(R.id.messageContainer) FrameLayout messageContainer;
     @Bind(R.id.btnSend) View btnSend;
+    @Bind(R.id.btnMessageBoxMusic) View btnMessageboxMusic;
 
     private int[] btnPlaylistCoordinates;
 
@@ -115,6 +117,8 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     private Realm mRealm;
 
     private Chat mChat;
+
+    private Animation leftSlide, rightSlide;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,11 +140,11 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
         buildApiClients();
 
-        buildRotationAnimation();
+        buildAnimations();
 
     }
 
-    private void buildRotationAnimation() {
+    private void buildAnimations() {
         RotateAnimation rotate = new RotateAnimation(0, 360,
                 Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF, 0.5f);
@@ -148,7 +152,56 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         rotate.setRepeatCount(Animation.INFINITE);
 
         btnPlaylist.setAnimation(rotate);
-        btnPlaylist.getAnimation().start();
+
+        leftSlide = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                FrameLayout.LayoutParams param = (FrameLayout.LayoutParams) messageContainer.getLayoutParams();
+                param.leftMargin = deltaX - (int)(deltaX * interpolatedTime);
+                param.rightMargin = (int)(deltaX * interpolatedTime);
+                messageContainer.setLayoutParams(param);
+                btnMessageboxMusic.setAlpha(interpolatedTime);
+            }
+        };
+        leftSlide.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                btnMessageboxMusic.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {}
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+        leftSlide.setInterpolator(new AccelerateDecelerateInterpolator());
+        leftSlide.setDuration(300);
+
+        rightSlide = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                FrameLayout.LayoutParams param = (FrameLayout.LayoutParams) messageContainer.getLayoutParams();
+                param.rightMargin = deltaX - (int)(deltaX * interpolatedTime);
+                param.leftMargin = (int)(deltaX * interpolatedTime);
+                messageContainer.setLayoutParams(param);
+                btnMessageboxMusic.setAlpha(1 - interpolatedTime);
+            }
+        };
+        rightSlide.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                btnMessageboxMusic.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+        rightSlide.setInterpolator(new AccelerateDecelerateInterpolator());
+        rightSlide.setDuration(300);
     }
 
     @Override
@@ -417,7 +470,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         }
     };
 
-    @OnClick(R.id.btnMusic)
+    @OnClick({R.id.btnMusic, R.id.btnMessageBoxMusic})
     public void addMusic() {
         Intent searchScreenIntent = new Intent(this, SearchScreenActivity.class);
         startActivityForResult(searchScreenIntent, IDetailsConstants.SONG_DETAILS_REQUEST);
@@ -627,18 +680,10 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @Override
     public void onFocusChange(View view, boolean isFocus) {
         if(isFocus) {
-            Animation slide = new Animation() {
-                @Override
-                protected void applyTransformation(float interpolatedTime, Transformation t) {
-                    FrameLayout.LayoutParams param = (FrameLayout.LayoutParams) messageContainer.getLayoutParams();
-                    param.leftMargin = deltaX - (int)(deltaX * interpolatedTime);
-                    param.rightMargin = (int)(deltaX * interpolatedTime);
-                    messageContainer.setLayoutParams(param);
-                }
-            };
-            slide.setInterpolator(new AccelerateDecelerateInterpolator());
-            slide.setDuration(300);
-            messageContainer.startAnimation(slide);
+            messageContainer.startAnimation(leftSlide);
+        } else {
+            if(TextUtils.isEmpty(((EditText)view).getText()))
+                messageContainer.startAnimation(rightSlide);
         }
     }
 
@@ -646,10 +691,22 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     public boolean onTouch(View view, MotionEvent motionEvent) {
         switch (view.getId()) {
             case R.id.rlChat:{
-
+                if(TextUtils.isEmpty(etMessage.getText())) {
+                    messageContainer.startAnimation(rightSlide);
+                }
+                AppUtil.hideSoftKeyboard(this);
+                etMessage.clearFocus();
             }
             break;
         }
         return false;
+    }
+
+    private void slideChatLeft() {
+
+    }
+
+    private void slideChatRight() {
+
     }
 }

@@ -20,4 +20,17 @@
         <item name="android:background">@null</item>
     </style>
 
+    <style name="styleChatMessage">
+        <item name="android:textSize">13sp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+    </style>
+
+    <style name="styleFrndChatMessage" parent="styleChatMessage">
+        <item name="android:textColor">@color/textFrnd</item>
+    </style>
+
+    <style name="styleMeChatMessage" parent="styleChatMessage">
+        <item name="android:textColor">@color/textMe</item>
+    </style>
+
 </resources>
