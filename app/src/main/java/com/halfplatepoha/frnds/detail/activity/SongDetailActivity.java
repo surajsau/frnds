@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Point;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.support.v4.view.animation.FastOutLinearInInterpolator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,8 +13,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -50,14 +46,12 @@ import com.halfplatepoha.frnds.network.clients.FrndsClient;
 import com.halfplatepoha.frnds.models.request.UpdateTrackRequest;
 import com.halfplatepoha.frnds.network.clients.SoundCloudClient;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
-import com.halfplatepoha.frnds.models.response.TrackResponse;
 import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
 import com.halfplatepoha.frnds.ui.GlideImageView;
 import com.halfplatepoha.frnds.ui.OpenSansEditText;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 import com.halfplatepoha.frnds.utils.AppUtil;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
@@ -73,12 +67,11 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 
-public class SongDetailActivity extends AppCompatActivity implements MediaPlayer.OnPreparedListener,
+public class SongDetailActivity extends AppCompatActivity implements
         View.OnFocusChangeListener, OnTouchListener{
 
     private static final String TAG = SongDetailActivity.class.getSimpleName();
 
-    private MediaPlayer mPlayer;
     private FrndsClient mFrndsClient;
     private SoundCloudClient mSoundCloudClient;
 
@@ -95,7 +88,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @Bind(R.id.tvTitle) OpenSansTextView tvTitle;
     @Bind(R.id.pendingChat) View pendingChat;
     @Bind(R.id.btnPlaylist) ImageButton btnPlaylist;
-    @Bind(R.id.ivSOngPLayingIndicator) View songPlayedIndicator;
+    @Bind(R.id.ivSongPlayingIndicator) View songPlayedIndicator;
     @Bind(R.id.messageContainer) FrameLayout messageContainer;
     @Bind(R.id.btnSend) View btnSend;
     @Bind(R.id.btnMessageBoxMusic) View btnMessageboxMusic;
@@ -119,8 +112,6 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
 
     private LinearLayoutManager mChatLayoutManager;
 
-    private Realm mRealm;
-
     private Chat mChat;
 
     private Animation leftSlide, rightSlide;
@@ -131,17 +122,13 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         setContentView(R.layout.activity_song_detail);
         ButterKnife.bind(this);
 
-        mRealm = Realm.getDefaultInstance();
-
-        helper = new ChatDAO(mRealm);
+        helper = new ChatDAO(Realm.getDefaultInstance());
 
         getDataFromBundle();
 
         if(IDetailsConstants.SOURCE_FAB.equalsIgnoreCase(mSource)) {
             startSearchActivity();
         }
-
-        prepareMediaPlayer();
 
         buildApiClients();
 
@@ -213,6 +200,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     protected void onStart() {
         super.onStart();
         registerReceiver(mNotificationReceiver, new IntentFilter(IConstants.CHAT_BROADCAST));
+        registerReceiver(songFinishedReceiver, new IntentFilter(IConstants.SONG_STATUS_BROADCAST));
     }
 
     private void addDataToAdapters() {
@@ -281,9 +269,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     }
 
     private void getChatObjectFromDb() {
-        mChat = mRealm.where(Chat.class)
-                .equalTo(IDbConstants.FRND_ID_KEY, mFrndId)
-                .findFirst();
+        mChat = helper.getFrndWithFrndId(mFrndId);
 
         mFrndImageUrl = mChat.getFrndImageUrl();
         mFrndName = mChat.getFrndName();
@@ -394,6 +380,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                 .setClientClass(FrndsClient.class)
                 .setConnectTimeout(5, TimeUnit.MINUTES)
                 .setReadTimeout(5, TimeUnit.MINUTES)
+                .setHeader(IConstants.CONTENT_TYPE, IConstants.APPLICATION_JSON)
                 .buildClient();
 
         mSoundCloudClient = new ClientGenerator.Builder()
@@ -401,12 +388,6 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                 .setBaseUrl(IConstants.SOUNDCLOUD_BASE_URL)
                 .setClientClass(SoundCloudClient.class)
                 .buildClient();
-    }
-
-    private void prepareMediaPlayer() {
-        mPlayer = new MediaPlayer();
-        mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mPlayer.setOnPreparedListener(this);
     }
 
     private void getDataFromBundle() {
@@ -418,58 +399,16 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         mFbId = FrndsPreference.getFromPref(IPrefConstants.FB_USER_ID, "");
     }
 
-    private void updateTrackAlbum(String imageUrl) {
-//        Picasso.with(this)
-//                .load(imageUrl)
-//                .into(ivIcon);
-    }
-
-    private void playMusic(String url) {
-        Log.d(TAG, url);
-        try {
-            mPlayer.setDataSource(url + "?" + IConstants.API_KEY_PARAM + "=" + IConstants.API_KEY_VALUE);
-            mPlayer.prepare();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onPrepared(MediaPlayer mediaPlayer) {
-        Log.e(TAG, "is Prepared + " + mediaPlayer.getDuration());
-        if(mediaPlayer.isPlaying())
-            mediaPlayer.pause();
-        else {
-            mediaPlayer.start();
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(mNotificationReceiver);
-
-        if(mPlayer != null) {
-            mPlayer.stop();
-            mPlayer.release();
-            mPlayer = null;
+        try {
+            unregisterReceiver(mNotificationReceiver);
+            unregisterReceiver(songFinishedReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
-
-    private BaseSubscriber<TrackResponse> tracksResponseSubscriber = new BaseSubscriber<TrackResponse>() {
-        @Override
-        public void onObjectReceived(TrackResponse trackResponse) {
-//            mDuration = trackResponse.getDuration();
-            updateTrackAlbum(trackResponse.getArtwork_url());
-            playMusic(trackResponse.getStream_url());
-        }
-    };
 
     @OnClick({R.id.btnMusic, R.id.btnMessageBoxMusic})
     public void addMusic() {
@@ -648,8 +587,19 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         }
     };
 
+    private BroadcastReceiver songFinishedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            FrndsPreference.setInPref(IPrefConstants.CURRENT_SONG_STATUS, IDetailsConstants.CURRENT_SONG_STATUS_STOP);
+            FrndsPreference.setInPref(IPrefConstants.CURRENT_SONG_FRND_ID, "");
+
+            songPlayedIndicator.setVisibility(View.GONE);
+            btnPlaylist.setAnimation(null);
+        }
+    };
+
     private void refreshChatDetails(String frndId, int messageType, String message, String trackId,
-                                    String trackTitle, String trackImageUrl) {
+                                    final String trackTitle, final String trackImageUrl) {
         if(mFrndId.equalsIgnoreCase(frndId)) {
             if(messageType == IDbConstants.TYPE_MUSIC) {
 
@@ -660,16 +610,17 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                         .subscribe(new BaseSubscriber<TrackDetails>() {
                             @Override
                             public void onObjectReceived(TrackDetails trackDetails) {
-
+                                Song song = new Song();
+                                song.setSongImgUrl(trackImageUrl);
+                                song.setSongTitle(trackTitle);
+                                song.setSongTimestamp(System.currentTimeMillis());
+                                song.setFrndId(mFrndId);
+                                if(trackDetails.getUser() != null) {
+                                    song.setSongArtist(trackDetails.getUser().getUsername());
+                                }
+                                mAlbumListAdapter.addSong(song);
                             }
                         });
-
-                Song song = new Song();
-                song.setSongImgUrl(trackImageUrl);
-                song.setSongTitle(trackTitle);
-                song.setSongTimestamp(System.currentTimeMillis());
-                song.setFrndId(mFrndId);
-                mAlbumListAdapter.addSong(song);
             }
 
             Message msg = new Message();
@@ -709,11 +660,4 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         return false;
     }
 
-    private void slideChatLeft() {
-
-    }
-
-    private void slideChatRight() {
-
-    }
 }

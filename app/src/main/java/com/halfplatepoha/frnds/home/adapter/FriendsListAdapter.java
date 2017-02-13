@@ -68,7 +68,9 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
                     .into(holder.ivFrndAvatar);
 
             holder.tvFrndName.setText(mFriends.get(position).getFrndName());
-            holder.tvFrndStatus.setText(mFriends.get(position).getFrndLastMessage().getMsgBody());
+
+            if(mFriends.get(position).getFrndLastMessage() != null)
+                holder.tvFrndStatus.setText(mFriends.get(position).getFrndLastMessage().getMsgBody());
 
             holder.ivIndicator.setVisibility(mFriends.get(position).isMsgRead() ? View.GONE: View.VISIBLE);
         }

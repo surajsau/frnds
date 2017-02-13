@@ -11,4 +11,7 @@ public interface IPrefConstants {
     String IS_REGISTERED = "is_registered";
 
     String SCREEN_TYPE = "screen_type";
+
+    String CURRENT_SONG_STATUS = "current_song_status";
+    String CURRENT_SONG_FRND_ID = "current_song_frnd_id";
 }

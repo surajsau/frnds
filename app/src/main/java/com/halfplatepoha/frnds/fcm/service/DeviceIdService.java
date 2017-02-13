@@ -28,6 +28,7 @@ public class DeviceIdService extends FirebaseInstanceIdService {
         mClient = new ClientGenerator.Builder()
                 .setBaseUrl(IConstants.FRNDS_BASE_URL)
                 .setLoggingInterceptor()
+                .setHeader(IConstants.CONTENT_TYPE, IConstants.APPLICATION_JSON)
                 .setClientClass(FrndsClient.class)
                 .buildClient();
     }

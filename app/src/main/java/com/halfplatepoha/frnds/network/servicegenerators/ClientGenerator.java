@@ -46,6 +46,20 @@ public class ClientGenerator {
             return this;
         }
 
+        public Builder setHeader(final String headerKey, final String headerValue) {
+            Interceptor apiKeyInterceptor = new Interceptor() {
+                @Override
+                public Response intercept(Interceptor.Chain chain) throws IOException {
+                    Request request = chain.request();
+                    request = request.newBuilder().header(headerKey, headerValue).build();
+                    return chain.proceed(request);
+                }
+            };
+
+            httpClient.addInterceptor(apiKeyInterceptor);
+            return this;
+        }
+
         public Builder setApiKeyInterceptor(final String apiKeyParam, final String apiKeyValue) {
             Interceptor apiKeyInterceptor = new Interceptor() {
                 @Override

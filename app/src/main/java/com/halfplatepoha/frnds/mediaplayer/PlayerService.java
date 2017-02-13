@@ -21,7 +21,7 @@ import java.io.IOException;
  * Created by surajkumarsau on 09/09/16.
  */
 public class PlayerService extends Service implements MediaPlayer.OnPreparedListener,
-        MediaPlayer.OnErrorListener{
+        MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener{
 
     private MediaPlayer mPlayer;
     public static final String ACTION_PLAY = "com.halfplatepoha.frnds.PLAY";
@@ -31,6 +31,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
         mPlayer.start();
+        Intent songStatusIntent = new Intent(IConstants.SONG_STATUS_BROADCAST);
+        songStatusIntent.putExtra(IDetailsConstants.CURRENT_SONG_STATUS, IDetailsConstants.CURRENT_SONG_STATUS_PLAYING);
+        sendBroadcast(new Intent(IConstants.SONG_STATUS_BROADCAST));
     }
 
     @Override
@@ -43,6 +46,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                     mPlayer = new MediaPlayer();
                     mPlayer.setOnPreparedListener(this);
                     mPlayer.setOnErrorListener(this);
+                    mPlayer.setOnCompletionListener(this);
                 }
 
                 mStreamUrl = intent.getStringExtra(IDetailsConstants.SERVICE_STREAM_URL);
@@ -116,5 +120,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mediaPlayer) {
+        mediaPlayer.release();
+        sendBroadcast(new Intent(IConstants.SONG_STATUS_BROADCAST));
+        stopSelf();
     }
 }

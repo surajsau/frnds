@@ -118,7 +118,7 @@
                         android:background="@null"
                         android:src="@drawable/cd_player_icon"/>
 
-                    <ImageView android:id="@+id/ivSOngPLayingIndicator"
+                    <ImageView android:id="@+id/ivSongPlayingIndicator"
                         android:layout_width="10dp"
                         android:layout_height="10dp"
                         android:layout_marginTop="15dp"

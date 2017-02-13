@@ -5,6 +5,9 @@ import android.support.annotation.IntDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import static com.halfplatepoha.frnds.detail.IDetailsConstants.CURRENT_SONG_STATUS_PLAYING;
+import static com.halfplatepoha.frnds.detail.IDetailsConstants.CURRENT_SONG_STATUS_STOP;
+
 /**
  * Created by surajkumarsau on 07/09/16.
  */
@@ -16,6 +19,16 @@ public interface IDetailsConstants {
 
     int TYPE_ME = 1;
     int TYPE_FRND = 2;
+
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({CURRENT_SONG_STATUS_PLAYING, CURRENT_SONG_STATUS_STOP})
+    @interface CurrentSongStatusType {}
+
+    int CURRENT_SONG_STATUS_PLAYING = 3;
+    int CURRENT_SONG_STATUS_STOP = 4;
+
+    String CURRENT_SONG_STATUS = "current_song_status";
 
     String SOURCE_TYPE = "source_type";
     String SOURCE_FAB = "source_fab";

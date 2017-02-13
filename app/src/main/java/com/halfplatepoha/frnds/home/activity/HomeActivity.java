@@ -10,6 +10,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -17,9 +18,11 @@ import com.halfplatepoha.frnds.FrndsPreference;
 import com.halfplatepoha.frnds.IConstants;
 import com.halfplatepoha.frnds.IPrefConstants;
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.db.ChatDAO;
 import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Chat;
 import com.halfplatepoha.frnds.db.models.Message;
+import com.halfplatepoha.frnds.db.models.Song;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.home.IFrndsConstants;
 import com.halfplatepoha.frnds.home.adapter.TabPagerAdapter;
@@ -49,7 +52,7 @@ public class HomeActivity extends AppCompatActivity {
     @Bind(R.id.ivPlayerAlbum)
     GlideImageView ivPlayerAlbum;
 
-    private Realm mRealm;
+    private ChatDAO helper;
 
 //    private TabPagerAdapter mTabAdapter;
 
@@ -62,7 +65,7 @@ public class HomeActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
 //        setupPager();
-        mRealm = Realm.getDefaultInstance();
+        helper = new ChatDAO(Realm.getDefaultInstance());
 
         setupListFragment();
 
@@ -77,7 +80,17 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
-//    private void setupPager() {
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try {
+            unregisterReceiver(notificationReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //    private void setupPager() {
 //        mTabAdapter = new TabPagerAdapter(this, getSupportFragmentManager());
 //        pager.setAdapter(mTabAdapter);
 //
@@ -125,7 +138,7 @@ public class HomeActivity extends AppCompatActivity {
                     String track = data.getStringExtra(IDetailsConstants.LATEST_IMAGE_TRACK);
                     String frndId = data.getStringExtra(IDetailsConstants.FRND_ID);
 
-                    Chat chatResult = mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, frndId).findFirst();
+                    Chat chatResult = helper.getFrndWithFrndId(frndId);
 
                     ivPlayerAlbum.setImageUrl(this, albumUrl);
                     tvPlayerTrackTitle.setText(track);
@@ -143,13 +156,18 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent != null) {
-                String trackId = intent.getStringExtra(IConstants.FRND_TRACK_ID);
-                int messageType = intent.getIntExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MESSAGE);
+                @IDbConstants.MessageType int messageType = intent.getIntExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MESSAGE);
                 String message = intent.getStringExtra(IConstants.FRND_MESSAGE);
                 String frndId = intent.getStringExtra(IConstants.FRND_ID);
-                String trackTitle = intent.getStringExtra(IConstants.FRND_TRACK_TITLE);
 
-//                mFriendsListFragment.refreshChatDetails(frndId, messageType, message, trackId, trackTitle);
+                Message msg = new Message.Builder()
+                        .setMsgBody(message)
+                        .setMsgType(messageType)
+                        .setUserType(IDetailsConstants.TYPE_FRND)
+                        .setMsgTimestamp(System.currentTimeMillis())
+                        .build();
+
+                mFriendsListFragment.refreshChatDetails(frndId, msg);
             }
         }
     };

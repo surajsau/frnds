@@ -33,10 +33,11 @@ public class ChatDAO {
     }
 
     public void insertIntoChatList(final Chat chat) {
+        final String frndId = chat.getFrndId();
         mRealm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                if(realm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, chat.getFrndId()).findFirst() == null)
+                if(getFrndWithFrndId(frndId) == null)
                     realm.insert(chat);
             }
         });
@@ -44,11 +45,12 @@ public class ChatDAO {
 
     public void insertMessageToChat(String chatId, Message message) {
         try{
-            Chat chatResult = mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, chatId).findFirst();
+            Chat chatResult = getFrndWithFrndId(chatId);
 
             mRealm.beginTransaction();
-            chatResult.getFrndMessages().add(message);
-            chatResult.setFrndLastMessage(message);
+            Message msg = mRealm.copyToRealm(message);
+            chatResult.getFrndMessages().add(msg);
+            chatResult.setFrndLastMessage(msg);
             mRealm.commitTransaction();
         }catch (Exception e) {
             FrndsLog.e("Message Transaction cancelled : " + e.getMessage());
@@ -58,15 +60,20 @@ public class ChatDAO {
 
     public void insertSongToChat(String chatId, Song song) {
         try {
-            Chat chatResult = mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, chatId).findFirst();
+            Chat chatResult = getFrndWithFrndId(chatId);
 
             mRealm.beginTransaction();
-            chatResult.getFrndSongs().add(song);
+            Song sng = mRealm.copyToRealm(song);
+            chatResult.getFrndSongs().add(sng);
             mRealm.commitTransaction();
         } catch (Exception e) {
             FrndsLog.e("Song Transaction cancelled : " + e.getMessage());
             mRealm.cancelTransaction();
         }
+    }
+
+    public Chat getFrndWithFrndId(String frndId) {
+        return mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, frndId).findFirst();
     }
 
     public void updateChatList(InstalledFrnds installedFrnds, final int transactionId) {
