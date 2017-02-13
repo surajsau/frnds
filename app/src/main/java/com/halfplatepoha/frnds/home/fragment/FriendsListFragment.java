@@ -25,6 +25,7 @@ import com.halfplatepoha.frnds.TokenTracker;
 import com.halfplatepoha.frnds.db.ChatDAO;
 import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Chat;
+import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.home.adapter.FriendsListAdapter;
 import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
@@ -162,7 +163,7 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
         }
     }
 
-    public void refreshChatDetails(String frndId, int messageType, String message, String trackId, String trackTitle) {
-        mAdapter.refreshChat(frndId, messageType, message);
+    public void refreshChatDetails(String frndId, Message message) {
+        mAdapter.refreshChat(frndId, message);
     }
 }

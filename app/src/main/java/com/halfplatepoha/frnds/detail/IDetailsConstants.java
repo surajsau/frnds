@@ -30,6 +30,14 @@ public interface IDetailsConstants {
     String TRACK_ARTIST = "track_artist";
     String FRND_ID = "frnd_id";
 
+    String LATEST_IMAGE_URL = "latest_image_url";
+    String LATEST_IMAGE_TRACK = "latest_image_track";
+    String LATEST_FRIEND_NAME = "latest_friend_name";
+    String LATEST_MESSAGE = "latest_message";
+    String LATEST_MESSAGE_TYPE = "latest_message_type";
+    String LATEST_USER_TYPE = "latest_user_type";
+    String LATEST_MESSAGE_TIMESTAMP = "latest_message_time_stamp";
+
     String SERVICE_STREAM_URL = "service_stream_url";
     String NOTIFICATION_SERVICE_TRACK_TITLE = "notification_track_title";
 
@@ -38,6 +46,7 @@ public interface IDetailsConstants {
     String IMG_LARGE_SUFFIX = "large";
     String IMG_500_X_500_SUFFIX = "t500x500";
     String IMG_300_X_300_SUFFIX = "t300x300";
+    String IMG_BADGE = "badge";
     String STRING_HTTPS = "https";
     String STRING_HTTP = "http";
 }

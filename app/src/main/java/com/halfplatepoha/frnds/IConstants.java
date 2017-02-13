@@ -5,7 +5,7 @@ package com.halfplatepoha.frnds;
  */
 public interface IConstants {
     String SOUNDCLOUD_BASE_URL = "http://api.soundcloud.com/";
-    String FRNDS_BASE_URL = "http://frnds-server.herokuapp.com/";
+    String FRNDS_BASE_URL = "http://10.21.24.155:50000/";
 
     String API_KEY_PARAM = "client_id";
     String API_KEY_VALUE = "e959350cd82cd9a9371893951600e1af";

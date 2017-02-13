@@ -22,7 +22,7 @@ public class Chat extends RealmObject {
 
     private boolean         msgRead;
 
-    public String           frndLastMessage;
+    public Message           frndLastMessage;
 
     public String getFrndId() {
         return frndId;
@@ -64,11 +64,11 @@ public class Chat extends RealmObject {
         this.frndImageUrl = frndImageUrl;
     }
 
-    public String getFrndLastMessage() {
+    public Message getFrndLastMessage() {
         return frndLastMessage;
     }
 
-    public void setFrndLastMessage(String frndLastMessage) {
+    public void setFrndLastMessage(Message frndLastMessage) {
         this.frndLastMessage = frndLastMessage;
     }
 

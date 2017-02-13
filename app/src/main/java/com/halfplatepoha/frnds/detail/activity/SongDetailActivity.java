@@ -99,6 +99,8 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @Bind(R.id.messageContainer) FrameLayout messageContainer;
     @Bind(R.id.btnSend) View btnSend;
     @Bind(R.id.btnMessageBoxMusic) View btnMessageboxMusic;
+    @Bind(R.id.tvTrackTitle) OpenSansTextView tvTrackTitle;
+    @Bind(R.id.tvTrackArtist) OpenSansTextView tvTrackArtist;
 
     private int[] btnPlaylistCoordinates;
 
@@ -106,6 +108,9 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     private String mFbId;
     private String mFrndImageUrl;
     private String mFrndName;
+
+    private String latestSongTrackName;
+    private String latestSongAlbumUrl;
 
     private String mSource;
 
@@ -238,6 +243,12 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                     public void onCompleted() {
                         if(mAlbumListAdapter.getItemCount() != 0)
                             rlAlbums.smoothScrollToPosition(mAlbumListAdapter.getItemCount() - 1);
+
+                        Song lastSong = mAlbumListAdapter.getLastSong();
+                        if(lastSong != null) {
+                            tvTrackTitle.setText(lastSong.getSongTitle());
+                            tvTrackArtist.setText(lastSong.getSongArtist());
+                        }
                     }
                 });
 
@@ -359,10 +370,10 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
             });
     }
 
-    private void callSendMessageApi(String message) {
+    private void callSendMessageApi(final Message message) {
         SendMessageRequest req  = new SendMessageRequest();
         req.setFbId(mFbId);
-        req.setMessage(message);
+        req.setMessage(message.getMsgBody());
         req.setTo(mFrndId);
 
         mFrndsClient.sendMessage(req)
@@ -371,7 +382,7 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                 .subscribe(new BaseSubscriber<Void>() {
                     @Override
                     public void onObjectReceived(Void aVoid) {
-
+                        helper.insertMessageToChat(mFrndId, message);
                     }
                 });
     }
@@ -451,16 +462,6 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private BaseSubscriber<TrackResponse> tracksResponseSubscriber = new BaseSubscriber<TrackResponse>() {
         @Override
         public void onObjectReceived(TrackResponse trackResponse) {
@@ -479,6 +480,9 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
     @OnClick(R.id.back)
     public void back() {
         Intent resultIntent = new Intent();
+        resultIntent.putExtra(IDetailsConstants.LATEST_IMAGE_TRACK, latestSongTrackName);
+        resultIntent.putExtra(IDetailsConstants.LATEST_IMAGE_URL, latestSongAlbumUrl);
+        resultIntent.putExtra(IDetailsConstants.FRND_ID, mFrndId);
         setResult(RESULT_OK, resultIntent);
         finish();
     }
@@ -494,11 +498,9 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
             mChatAdapter.addMessage(msgBuilder.build());
             rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
 
-            callSendMessageApi(etMessage.getText().toString());
+            callSendMessageApi(msgBuilder.build());
 
             etMessage.setText("");
-
-            helper.insertMessageToChat(mFrndId, msgBuilder.build());
         }
     }
 
@@ -570,10 +572,12 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                     FrndsLog.e(trackImageUrl);
 
                     String trackTitle = data.getExtras().getString(IDetailsConstants.TRACK_TITLE);
-                    String trackArtist = data.getExtras().getString(IDetailsConstants.TRACK_URL);
+                    String trackArtist = data.getExtras().getString(IDetailsConstants.TRACK_ARTIST);
 
                     //--setting background image of activity
                     ivAlbumBg.setImageUrl(this, trackImageUrl);
+                    tvTrackTitle.setText(trackTitle);
+                    tvTrackArtist.setText(trackArtist);
 
                     trackImageUrl = trackImageUrl.replace(IDetailsConstants.IMG_500_X_500_SUFFIX, IDetailsConstants.IMG_300_X_300_SUFFIX);
 
@@ -582,6 +586,9 @@ public class SongDetailActivity extends AppCompatActivity implements MediaPlayer
                     startPlayingTrack(trackTitle, trackUrl);
 
                     callUpdateTracksApi(trackId);
+
+                    latestSongAlbumUrl = trackImageUrl.replace(IDetailsConstants.IMG_300_X_300_SUFFIX, IDetailsConstants.IMG_BADGE);
+                    latestSongTrackName = trackTitle;
                 }
             }
             break;

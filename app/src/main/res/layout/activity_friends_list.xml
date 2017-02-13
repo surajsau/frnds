@@ -34,28 +34,86 @@
 
     </FrameLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:orientation="vertical">-->
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tabs"
-            android:layout_width="match_parent"
-            android:layout_height="?android:actionBarSize"
-            android:layout_marginTop="?android:actionBarSize"/>
-
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </LinearLayout>
-
-        <!--<FrameLayout android:id="@+id/fragmentHome"-->
+        <!--<android.support.design.widget.TabLayout-->
+            <!--android:id="@+id/tabs"-->
             <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent">-->
+            <!--android:layout_height="?android:actionBarSize"-->
+            <!--android:layout_marginTop="?android:actionBarSize"/>-->
 
-        <!--</FrameLayout>-->
+        <!--<android.support.v4.view.ViewPager-->
+            <!--android:id="@+id/pager"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"/>-->
+
+    <!--</LinearLayout>-->
+
+    <FrameLayout android:id="@+id/fragmentHome"
+        android:layout_marginTop="?android:actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <LinearLayout android:id="@+id/player"
+        android:layout_width="match_parent"
+        android:layout_height="?android:actionBarSize"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:background="@color/colorPrimary">
+
+        <com.halfplatepoha.frnds.ui.GlideImageView
+            android:id="@+id/ivPlayerAlbum"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:src="@drawable/warriors"
+            tools:src="@drawable/warriors"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="4"
+            android:paddingLeft="16dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
+            <com.halfplatepoha.frnds.ui.OpenSansTextView
+                android:id="@+id/tvPlayerTrackTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="We're the Champions!"
+                tools:text="We're the Champions!"
+                android:textSize="15sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="@color/textPrimary"/>
+
+            <com.halfplatepoha.frnds.ui.OpenSansTextView
+                android:id="@+id/tvPlayerTrackFrnd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="with Amrit Kamal Lenka"
+                android:text="with Amrit Kamal Lenka"
+                android:textSize="13sp"
+                android:textColor="@color/textSecondary"/>
+        </LinearLayout>
+
+        <ImageButton android:id="@+id/btnPlayPause"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/play"
+            android:background="@null"/>
+
+        <ImageButton android:id="@+id/btnPlayNext"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/play"
+            android:background="@null"/>
+    </LinearLayout>
 
 </FrameLayout>

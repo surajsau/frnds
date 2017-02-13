@@ -64,6 +64,13 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
         notifyItemInserted(albums.size() - 1);
     }
 
+    public Song getLastSong() {
+        if(albums != null && !albums.isEmpty()) {
+            return albums.get(albums.size() - 1);
+        }
+        return null;
+    }
+
     public void refresh() {
         if(albums != null) {
             albums.clear();

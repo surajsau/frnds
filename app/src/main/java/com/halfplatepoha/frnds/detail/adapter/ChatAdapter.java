@@ -12,6 +12,7 @@ import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
+import com.halfplatepoha.frnds.ui.OpenSansButton;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 import com.halfplatepoha.frnds.utils.AppUtil;
 
@@ -83,7 +84,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @Bind(R.id.tvMeMsg) OpenSansTextView tvMeMsg;
         @Bind(R.id.btnPlayPause) ImageButton btnPlayPause;
-        @Bind(R.id.btnRetry) ImageButton btnRetry;
+        @Bind(R.id.btnRetry) OpenSansButton btnRetry;
 
         public MeChatViewHolder(View itemView) {
             super(itemView);

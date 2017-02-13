@@ -18,8 +18,7 @@
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:fitsSystemWindows="true"
-        android:layout_marginBottom="42dp"
-        android:background="@color/colorPrimary">
+        android:layout_marginBottom="?android:actionBarSize">
 
         <LinearLayout android:orientation="vertical"
             android:layout_width="match_parent"
@@ -141,8 +140,6 @@
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"/>
 
-
-
             </FrameLayout>
         </LinearLayout>
 
@@ -165,19 +162,24 @@
                 android:id="@+id/tvTrackTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Warriors"
+                tools:text="Warriors Sample text here"
                 android:textSize="15sp"
+                android:gravity="center_horizontal"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/textPrimary"/>
+                android:textColor="@color/textSecondary"/>
 
             <com.halfplatepoha.frnds.ui.OpenSansTextView
                 android:id="@+id/tvTrackArtist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Imagine Dragons"
+                tools:text="Imagine Dragons"
                 android:textSize="13sp"
+                android:maxLines="1"
+                android:gravity="center_horizontal"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/textPrimary"
+                android:textColor="@color/textSecondary"
                 android:layout_marginBottom="10dp"/>
 
             <LinearLayout

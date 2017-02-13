@@ -23,6 +23,8 @@ public interface IFrndsConstants {
     String FRIEND_AVATAR_TRANSITION = "friend_avatar_transition";
     String FRIEND_NAME_TRANSITION = "friend_name_transition";
 
+    String HOME_FRAGMENT_TAG = "home_fragment_tag";
+
     String DETAIL_DIALOG_TAG = "detail_dialog_tag";
 
     int FRIEND_LIST_REQUEST = 201;
@@ -32,4 +34,5 @@ public interface IFrndsConstants {
     String FRIEND_ID = "friend_id";
 
     @DrawableRes int[] tabDrawables = {R.drawable.chat, R.drawable.soundcloud, R.drawable.playlist};
+    @DrawableRes int[] tabSelectedDrawables = {R.drawable.chat_selected, R.drawable.soundcloud_selected, R.drawable.playlist_selected};
 }

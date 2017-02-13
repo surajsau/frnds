@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.db.models.Chat;
+import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.home.IFrndsConstants;
@@ -67,7 +68,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
                     .into(holder.ivFrndAvatar);
 
             holder.tvFrndName.setText(mFriends.get(position).getFrndName());
-            holder.tvFrndStatus.setText(mFriends.get(position).getFrndLastMessage());
+            holder.tvFrndStatus.setText(mFriends.get(position).getFrndLastMessage().getMsgBody());
 
             holder.ivIndicator.setVisibility(mFriends.get(position).isMsgRead() ? View.GONE: View.VISIBLE);
         }
@@ -89,14 +90,14 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         return mFriends.size();
     }
 
-    public void refreshChat(String frndId, int messageType, String message) {
+    public void refreshChat(String frndId, Message lastMessage) {
         int position = getPositionFromId(frndId);
         if(position != -1) {
             Chat chat = mFriends.remove(position);
             try {
                 mRealm.beginTransaction();
                 chat.setFrndPosition(0);
-                chat.setFrndLastMessage(message);
+                chat.setFrndLastMessage(lastMessage);
                 chat.setMsgRead(false);
                 mRealm.commitTransaction();
             }catch (Exception e) {

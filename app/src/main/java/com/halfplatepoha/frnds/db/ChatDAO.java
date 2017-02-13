@@ -48,6 +48,7 @@ public class ChatDAO {
 
             mRealm.beginTransaction();
             chatResult.getFrndMessages().add(message);
+            chatResult.setFrndLastMessage(message);
             mRealm.commitTransaction();
         }catch (Exception e) {
             FrndsLog.e("Message Transaction cancelled : " + e.getMessage());
