@@ -7,7 +7,7 @@ import static com.halfplatepoha.frnds.detail.IDetailsConstants.TRACK_ID;
  */
 public interface IConstants {
     String SOUNDCLOUD_BASE_URL = "http://api.soundcloud.com/";
-    String FRNDS_BASE_URL = "http://192.168.0.5:50000/";
+    String FRNDS_BASE_URL = "https://turnkey-world-156014.appspot.com/";
 
     String API_KEY_PARAM = "client_id";
     String API_KEY_VALUE = "e959350cd82cd9a9371893951600e1af";
@@ -44,4 +44,7 @@ public interface IConstants {
     String FRND_TRACK_ID = "frnd_track_id";
     String FRND_TRACK_TITLE = "frnd_track_title";
     String FRND_TRACK_URL = "frnd_track_image_url";
+
+    String CHAT_DETAIL_NOTIFICATION_FILTER = "chat_detail_filter";
+
 }

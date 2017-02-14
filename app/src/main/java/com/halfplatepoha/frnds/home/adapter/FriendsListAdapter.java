@@ -15,6 +15,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.db.ChatDAO;
 import com.halfplatepoha.frnds.db.models.Chat;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
@@ -22,6 +23,7 @@ import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.home.IFrndsConstants;
 import com.halfplatepoha.frnds.home.fragment.FriendDetailDialogFragment;
 import com.halfplatepoha.frnds.home.activity.HomeActivity;
+import com.halfplatepoha.frnds.home.model.ChatListingModel;
 import com.halfplatepoha.frnds.models.User;
 import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
@@ -34,19 +36,19 @@ import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.realm.Realm;
 
+import static com.halfplatepoha.frnds.R.drawable.chat;
+
 /**
  * Created by surajkumarsau on 07/09/16.
  */
 public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.FriendViewHolder>{
 
     private Context mContext;
-    private ArrayList<Chat> mFriends;
+    private ArrayList<ChatListingModel> mFriends;
     private FragmentManager mFragmentManager;
-    private Realm mRealm;
 
-    public FriendsListAdapter(Context context, Realm realm) {
+    public FriendsListAdapter(Context context) {
         mContext = context;
-        mRealm = realm;
 
         mFriends = new ArrayList<>();
 
@@ -69,20 +71,16 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
             holder.tvFrndName.setText(mFriends.get(position).getFrndName());
 
-            if(mFriends.get(position).getFrndLastMessage() != null)
-                holder.tvFrndStatus.setText(mFriends.get(position).getFrndLastMessage().getMsgBody());
+            holder.tvFrndStatus.setText(mFriends.get(position).getLastMessage());
 
-            holder.ivIndicator.setVisibility(mFriends.get(position).isMsgRead() ? View.GONE: View.VISIBLE);
+            holder.ivIndicator.setVisibility(mFriends.get(position).isMessageRead() ? View.GONE: View.VISIBLE);
         }
     }
 
     public void addChat(Chat chat) {
-        mFriends.add(chat.getFrndPosition(), chat);
+        ChatListingModel chatModel = new ChatListingModel(chat);
+        mFriends.add(chat.getFrndPosition(), chatModel);
         notifyItemInserted(mFriends.size() - 1);
-    }
-
-    public ArrayList<Chat> getFrndsList() {
-        return mFriends;
     }
 
     @Override
@@ -92,19 +90,13 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         return mFriends.size();
     }
 
-    public void refreshChat(String frndId, Message lastMessage) {
+    public void refreshChat(String frndId, String lastMessage) {
         int position = getPositionFromId(frndId);
         if(position != -1) {
-            Chat chat = mFriends.remove(position);
-            try {
-                mRealm.beginTransaction();
-                chat.setFrndPosition(0);
-                chat.setFrndLastMessage(lastMessage);
-                chat.setMsgRead(false);
-                mRealm.commitTransaction();
-            }catch (Exception e) {
-                e.printStackTrace();
-            }
+            ChatListingModel chat = mFriends.remove(position);
+            chat.setFrndPosition(0);
+            chat.setLastMessage(lastMessage);
+            chat.setMessageRead(false);
 
             mFriends.add(chat.getFrndPosition(), chat);
             notifyItemMoved(position, 0);
@@ -134,7 +126,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
         @OnClick(R.id.rowFriend)
         public void openSongDetails() {
-            Chat frnd = mFriends.get(getAdapterPosition());
+            ChatListingModel frnd = mFriends.get(getAdapterPosition());
             Intent songDetailsIntent = new Intent(mContext, SongDetailActivity.class);
             Pair<View, String> avatarTransition = Pair.create((View)ivFrndAvatar, mContext.getString(R.string.frnd_avatar_transition));
             Pair<View, String> nameTransition = Pair.create((View)tvFrndName, mContext.getString(R.string.frnd_name_transition));
@@ -148,7 +140,7 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
         @OnClick(R.id.ivFrndAvatar)
         public void openDetailDialog() {
-            Chat frnd = mFriends.get(getAdapterPosition());
+            ChatListingModel frnd = mFriends.get(getAdapterPosition());
             FriendDetailDialogFragment dlgDetail = new FriendDetailDialogFragment();
             Bundle dlgBundle = new Bundle();
             dlgBundle.putString(IFrndsConstants.FRIEND_NAME, frnd.getFrndName());

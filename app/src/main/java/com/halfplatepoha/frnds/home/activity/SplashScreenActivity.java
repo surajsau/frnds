@@ -17,31 +17,45 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.halfplatepoha.frnds.FrndsLog;
+import com.halfplatepoha.frnds.FrndsPreference;
+import com.halfplatepoha.frnds.IConstants;
+import com.halfplatepoha.frnds.IPrefConstants;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.TokenTracker;
 import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.ChatDAO;
 import com.halfplatepoha.frnds.login.activity.LoginActivity;
 import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
+import com.halfplatepoha.frnds.models.request.GetPendingRequest;
+import com.halfplatepoha.frnds.models.response.GetPendingMessageResponse;
+import com.halfplatepoha.frnds.network.clients.FrndsClient;
+import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import com.halfplatepoha.frnds.ui.GlideImageView;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import pl.droidsonroids.gif.GifImageView;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.OnTransactionCompletedListener{
-
-    private Realm mRealm;
 
     private FirebaseAuth mAuth;
 
     private ChatDAO helper;
 
     @Bind(R.id.appName) OpenSansTextView appName;
+
+    private FrndsClient frndsClient;
+
+    private String fbId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +66,21 @@ public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.O
         mAuth = FirebaseAuth.getInstance();
 
         if(mAuth.getCurrentUser() != null) {
-            mRealm = Realm.getDefaultInstance();
-            helper = new ChatDAO(mRealm);
+            helper = new ChatDAO(Realm.getDefaultInstance());
             helper.setOnTransactionCompletedListener(this);
 
+            fbId = FrndsPreference.getFromPref(IPrefConstants.FB_USER_ID, "");
+
             getFriendsWhoInstalledApp();
+
+            frndsClient = new ClientGenerator.Builder()
+                    .setLoggingInterceptor()
+                    .setBaseUrl(IConstants.FRNDS_BASE_URL)
+                    .setClientClass(FrndsClient.class)
+                    .setConnectTimeout(5, TimeUnit.MINUTES)
+                    .setReadTimeout(5, TimeUnit.MINUTES)
+                    .setHeader(IConstants.CONTENT_TYPE, IConstants.APPLICATION_JSON)
+                    .buildClient();
         } else {
             startLoginActivity();
         }
@@ -107,13 +131,28 @@ public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.O
     public void onTransactionComplete(int transcationId) {
         switch (transcationId) {
             case IDbConstants.UPDATE_FRND_LIST_TRANSACTION_ID:
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startHomeActivity();
-                    }
-                }, 1000);
-                break;
+                getPendingMessagesAndSongs();
         }
+    }
+
+    private void getPendingMessagesAndSongs() {
+        GetPendingRequest request = new GetPendingRequest();
+        request.setFbId(fbId);
+        frndsClient.getPendingMessages(request)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter(new Func1<GetPendingMessageResponse, Boolean>() {
+                    @Override
+                    public Boolean call(GetPendingMessageResponse getPendingMessageResponse) {
+                        return getPendingMessageResponse != null && getPendingMessageResponse.getBody() != null
+                                && !getPendingMessageResponse.getBody().isEmpty();
+                    }
+                })
+                .flatMap(new Func1<GetPendingMessageResponse, Observable<GetPendingMessageResponse.Body>>() {
+                    @Override
+                    public Observable<GetPendingMessageResponse.Body> call(GetPendingMessageResponse getPendingMessageResponse) {
+                        return Observable.from(getPendingMessageResponse.getBody());
+                    }
+                });
     }
 }

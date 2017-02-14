@@ -1,9 +1,12 @@
 package com.halfplatepoha.frnds.network.clients;
 
+import com.halfplatepoha.frnds.models.request.GetPendingRequest;
 import com.halfplatepoha.frnds.models.request.RegisterGCMRequest;
 import com.halfplatepoha.frnds.models.request.RegisterRequest;
 import com.halfplatepoha.frnds.models.request.SendMessageRequest;
 import com.halfplatepoha.frnds.models.request.UpdateTrackRequest;
+import com.halfplatepoha.frnds.models.response.GetPendingMessageResponse;
+import com.halfplatepoha.frnds.models.response.GetPendingSongsResponse;
 import com.halfplatepoha.frnds.models.response.RegisterGCMResponse;
 import com.halfplatepoha.frnds.models.response.RegisterResponse;
 import com.halfplatepoha.frnds.models.response.UpdateTrackResponse;
@@ -29,5 +32,11 @@ public interface FrndsClient {
 
     @POST("v0/sendMessage")
     Observable<Void> sendMessage(@Body SendMessageRequest request);
+
+    @POST("v0/getPendingMessages")
+    Observable<GetPendingMessageResponse> getPendingMessages(@Body GetPendingRequest request);
+
+    @POST("v0/getPendingSongs")
+    Observable<GetPendingSongsResponse> getPendingSongs(@Body GetPendingRequest request);
 
 }

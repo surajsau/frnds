@@ -3,8 +3,10 @@ package com.halfplatepoha.frnds.fcm.service;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Debug;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -30,6 +32,7 @@ import com.halfplatepoha.frnds.network.clients.SoundCloudClient;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 
 import java.io.IOException;
+import java.util.Map;
 
 import io.realm.Realm;
 import rx.Observable;
@@ -52,7 +55,6 @@ public class NotificationService extends FirebaseMessagingService {
     @Override
     public void onCreate() {
         super.onCreate();
-
         helper = new ChatDAO(Realm.getDefaultInstance());
 
         mSoundcloudClient = new ClientGenerator.Builder()
@@ -76,7 +78,10 @@ public class NotificationService extends FirebaseMessagingService {
         FrndsLog.e("ChatMessage payload: " + remoteMessage.getData());
         FrndsLog.e("ChatMessage body: " +  remoteMessage.getNotification().getBody());
 
+        Map<String, String> notificationData = remoteMessage.getData();
+
         try {
+
             NotificationModel model = mMapper.readValue(remoteMessage.getNotification().getBody(), NotificationModel.class);
             constructNotification(model);
         } catch (IOException e) {
@@ -93,6 +98,8 @@ public class NotificationService extends FirebaseMessagingService {
 
         Intent chatIntent = new Intent(IConstants.CHAT_BROADCAST);
         chatIntent.putExtra(IConstants.FRND_ID, model.getFriendId());
+
+        Log.e("Model type", model.getType());
 
         switch (model.getType()){
             case IFCMConstants.SONG:{

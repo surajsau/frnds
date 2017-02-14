@@ -81,7 +81,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
+    protected void onDestroy() {
         super.onStop();
         try {
             unregisterReceiver(notificationReceiver);

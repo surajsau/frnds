@@ -96,7 +96,7 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
     }
 
     private void setupRecyclerView() {
-        mAdapter = new FriendsListAdapter(getActivity(), mRealm);
+        mAdapter = new FriendsListAdapter(getActivity());
         rlFrnds.setLayoutManager(new LinearLayoutManager(getActivity()));
         rlFrnds.setAdapter(mAdapter);
 
@@ -164,6 +164,7 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
     }
 
     public void refreshChatDetails(String frndId, Message message) {
-        mAdapter.refreshChat(frndId, message);
+        if(message != null)
+            mAdapter.refreshChat(frndId, message.getMsgBody());
     }
 }
