@@ -1,5 +1,6 @@
 package com.halfplatepoha.frnds;
 
+import static com.halfplatepoha.frnds.detail.IDetailsConstants.FRND_ID;
 import static com.halfplatepoha.frnds.detail.IDetailsConstants.TRACK_ID;
 
 /**
@@ -40,6 +41,7 @@ public interface IConstants {
     String SONG_STATUS_BROADCAST = "sync_song_status_broadcast";
     String FRND_MESSAGE = "frnd_message";
     String FRND_MESSAGE_TYPE = "frnd_message_type";
+    String FRND_TIME_STAMP = "frnd_message_timestamp";
     String FRND_ID = "frnd_id";
     String FRND_TRACK_ID = "frnd_track_id";
     String FRND_TRACK_TITLE = "frnd_track_title";

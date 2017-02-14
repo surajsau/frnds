@@ -12,6 +12,7 @@ import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
+import com.halfplatepoha.frnds.detail.model.MessageModel;
 import com.halfplatepoha.frnds.ui.OpenSansButton;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 import com.halfplatepoha.frnds.utils.AppUtil;
@@ -27,12 +28,18 @@ import butterknife.OnClick;
  */
 public class ChatAdapter extends RecyclerView.Adapter {
 
-    private ArrayList<Message> mMessages;
+    private ArrayList<MessageModel> mMessages;
     private Context mContext;
 
     public ChatAdapter(Context context) {
         mContext = context;
         mMessages = new ArrayList<>();
+    }
+
+    private OnPlayClickListener listener;
+
+    public void setOnPlayClickListener(OnPlayClickListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -55,14 +62,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if(mMessages.get(position) != null) {
             if(holder instanceof MeChatViewHolder) {
-                ((MeChatViewHolder) holder).tvMeMsg.setText(mMessages.get(position).getMsgBody());
+                ((MeChatViewHolder) holder).tvMeMsg.setText(mMessages.get(position).getMessage());
                 ((MeChatViewHolder) holder).btnPlayPause
-                        .setVisibility(mMessages.get(position).getMsgType() == IDbConstants.TYPE_MUSIC ?
+                        .setVisibility(mMessages.get(position).getMessageType() == IDbConstants.TYPE_MUSIC ?
                                             View.VISIBLE : View.GONE);
             } else if(holder instanceof FrndChatViewHolder) {
-                ((FrndChatViewHolder) holder).tvFrndMessage.setText(mMessages.get(position).getMsgBody());
+                ((FrndChatViewHolder) holder).tvFrndMessage.setText(mMessages.get(position).getMessage());
                 ((FrndChatViewHolder) holder).btnPlayPause
-                        .setVisibility(mMessages.get(position).getMsgType() == IDbConstants.TYPE_MUSIC ?
+                        .setVisibility(mMessages.get(position).getMessageType() == IDbConstants.TYPE_MUSIC ?
                                 View.VISIBLE : View.GONE);
             }
         }
@@ -93,7 +100,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @OnClick(R.id.btnPlayPause)
         public void onPlayPauseClicked() {
-
+            int position = getAdapterPosition();
+            listener.onPlayClick(mMessages.get(position).getMessageTrackUrl(),
+                    mMessages.get(position).getMessage(),
+                    position);
         }
 
         @OnClick(R.id.btnRetry)
@@ -102,7 +112,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public void addMessage(Message msg) {
+    public void addMessage(MessageModel msg) {
         if(mMessages == null)
             mMessages = new ArrayList<>();
         mMessages.add(msg);
@@ -128,8 +138,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @OnClick(R.id.btnPlayPause)
         public void onPlayPauseClicked() {
-
+            int position = getAdapterPosition();
+            listener.onPlayClick(mMessages.get(position).getMessageTrackUrl(),
+                    mMessages.get(position).getMessage(),getAdapterPosition());
         }
 
     }
+
+    public interface OnPlayClickListener {
+        void onPlayClick(String trackUrl, String message, int position);
+    }
+
 }

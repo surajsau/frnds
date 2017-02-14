@@ -22,7 +22,7 @@ public class Chat extends RealmObject {
 
     private boolean         msgRead;
 
-    public Message           frndLastMessage;
+    public Message          frndLastMessage;
 
     public String getFrndId() {
         return frndId;

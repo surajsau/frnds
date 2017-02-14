@@ -51,6 +51,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
                 mStreamUrl = intent.getStringExtra(IDetailsConstants.SERVICE_STREAM_URL);
                 String title = intent.getStringExtra(IDetailsConstants.NOTIFICATION_SERVICE_TRACK_TITLE);
+                String frndId = intent.getStringExtra(IDetailsConstants.FRND_ID);
 
                 if(!TextUtils.isEmpty(mStreamUrl)) {
                     mStreamUrl = mStreamUrl.concat("?" + IConstants.API_KEY_PARAM + "=" + IConstants.API_KEY_VALUE);
@@ -59,8 +60,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                     mPlayer.setDataSource(mStreamUrl);
                     mPlayer.prepareAsync();
 
+                    Intent detailIntent = new Intent(getApplicationContext(), SongDetailActivity.class);
+                    detailIntent.putExtra(IDetailsConstants.FRND_ID, frndId);
                     PendingIntent songDetailsIntent = PendingIntent.getActivity(getApplicationContext(), IConstants.NOTIFICATION_PLAY_PENDING_INTENT_REQUEST,
-                            new Intent(getApplicationContext(), SongDetailActivity.class),
+                            detailIntent,
                             PendingIntent.FLAG_UPDATE_CURRENT);
 
                     Intent stopPlay = new Intent(this, PlayerService.class);
@@ -70,6 +73,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                             stopPlay, PendingIntent.FLAG_UPDATE_CURRENT);
 
                     NotificationCompat.Builder playNotificationBuilder = new NotificationCompat.Builder(this)
+                            .setContentTitle("Sync.")
                             .setStyle(new NotificationCompat.BigTextStyle().bigText("You\'re listening to " + title))
                             .setSmallIcon(R.mipmap.ic_launcher)
                             .addAction(R.drawable.profile_icon, "Profile", songDetailsIntent)

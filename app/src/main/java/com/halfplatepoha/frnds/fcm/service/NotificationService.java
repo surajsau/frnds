@@ -45,31 +45,12 @@ import rx.schedulers.Schedulers;
  */
 public class NotificationService extends FirebaseMessagingService {
 
-    private ObjectMapper mMapper;
-    private NotificationManager mManager;
-    private String username;
-
     private ChatDAO helper;
-    private SoundCloudClient mSoundcloudClient;
 
     @Override
     public void onCreate() {
         super.onCreate();
         helper = new ChatDAO(Realm.getDefaultInstance());
-
-        mSoundcloudClient = new ClientGenerator.Builder()
-                .setClientClass(SoundCloudClient.class)
-                .setBaseUrl(IConstants.SOUNDCLOUD_BASE_URL)
-                .setApiKeyInterceptor(IConstants.API_KEY_PARAM, IConstants.API_KEY_VALUE)
-                .setLoggingInterceptor()
-                .buildClient();
-
-        mMapper = new ObjectMapper();
-        mMapper.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
-        mMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-
-        mManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        username = FrndsPreference.getFromPref(IPrefConstants.USER_NAME, "there");
     }
 
     @Override
@@ -78,101 +59,42 @@ public class NotificationService extends FirebaseMessagingService {
         FrndsLog.e("ChatMessage payload: " + remoteMessage.getData());
         FrndsLog.e("ChatMessage body: " +  remoteMessage.getNotification().getBody());
 
-        Map<String, String> notificationData = remoteMessage.getData();
-
-        try {
-
-            NotificationModel model = mMapper.readValue(remoteMessage.getNotification().getBody(), NotificationModel.class);
-            constructNotification(model);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Map<String, String> data = remoteMessage.getData();
+        NotificationModel model = new NotificationModel();
+        model.setFriendId(data.get("friendId"));
+        model.setFriendName(data.get("friendName"));
+        model.setType(data.get("type"));
+        model.setMessage(data.get("message"));
+        model.setTrackId(data.get("trackId"));
+        model.setTrackName(data.get("trackName"));
+        model.setTrackUrl(data.get("trackUrl"));
+        constructNotification(model);
 
     }
 
     private void constructNotification(final NotificationModel model) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext())
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setAutoCancel(true)
-                .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_SOUND|Notification.FLAG_AUTO_CANCEL);
-
         Intent chatIntent = new Intent(IConstants.CHAT_BROADCAST);
         chatIntent.putExtra(IConstants.FRND_ID, model.getFriendId());
 
-        Log.e("Model type", model.getType());
+        long timestamp = System.currentTimeMillis();
+
+        chatIntent.putExtra(IConstants.FRND_TIME_STAMP, timestamp);
 
         switch (model.getType()){
             case IFCMConstants.SONG:{
-                final String notificationMessage = getMessageFromModel(model);
+                String notificationMessage = getMessageFromModel(model);
 
                 chatIntent.putExtra(IConstants.FRND_MESSAGE, notificationMessage);
                 chatIntent.putExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MUSIC);
                 chatIntent.putExtra(IConstants.FRND_TRACK_ID, model.getTrackId());
                 chatIntent.putExtra(IConstants.FRND_TRACK_URL, model.getTrackUrl());
                 chatIntent.putExtra(IConstants.FRND_TRACK_TITLE, model.getTrackName());
-
-                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(notificationMessage))
-                        .setContentTitle("Hey " + username + " ...");
-
-                mSoundcloudClient.getTrackDetails(model.getTrackId())
-                            .subscribeOn(Schedulers.newThread())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new BaseSubscriber<TrackDetails>() {
-                                @Override
-                                public void onObjectReceived(TrackDetails trackDetails) {
-                                    Message message = new Message();
-                                    message.setMsgBody(notificationMessage);
-                                    message.setMsgTimestamp(System.currentTimeMillis());
-                                    message.setUserType(IDetailsConstants.TYPE_FRND);
-                                    message.setMsgType(IDbConstants.TYPE_MUSIC);
-
-                                    Song song = new Song();
-                                    song.setSongUrl(model.getTrackUrl());
-                                    song.setFrndId(model.getFriendId());
-                                    song.setSongTitle(model.getTrackName());
-                                    song.setSongArtist(trackDetails.getUser().getUsername());
-                                    song.setSongImgUrl(trackDetails.getArtwork_url()
-                                                            .replace(IDetailsConstants.STRING_HTTPS, IDetailsConstants.STRING_HTTP)
-                                                            .replace(IDetailsConstants.IMG_LARGE_SUFFIX, IDetailsConstants.IMG_500_X_500_SUFFIX));
-
-                                    FrndsLog.e(model.getFriendId());
-                                    helper.insertSongToChat(model.getFriendId(), song);
-                                    helper.insertMessageToChat(model.getFriendId(), message);
-                                }
-                            });
-
             }
             break;
 
             case IFCMConstants.MESSAGE:{
-
                 chatIntent.putExtra(IConstants.FRND_MESSAGE, model.getMessage());
                 chatIntent.putExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MESSAGE);
-
-                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(model.getMessage()))
-                        .setContentTitle(model.getFriendName() + " says");
-
-                Observable.just(model)
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .filter(new Func1<NotificationModel, Boolean>() {
-                            @Override
-                            public Boolean call(NotificationModel model) {
-                                return (model != null && !TextUtils.isEmpty(model.getMessage()));
-                            }
-                        })
-                        .subscribe(new BaseSubscriber<NotificationModel>() {
-                            @Override
-                            public void onObjectReceived(NotificationModel model) {
-                                Message message = new Message();
-                                message.setMsgBody(model.getMessage());
-                                message.setMsgType(IDbConstants.TYPE_MESSAGE);
-                                message.setUserType(IDetailsConstants.TYPE_FRND);
-                                message.setMsgTimestamp(System.currentTimeMillis());
-
-                                helper.insertMessageToChat(model.getFriendId(), message);
-                            }
-                        });
             }
             break;
         }
@@ -184,10 +106,6 @@ public class NotificationService extends FirebaseMessagingService {
             case IConstants.SCREEN_LISTING:
                 sendBroadcast(chatIntent);
                 break;
-
-            case IConstants.SCREEN_NONE:
-                mManager.notify(IConstants.NOTIFICATION_ID, builder.build());
-                break;
         }
     }
 
@@ -195,8 +113,6 @@ public class NotificationService extends FirebaseMessagingService {
         if(model == null)
             return null;
 
-        return model.getFriendName()
-                + " is listening to "
-                + model.getTrackName();
+        return String.format(getString(R.string.music_chat_message), model.getFriendName(), model.getTrackName());
     }
 }

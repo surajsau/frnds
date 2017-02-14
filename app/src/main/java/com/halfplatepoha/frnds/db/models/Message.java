@@ -17,6 +17,7 @@ public class Message extends RealmObject {
     private int         userType;
     private long        msgTimestamp;
     private int         msgType;
+    private String      msgTrackUrl;
 
     public String getMsgBody() {
         return msgBody;
@@ -26,7 +27,7 @@ public class Message extends RealmObject {
         this.msgBody = msgBody;
     }
 
-    public int getUserType() {
+    public @IDetailsConstants.UserType int getUserType() {
         return userType;
     }
 
@@ -42,7 +43,7 @@ public class Message extends RealmObject {
         this.msgTimestamp = msgTimestamp;
     }
 
-    public int getMsgType() {
+    public @IDbConstants.MessageType int getMsgType() {
         return msgType;
     }
 
@@ -50,11 +51,20 @@ public class Message extends RealmObject {
         this.msgType = msgType;
     }
 
+    public String getMsgTrackUrl() {
+        return msgTrackUrl;
+    }
+
+    public void setMsgTrackUrl(String msgTrackUrl) {
+        this.msgTrackUrl = msgTrackUrl;
+    }
+
     public static class Builder {
         private String      msgBody;
         private int         userType;
         private long        msgTimestamp;
         private int         msgType;
+        private String      msgTrackUrl;
 
         public Builder setMsgBody(String msgBody) {
             this.msgBody = msgBody;
@@ -76,12 +86,18 @@ public class Message extends RealmObject {
             return this;
         }
 
+        public Builder setMsgTrackUrl(String msgTrackUrl) {
+            this.msgTrackUrl = msgTrackUrl;
+            return this;
+        }
+
         public Message build() {
             Message message = new Message();
             message.setMsgType(msgType);
             message.setUserType(userType);
             message.setMsgBody(msgBody);
             message.setMsgTimestamp(msgTimestamp);
+            message.setMsgTrackUrl(msgTrackUrl);
 
             return message;
         }

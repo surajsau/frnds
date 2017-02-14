@@ -17,6 +17,7 @@ import com.halfplatepoha.frnds.db.models.Song;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.detail.fragment.ShareSongFragment;
+import com.halfplatepoha.frnds.detail.model.SongModel;
 import com.halfplatepoha.frnds.ui.GlideImageView;
 
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import butterknife.OnClick;
 public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.AlbumListViewHolder> {
 
     private Context mContext;
-    private ArrayList<Song> albums;
+    private ArrayList<SongModel> albums;
 
     private FragmentManager mFragmentManager;
 
@@ -52,19 +53,19 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
     @Override
     public void onBindViewHolder(AlbumListViewHolder holder, int position) {
         if (albums.get(position) != null) {
-            FrndsLog.e(albums.get(position).getSongImgUrl());
-            holder.ivAlbum.setImageUrl(mContext, albums.get(position).getSongImgUrl());
+            FrndsLog.e(albums.get(position).getTrackUrl());
+            holder.ivAlbum.setImageUrl(mContext, albums.get(position).getTrackImageUrl());
         }
     }
 
-    public void addSong(Song song) {
+    public void addSong(SongModel songModel) {
         if(albums == null)
             albums = new ArrayList<>();
-        albums.add(song);
+        albums.add(songModel);
         notifyItemInserted(albums.size() - 1);
     }
 
-    public Song getLastSong() {
+    public SongModel getLastSong() {
         if(albums != null && !albums.isEmpty()) {
             return albums.get(albums.size() - 1);
         }

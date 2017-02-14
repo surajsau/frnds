@@ -101,13 +101,6 @@
                 android:textColor="@color/textSecondary"/>
         </LinearLayout>
 
-        <ImageButton android:id="@+id/btnPlayPause"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            app:srcCompat="@drawable/play"
-            android:background="@null"/>
-
         <ImageButton android:id="@+id/btnPlayNext"
             android:layout_width="0dp"
             android:layout_weight="1"

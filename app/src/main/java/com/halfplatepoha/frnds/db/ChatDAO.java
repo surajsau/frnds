@@ -130,6 +130,35 @@ public class ChatDAO {
         void onTransactionComplete(int transcationId);
     }
 
+    public void updateSong(Song sng) {
+        try {
+            Song song = mRealm.where(Song.class)
+                    .equalTo(IDbConstants.FRND_ID_KEY, sng.getFrndId())
+                    .equalTo(IDbConstants.SONG_TIME_STAMP_KEY, sng.getSongTimestamp()).findFirst();
+            mRealm.beginTransaction();
+            song.setSongImgUrl(sng.getSongImgUrl());
+            song.setSongArtist(sng.getSongArtist());
+            mRealm.commitTransaction();
+        } catch (Exception e) {
+            e.printStackTrace();
+            mRealm.cancelTransaction();
+        }
+    }
+
+    public boolean doesSongExist(String frndId, long timestamp) {
+        return (mRealm.where(Song.class)
+                .equalTo(IDbConstants.FRND_ID_KEY, frndId)
+                .equalTo(IDbConstants.SONG_TIME_STAMP_KEY, timestamp)
+                .count() == 1);
+    }
+
+    public boolean doesMessageExist(String frndId, long timestamp) {
+        return (mRealm.where(Message.class)
+                .equalTo(IDbConstants.FRND_ID_KEY, frndId)
+                .equalTo(IDbConstants.SONG_TIME_STAMP_KEY, timestamp)
+                .count() == 1);
+    }
+
     public void close() {
 
     }

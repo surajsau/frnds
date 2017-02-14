@@ -16,7 +16,8 @@
             android:value="@string/facebook_app_id" />
 
         <activity android:name=".search.activity.SearchScreenActivity" />
-        <activity android:name=".detail.activity.SongDetailActivity" />
+        <activity android:name=".detail.activity.SongDetailActivity"
+            android:launchMode="singleTask"/>
         <activity android:name=".login.activity.LoginActivity" />
         <activity
             android:name="com.facebook.FacebookActivity"

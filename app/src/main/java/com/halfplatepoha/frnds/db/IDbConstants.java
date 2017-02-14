@@ -12,6 +12,7 @@ public interface IDbConstants {
 
     String SONG_ID_KEY = "songId";
     String FRND_ID_KEY = "frndId";
+    String SONG_TIME_STAMP_KEY = "songTimestamp";
     String USER_FB_ID_KEY = "userFbId";
 
     @Retention(RetentionPolicy.SOURCE)

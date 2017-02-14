@@ -1,10 +1,12 @@
 package com.halfplatepoha.frnds.home.activity;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.bumptech.glide.Glide;
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
@@ -37,6 +39,8 @@ public class ProfileAndSettingsActivity extends AppCompatActivity {
     @Bind(R.id.tvUserName)
     OpenSansTextView tvUserName;
 
+    AccessTokenTracker tracker;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +48,19 @@ public class ProfileAndSettingsActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         showProfile();
+
+        tracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                openSplashActivity();
+            }
+        };
+    }
+
+    private void openSplashActivity() {
+        Intent splashIntent = new Intent(this, SplashScreenActivity.class);
+        splashIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(splashIntent);
     }
 
     private void showProfile() {

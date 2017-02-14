@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -12,6 +13,7 @@ import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -40,14 +42,17 @@ import com.halfplatepoha.frnds.models.request.RegisterRequest;
 import com.halfplatepoha.frnds.models.response.RegisterGCMResponse;
 import com.halfplatepoha.frnds.models.response.RegisterResponse;
 import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
+import com.halfplatepoha.frnds.ui.OpenSansButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.realm.Realm;
 import rx.schedulers.Schedulers;
 
@@ -69,7 +74,8 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
 
     private Realm mRealm;
 
-    @Bind(R.id.btnFbLogin) LoginButton btnLogin;
+    @Bind(R.id.btnFbLogin)
+    OpenSansButton btnFbLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,8 +97,7 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
     }
 
     private void initFbButton() {
-        btnLogin.setReadPermissions("email", "public_profile", "user_friends");
-        btnLogin.registerCallback(mCallbackManager, this);
+        LoginManager.getInstance().registerCallback(mCallbackManager, this);
     }
 
     @Override
@@ -136,11 +141,13 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
 
     @Override
     public void onCancel() {
+        btnFbLogin.setVisibility(View.VISIBLE);
         FrndsLog.e("Cancelled");
     }
 
     @Override
     public void onError(FacebookException error) {
+        btnFbLogin.setVisibility(View.VISIBLE);
         FrndsLog.e(error.getMessage());
     }
 
@@ -188,6 +195,12 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    @OnClick(R.id.btnFbLogin)
+    public void onFbLogin() {
+        LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email", "public_profile", "user_friends"));
+        btnFbLogin.setVisibility(View.GONE);
     }
 
     private BaseSubscriber<RegisterGCMResponse> registergcmSubscriber = new BaseSubscriber<RegisterGCMResponse>() {
