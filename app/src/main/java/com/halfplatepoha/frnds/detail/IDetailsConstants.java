@@ -32,7 +32,7 @@ public interface IDetailsConstants {
 
     String SOURCE_TYPE = "source_type";
     String SOURCE_FAB = "source_fab";
-    String SOURCE_LIST = "source_list";
+    String SOURCE_NOTIFICATION = "source_notification";
 
     int SONG_DETAILS_REQUEST = 101;
 
@@ -41,7 +41,7 @@ public interface IDetailsConstants {
     String TRACK_IMAGE_URL = "track_image_url";
     String TRACK_TITLE = "track_title";
     String TRACK_ARTIST = "track_artist";
-    String FRND_ID = "frnd_id";
+    String FRND_ID = "friendId";
 
     String LATEST_IMAGE_URL = "latest_image_url";
     String LATEST_IMAGE_TRACK = "latest_image_track";

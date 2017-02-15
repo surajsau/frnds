@@ -21,6 +21,7 @@ import com.halfplatepoha.frnds.search.activity.SearchScreenActivity;
 import com.halfplatepoha.frnds.ui.AutoLoadingRecyclerAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -61,13 +62,16 @@ public class SearchResultAdapter extends AutoLoadingRecyclerAdapter<TrackDetails
         return mList.size();
     }
 
-    public void refreshList() {
+    public void refreshList(List<TrackDetails> tracks) {
         if(!mList.isEmpty()) {
             int size = mList.size();
 
             mList.clear();
-            notifyItemRangeRemoved(0, size - 1);
+            notifyItemRangeRemoved(0, size);
         }
+
+        mList.addAll(tracks);
+        notifyItemRangeInserted(0, tracks.size());
     }
 
     public void addItemToList(TrackDetails details) {

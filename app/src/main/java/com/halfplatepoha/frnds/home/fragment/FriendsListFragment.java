@@ -163,8 +163,7 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
         }
     }
 
-    public void refreshChatDetails(String frndId, Message message) {
-        if(message != null)
-            mAdapter.refreshChat(frndId, message.getMsgBody());
+    public void refreshChatDetails(String frndId, String message) {
+        mAdapter.refreshChat(frndId, message);
     }
 }

@@ -12,6 +12,7 @@ import com.halfplatepoha.frnds.models.response.RegisterResponse;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 import rx.Observable;
+import rx.observables.ConnectableObservable;
 
 /**
  * Created by surajkumarsau on 28/08/16.

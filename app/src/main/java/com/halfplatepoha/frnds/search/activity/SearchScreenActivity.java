@@ -1,6 +1,5 @@
 package com.halfplatepoha.frnds.search.activity;
 
-import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -153,24 +152,11 @@ public class SearchScreenActivity extends AppCompatActivity implements ValueEven
                         @Override
                         public void onObjectReceived(List<TrackDetails> trackDetails) {
                             if(trackDetails != null && !trackDetails.isEmpty()) {
+                                FrndsLog.e("count: " + trackDetails.size());
                                 rlSearchResult.setVisibility(View.VISIBLE);
                                 llPoweredBySoundCloud.setVisibility(View.GONE);
+                                mAdapter.refreshList(trackDetails);
                             }
-                            Observable.just(trackDetails)
-                                    .flatMap(new Func1<List<TrackDetails>, Observable<TrackDetails>>() {
-                                        @Override
-                                        public Observable<TrackDetails> call(List<TrackDetails> trackDetails) {
-                                            return Observable.from(trackDetails);
-                                        }
-                                    })
-                                    .subscribeOn(Schedulers.newThread())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(new BaseSubscriber<TrackDetails>() {
-                                        @Override
-                                        public void onObjectReceived(TrackDetails details) {
-                                            mAdapter.addItemToList(details);
-                                        }
-                                    });
                         }
                     });
         }

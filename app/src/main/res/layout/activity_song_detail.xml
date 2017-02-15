@@ -123,6 +123,8 @@
                         android:layout_height="10dp"
                         android:layout_marginTop="15dp"
                         android:layout_marginLeft="15dp"
+                        tools:visibility="visible"
+                        android:visibility="gone"
                         android:src="@drawable/song_playing_indicator"/>
                 </FrameLayout>
             </FrameLayout>

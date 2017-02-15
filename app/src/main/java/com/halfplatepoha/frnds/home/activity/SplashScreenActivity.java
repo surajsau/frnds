@@ -25,6 +25,8 @@ import com.halfplatepoha.frnds.db.ChatDAO;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.db.models.Song;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
+import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
+import com.halfplatepoha.frnds.fcm.IFCMConstants;
 import com.halfplatepoha.frnds.login.activity.LoginActivity;
 import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.models.request.GetPendingRequest;
@@ -37,6 +39,7 @@ import com.halfplatepoha.frnds.network.servicegenerators.ClientGenerator;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
@@ -45,7 +48,10 @@ import io.realm.Realm;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
+import rx.observables.ConnectableObservable;
 import rx.schedulers.Schedulers;
+
+import static android.R.string.no;
 
 public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.OnTransactionCompletedListener{
 
@@ -90,6 +96,7 @@ public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.O
             soundCloudClient = new ClientGenerator.Builder()
                     .setLoggingInterceptor()
                     .setBaseUrl(IConstants.SOUNDCLOUD_BASE_URL)
+                    .setApiKeyInterceptor(IConstants.API_KEY_PARAM, IConstants.API_KEY_VALUE)
                     .setClientClass(SoundCloudClient.class)
                     .buildClient();
         } else {
@@ -99,6 +106,7 @@ public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.O
 
     private void startLoginActivity() {
         startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 
     private void getFriendsWhoInstalledApp() {
@@ -133,65 +141,97 @@ public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.O
     }
 
     private void startHomeActivity() {
-//        if(isPendingSongComplete && isPendingMessageComplete) {
+        FrndsLog.e("song : " + isPendingSongComplete + ".. message : " + isPendingMessageComplete);
+        if(isPendingSongComplete && isPendingMessageComplete) {
             Intent homeIntent = new Intent(this, HomeActivity.class);
-            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, appName, getString(R.string.app_name_transition));
-            startActivity(homeIntent, options.toBundle());
-//        }
+//            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(this, appName, getString(R.string.app_name_transition));
+            startActivity(homeIntent);
+            finish();
+        }
     }
 
     @Override
     public void onTransactionComplete(int transcationId) {
         switch (transcationId) {
             case IDbConstants.UPDATE_FRND_LIST_TRANSACTION_ID:
-//                getPendingMessagesAndSongs();
-                startHomeActivity();
+                getPendingMessagesAndSongs();
         }
     }
 
     private void getPendingMessagesAndSongs() {
         GetPendingRequest request = new GetPendingRequest();
         request.setFbId(fbId);
-        Observable<GetPendingResponse> response = frndsClient.getPending(request)
+
+        frndsClient.getPending(request)
                 .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter(new Func1<GetPendingResponse, Boolean>() {
+                    @Override
+                    public Boolean call(GetPendingResponse getPendingResponse) {
+                        return getPendingResponse != null;
+                    }
+                })
+                .subscribe(new BaseSubscriber<GetPendingResponse>() {
+                    @Override
+                    public void onObjectReceived(GetPendingResponse getPendingResponse) {
+                        if(getPendingResponse != null) {
+                            Observable.just(getPendingResponse.getPendingMessages())
+                                    .filter(new Func1<ArrayList<GetPendingResponse.PendingMessage>, Boolean>() {
+                                        @Override
+                                        public Boolean call(ArrayList<GetPendingResponse.PendingMessage> pendingMessages) {
+                                            return pendingMessages != null && !pendingMessages.isEmpty();
+                                        }
+                                    })
+                                    .flatMap(new Func1<ArrayList<GetPendingResponse.PendingMessage>, Observable<GetPendingResponse.PendingMessage>>() {
+                                        @Override
+                                        public Observable<GetPendingResponse.PendingMessage> call(ArrayList<GetPendingResponse.PendingMessage> pendingMessages) {
+                                            return Observable.from(pendingMessages);
+                                        }
+                                    })
+                                    .filter(new Func1<GetPendingResponse.PendingMessage, Boolean>() {
+                                        @Override
+                                        public Boolean call(GetPendingResponse.PendingMessage pendingMessage) {
+                                            return pendingMessage != null &&
+                                                    (!TextUtils.isEmpty(pendingMessage.getFbId())) &&
+                                                    pendingMessage.getMessages() != null && !pendingMessage.getMessages().isEmpty();
+                                        }
+                                    })
+                                    .subscribe(pendingMessageSubscriber);
 
-        response.flatMap(new Func1<GetPendingResponse, Observable<GetPendingResponse.PendingMessage>>() {
-                    @Override
-                    public Observable<GetPendingResponse.PendingMessage> call(GetPendingResponse getPendingResponse) {
-                        return Observable.from(getPendingResponse.getPendingMessages());
-                    }
-                })
-                .filter(new Func1<GetPendingResponse.PendingMessage, Boolean>() {
-                    @Override
-                    public Boolean call(GetPendingResponse.PendingMessage pendingMessage) {
-                        return pendingMessage != null &&
-                                (!TextUtils.isEmpty(pendingMessage.getFbId())) &&
-                                pendingMessage.getMessages() != null && !pendingMessage.getMessages().isEmpty();
-                    }
-                })
-                .subscribe(pendingMessageSubscriber);
+                            Observable.just(getPendingResponse.getPendingSongs())
+                                    .filter(new Func1<ArrayList<GetPendingResponse.PendingSong>, Boolean>() {
+                                        @Override
+                                        public Boolean call(ArrayList<GetPendingResponse.PendingSong> pendingSongs) {
+                                            return pendingSongs != null && !pendingSongs.isEmpty();
 
-        response.flatMap(new Func1<GetPendingResponse, Observable<GetPendingResponse.PendingSong>>() {
-                    @Override
-                    public Observable<GetPendingResponse.PendingSong> call(GetPendingResponse getPendingResponse) {
-                        return Observable.from(getPendingResponse.getPendingSongs());
+                                        }
+                                    })
+                                    .flatMap(new Func1<ArrayList<GetPendingResponse.PendingSong>, Observable<GetPendingResponse.PendingSong>>() {
+
+                                        @Override
+                                        public Observable<GetPendingResponse.PendingSong> call(ArrayList<GetPendingResponse.PendingSong> pendingSongs) {
+                                            return Observable.from(pendingSongs);
+                                        }
+                                    })
+                                    .filter(new Func1<GetPendingResponse.PendingSong, Boolean>() {
+                                        @Override
+                                        public Boolean call(GetPendingResponse.PendingSong pendingSong) {
+                                            return pendingSong != null &&
+                                                    (!TextUtils.isEmpty(pendingSong.getFbId())) &&
+                                                    pendingSong.getTracks() != null && !pendingSong.getTracks().isEmpty();
+                                        }
+                                    })
+                                    .subscribe(pendingSongSubscriber);
+                        }
                     }
-                })
-                .filter(new Func1<GetPendingResponse.PendingSong, Boolean>() {
-                    @Override
-                    public Boolean call(GetPendingResponse.PendingSong pendingSong) {
-                        return pendingSong != null &&
-                                (!TextUtils.isEmpty(pendingSong.getFbId())) &&
-                                pendingSong.getTracks() != null && !pendingSong.getTracks().isEmpty();
-                    }
-                })
-                .subscribe(pendingSongSubscriber);
+                });
     }
 
     private BaseSubscriber<GetPendingResponse.PendingMessage> pendingMessageSubscriber = new BaseSubscriber<GetPendingResponse.PendingMessage>() {
+
         @Override
         public void onObjectReceived(GetPendingResponse.PendingMessage pendingMessage) {
+            FrndsLog.e("message received");
             String fbId = pendingMessage.getFbId();
             for(GetPendingResponse.PendingMessage.Message message : pendingMessage.getMessages()) {
                 if(!helper.doesMessageExist(fbId, message.getTimestamp())) {
@@ -199,6 +239,7 @@ public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.O
                     msg.setMsgTimestamp(message.getTimestamp());
                     msg.setMsgType(IDbConstants.TYPE_MESSAGE);
                     msg.setMsgBody(message.getMessage());
+                    msg.setFrndId(fbId);
                     msg.setUserType(IDetailsConstants.TYPE_FRND);
 
                     helper.insertMessageToChat(fbId, msg);
@@ -208,14 +249,17 @@ public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.O
 
         @Override
         public void onCompleted() {
+            FrndsLog.e("pending messages done");
             isPendingMessageComplete = true;
             startHomeActivity();
         }
     };
 
     private BaseSubscriber<GetPendingResponse.PendingSong> pendingSongSubscriber = new BaseSubscriber<GetPendingResponse.PendingSong>() {
+
         @Override
         public void onObjectReceived(GetPendingResponse.PendingSong pendingSong) {
+            FrndsLog.e("song received");
             final String fbId = pendingSong.getFbId();
             Observable.just(pendingSong)
                     .subscribeOn(Schedulers.newThread())
@@ -254,15 +298,23 @@ public class SplashScreenActivity extends AppCompatActivity implements ChatDAO.O
                                                 helper.insertSongToChat(fbId, song);
                                             }
                                         }
+
+                                        @Override
+                                        public void onCompleted() {
+                                            FrndsLog.e("songs completed");
+                                            isPendingSongComplete = true;
+                                            startHomeActivity();
+                                        }
                                     });
                         }
-
-                        @Override
-                        public void onCompleted() {
-                            isPendingSongComplete = true;
-                            startHomeActivity();
-                        }
                     });
+        }
+
+        @Override
+        public void onCompleted() {
+            FrndsLog.e("pending songs done");
+            isPendingSongComplete = true;
+            startHomeActivity();
         }
     };
 

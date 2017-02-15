@@ -16,4 +16,5 @@
     <string name="app_name_transition">sync_transition</string>
     <string name="frnd_avatar_transition">frnd_avatar_transition</string>
     <string name="frnd_name_transition">frnd_name_transition</string>
+    <string name="current_user_placeholder">You</string>
 </resources>

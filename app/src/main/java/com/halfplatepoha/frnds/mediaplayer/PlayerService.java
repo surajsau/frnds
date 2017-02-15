@@ -84,6 +84,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             } else if(intent.getAction().equals(ACTION_STOP)) {
                 if(mPlayer != null)
                     mPlayer.release();
+                Intent songStatusIntent = new Intent(IConstants.SONG_STATUS_BROADCAST);
+                songStatusIntent.putExtra(IDetailsConstants.CURRENT_SONG_STATUS, IDetailsConstants.CURRENT_SONG_STATUS_STOP);
+                sendBroadcast(new Intent(IConstants.SONG_STATUS_BROADCAST));
                 stopSelf();
             }
         } catch (IllegalArgumentException e) {

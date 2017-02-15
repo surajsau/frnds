@@ -155,7 +155,7 @@ public class ChatDAO {
     public boolean doesMessageExist(String frndId, long timestamp) {
         return (mRealm.where(Message.class)
                 .equalTo(IDbConstants.FRND_ID_KEY, frndId)
-                .equalTo(IDbConstants.SONG_TIME_STAMP_KEY, timestamp)
+                .equalTo(IDbConstants.MSG_TIME_STAMP_KEY, timestamp)
                 .count() == 1);
     }
 

@@ -17,6 +17,7 @@ public class Message extends RealmObject {
     private int         userType;
     private long        msgTimestamp;
     private int         msgType;
+    private String      frndId;
     private String      msgTrackUrl;
 
     public String getMsgBody() {
@@ -43,6 +44,14 @@ public class Message extends RealmObject {
         this.msgTimestamp = msgTimestamp;
     }
 
+    public String getFrndId() {
+        return frndId;
+    }
+
+    public void setFrndId(String frndId) {
+        this.frndId = frndId;
+    }
+
     public @IDbConstants.MessageType int getMsgType() {
         return msgType;
     }
@@ -65,6 +74,7 @@ public class Message extends RealmObject {
         private long        msgTimestamp;
         private int         msgType;
         private String      msgTrackUrl;
+        private String      frndId;
 
         public Builder setMsgBody(String msgBody) {
             this.msgBody = msgBody;
@@ -91,6 +101,11 @@ public class Message extends RealmObject {
             return this;
         }
 
+        public Builder setFrndId(String frndId) {
+            this.frndId = frndId;
+            return this;
+        }
+
         public Message build() {
             Message message = new Message();
             message.setMsgType(msgType);
@@ -98,6 +113,7 @@ public class Message extends RealmObject {
             message.setMsgBody(msgBody);
             message.setMsgTimestamp(msgTimestamp);
             message.setMsgTrackUrl(msgTrackUrl);
+            message.setFrndId(frndId);
 
             return message;
         }

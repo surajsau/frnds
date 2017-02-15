@@ -24,6 +24,7 @@ import com.halfplatepoha.frnds.db.models.Chat;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.db.models.Song;
 import com.halfplatepoha.frnds.detail.IDetailsConstants;
+import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
 import com.halfplatepoha.frnds.home.IFrndsConstants;
 import com.halfplatepoha.frnds.home.adapter.TabPagerAdapter;
 import com.halfplatepoha.frnds.home.fragment.FriendsListFragment;
@@ -63,6 +64,13 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends_list);
         ButterKnife.bind(this);
+
+        if(getIntent() != null
+                && IDetailsConstants.SOURCE_NOTIFICATION.equalsIgnoreCase(getIntent().getStringExtra(IDetailsConstants.FRND_ID))) {
+            Intent detailIntent = new Intent(this, SongDetailActivity.class);
+            detailIntent.putExtras(getIntent());
+            startActivityForResult(detailIntent, IFrndsConstants.FRIEND_LIST_REQUEST);
+        }
 
 //        setupPager();
         helper = new ChatDAO(Realm.getDefaultInstance());
@@ -144,7 +152,8 @@ public class HomeActivity extends AppCompatActivity {
                     tvPlayerTrackTitle.setText(track);
                     tvPlayerTrackFrnd.setText(String.format("with %s", chatResult.getFrndName()));
 
-                    mFriendsListFragment.refreshChatDetails(frndId, chatResult.getFrndLastMessage());
+                    if(chatResult.getFrndLastMessage() != null)
+                        mFriendsListFragment.refreshChatDetails(frndId, chatResult.getFrndLastMessage().getMsgBody());
                 }
             }
             break;
@@ -156,18 +165,34 @@ public class HomeActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if(intent != null) {
+                String trackId = intent.getStringExtra(IConstants.FRND_TRACK_ID);
                 @IDbConstants.MessageType int messageType = intent.getIntExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MESSAGE);
-                String message = intent.getStringExtra(IConstants.FRND_MESSAGE);
+                String messageBody = intent.getStringExtra(IConstants.FRND_MESSAGE);
+                String trackUrl = intent.getStringExtra(IConstants.FRND_TRACK_URL);
                 String frndId = intent.getStringExtra(IConstants.FRND_ID);
+                String trackTitle = intent.getStringExtra(IConstants.FRND_TRACK_TITLE);
+                long timestamp = intent.getLongExtra(IConstants.FRND_TIME_STAMP, 0L);
 
-                Message msg = new Message.Builder()
-                        .setMsgBody(message)
-                        .setMsgType(messageType)
-                        .setUserType(IDetailsConstants.TYPE_FRND)
-                        .setMsgTimestamp(System.currentTimeMillis())
-                        .build();
+                Message message = new Message();
+                message.setMsgBody(messageBody);
+                message.setMsgTimestamp(timestamp);
+                message.setUserType(IDetailsConstants.TYPE_FRND);
+                message.setMsgType(messageType);
+                message.setMsgTrackUrl(trackUrl);
 
-                mFriendsListFragment.refreshChatDetails(frndId, msg);
+                if(messageType == IDbConstants.TYPE_MUSIC) {
+                    Song song = new Song();
+                    song.setSongUrl(trackUrl);
+                    song.setFrndId(frndId);
+                    song.setSongTitle(trackTitle);
+                    song.setSongTimestamp(timestamp);
+
+                    helper.insertSongToChat(frndId, song);
+                }
+
+                helper.insertMessageToChat(frndId, message);
+
+                mFriendsListFragment.refreshChatDetails(frndId, messageBody);
             }
         }
     };

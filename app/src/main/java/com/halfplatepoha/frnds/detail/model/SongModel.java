@@ -1,6 +1,7 @@
 package com.halfplatepoha.frnds.detail.model;
 
 import com.halfplatepoha.frnds.db.models.Song;
+import com.halfplatepoha.frnds.detail.IDetailsConstants;
 
 /**
  * Created by surajkumarsau on 14/02/17.
@@ -50,6 +51,7 @@ public class SongModel {
     }
 
     public void setTrackImageUrl(String trackImageUrl) {
-        this.trackImageUrl = trackImageUrl;
+        this.trackImageUrl = trackImageUrl.replace(IDetailsConstants.STRING_HTTPS, IDetailsConstants.STRING_HTTP)
+                .replace(IDetailsConstants.IMG_LARGE_SUFFIX, IDetailsConstants.IMG_500_X_500_SUFFIX);
     }
 }

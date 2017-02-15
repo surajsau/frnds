@@ -45,14 +45,6 @@ import rx.schedulers.Schedulers;
  */
 public class NotificationService extends FirebaseMessagingService {
 
-    private ChatDAO helper;
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        helper = new ChatDAO(Realm.getDefaultInstance());
-    }
-
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         FrndsLog.e("From: " + remoteMessage.getFrom());
