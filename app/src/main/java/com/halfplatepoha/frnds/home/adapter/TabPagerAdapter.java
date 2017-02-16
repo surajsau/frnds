@@ -39,12 +39,12 @@ public class TabPagerAdapter extends FragmentPagerAdapter implements TabHelper.I
                     mFriendsListFragment = new FriendsListFragment();
                 return mFriendsListFragment;
 
-            case 1:
-                if(mSoundCloudSearchFragment == null)
-                    mSoundCloudSearchFragment = new SoundCloudSearchFragment();
-                return mSoundCloudSearchFragment;
+//            case 1:
+//                if(mSoundCloudSearchFragment == null)
+//                    mSoundCloudSearchFragment = new SoundCloudSearchFragment();
+//                return mSoundCloudSearchFragment;
 
-            case 2:
+            case 1:
                 if(mTracksListFragment == null)
                     mTracksListFragment = new TracksListFragment();
                 return mTracksListFragment;

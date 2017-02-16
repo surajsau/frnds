@@ -96,6 +96,7 @@ public class AlbumListAdapter extends RecyclerView.Adapter<AlbumListAdapter.Albu
         @OnClick(R.id.ivAlbum)
         public void openSongDetailsDialog() {
             ShareSongFragment shareSong = new ShareSongFragment();
+            shareSong.setSongModel(albums.get(getAdapterPosition()));
             mFragmentManager.beginTransaction()
                     .replace(R.id.home, shareSong)
                     .addToBackStack(IDetailsConstants.SONG_SHARE_TAG)

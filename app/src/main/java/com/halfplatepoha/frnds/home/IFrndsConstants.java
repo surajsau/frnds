@@ -33,6 +33,6 @@ public interface IFrndsConstants {
     String FRIEND_NAME = "friend_name";
     String FRIEND_ID = "friend_id";
 
-    @DrawableRes int[] tabDrawables = {R.drawable.chat, R.drawable.soundcloud, R.drawable.playlist};
-    @DrawableRes int[] tabSelectedDrawables = {R.drawable.chat_selected, R.drawable.soundcloud_selected, R.drawable.playlist_selected};
+    @DrawableRes int[] tabDrawables = {R.drawable.chat, R.drawable.playlist};
+    @DrawableRes int[] tabSelectedDrawables = {R.drawable.chat_selected, R.drawable.playlist_selected};
 }

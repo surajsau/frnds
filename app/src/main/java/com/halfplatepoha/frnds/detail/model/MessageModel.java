@@ -14,6 +14,7 @@ public class MessageModel {
     private @IDetailsConstants.UserType int userType;
     private @IDbConstants.MessageType int messageType;
     private String messageTrackUrl;
+    private String messageTrackId;
 
     public String getMessage() {
         return message;
@@ -53,5 +54,13 @@ public class MessageModel {
 
     public void setMessageTrackUrl(String messageTrackUrl) {
         this.messageTrackUrl = messageTrackUrl;
+    }
+
+    public String getMessageTrackId() {
+        return messageTrackId;
+    }
+
+    public void setMessageTrackId(String messageTrackId) {
+        this.messageTrackId = messageTrackId;
     }
 }

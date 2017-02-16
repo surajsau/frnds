@@ -33,72 +33,76 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mPlayer.start();
         Intent songStatusIntent = new Intent(IConstants.SONG_STATUS_BROADCAST);
         songStatusIntent.putExtra(IDetailsConstants.CURRENT_SONG_STATUS, IDetailsConstants.CURRENT_SONG_STATUS_PLAYING);
-        sendBroadcast(new Intent(IConstants.SONG_STATUS_BROADCAST));
+        sendBroadcast(songStatusIntent);
+        FrndsLog.e("" + IDetailsConstants.CURRENT_SONG_STATUS_PLAYING);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        FrndsLog.e(intent.getAction());
-        FrndsLog.e(intent.getStringExtra(IDetailsConstants.SERVICE_STREAM_URL));
-        try {
-            if (intent.getAction().equals(ACTION_PLAY)) {
-                if(mPlayer == null) {
-                    mPlayer = new MediaPlayer();
-                    mPlayer.setOnPreparedListener(this);
-                    mPlayer.setOnErrorListener(this);
-                    mPlayer.setOnCompletionListener(this);
+        if(intent != null) {
+            FrndsLog.e(intent.getAction());
+            FrndsLog.e(intent.getStringExtra(IDetailsConstants.SERVICE_STREAM_URL));
+            try {
+                if (intent.getAction().equals(ACTION_PLAY)) {
+                    if (mPlayer == null) {
+                        mPlayer = new MediaPlayer();
+                        mPlayer.setOnPreparedListener(this);
+                        mPlayer.setOnErrorListener(this);
+                        mPlayer.setOnCompletionListener(this);
+                    }
+
+                    mStreamUrl = intent.getStringExtra(IDetailsConstants.SERVICE_STREAM_URL);
+                    String title = intent.getStringExtra(IDetailsConstants.NOTIFICATION_SERVICE_TRACK_TITLE);
+                    String frndId = intent.getStringExtra(IDetailsConstants.FRND_ID);
+
+                    if (!TextUtils.isEmpty(mStreamUrl)) {
+                        mStreamUrl = mStreamUrl.concat("?" + IConstants.API_KEY_PARAM + "=" + IConstants.API_KEY_VALUE);
+
+                        mPlayer.reset();
+                        mPlayer.setDataSource(mStreamUrl);
+                        mPlayer.prepareAsync();
+
+                        Intent detailIntent = new Intent(getApplicationContext(), SongDetailActivity.class);
+                        detailIntent.putExtra(IDetailsConstants.FRND_ID, frndId);
+                        PendingIntent songDetailsIntent = PendingIntent.getActivity(getApplicationContext(), IConstants.NOTIFICATION_PLAY_PENDING_INTENT_REQUEST,
+                                detailIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        Intent stopPlay = new Intent(this, PlayerService.class);
+                        stopPlay.setAction(PlayerService.ACTION_STOP);
+
+                        PendingIntent stopPlayService = PendingIntent.getService(getApplicationContext(), IConstants.NOTIFICATION_STOP_PLAYING_INTENT_REQUEST,
+                                stopPlay, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        NotificationCompat.Builder playNotificationBuilder = new NotificationCompat.Builder(this)
+                                .setContentTitle("Sync.")
+                                .setStyle(new NotificationCompat.BigTextStyle().bigText("You\'re listening to " + title))
+                                .setSmallIcon(R.mipmap.ic_launcher)
+                                .addAction(R.drawable.profile_icon, "Profile", songDetailsIntent)
+                                .addAction(R.drawable.stop, "Stop", stopPlayService);
+
+                        startForeground(IConstants.PLAY_NOTIFICATION_ID, playNotificationBuilder.build());
+                    }
+                } else if (intent.getAction().equals(ACTION_STOP)) {
+                    if (mPlayer != null)
+                        mPlayer.release();
+                    Intent songStatusIntent = new Intent(IConstants.SONG_STATUS_BROADCAST);
+                    songStatusIntent.putExtra(IDetailsConstants.CURRENT_SONG_STATUS, IDetailsConstants.CURRENT_SONG_STATUS_STOP);
+                    sendBroadcast(new Intent(IConstants.SONG_STATUS_BROADCAST));
+                    FrndsLog.e("" + IDetailsConstants.CURRENT_SONG_STATUS_STOP);
+                    stopSelf();
                 }
-
-                mStreamUrl = intent.getStringExtra(IDetailsConstants.SERVICE_STREAM_URL);
-                String title = intent.getStringExtra(IDetailsConstants.NOTIFICATION_SERVICE_TRACK_TITLE);
-                String frndId = intent.getStringExtra(IDetailsConstants.FRND_ID);
-
-                if(!TextUtils.isEmpty(mStreamUrl)) {
-                    mStreamUrl = mStreamUrl.concat("?" + IConstants.API_KEY_PARAM + "=" + IConstants.API_KEY_VALUE);
-
-                    mPlayer.reset();
-                    mPlayer.setDataSource(mStreamUrl);
-                    mPlayer.prepareAsync();
-
-                    Intent detailIntent = new Intent(getApplicationContext(), SongDetailActivity.class);
-                    detailIntent.putExtra(IDetailsConstants.FRND_ID, frndId);
-                    PendingIntent songDetailsIntent = PendingIntent.getActivity(getApplicationContext(), IConstants.NOTIFICATION_PLAY_PENDING_INTENT_REQUEST,
-                            detailIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT);
-
-                    Intent stopPlay = new Intent(this, PlayerService.class);
-                    stopPlay.setAction(PlayerService.ACTION_STOP);
-
-                    PendingIntent stopPlayService = PendingIntent.getService(getApplicationContext(), IConstants.NOTIFICATION_STOP_PLAYING_INTENT_REQUEST,
-                            stopPlay, PendingIntent.FLAG_UPDATE_CURRENT);
-
-                    NotificationCompat.Builder playNotificationBuilder = new NotificationCompat.Builder(this)
-                            .setContentTitle("Sync.")
-                            .setStyle(new NotificationCompat.BigTextStyle().bigText("You\'re listening to " + title))
-                            .setSmallIcon(R.mipmap.ic_launcher)
-                            .addAction(R.drawable.profile_icon, "Profile", songDetailsIntent)
-                            .addAction(R.drawable.stop, "Stop", stopPlayService);
-
-                    startForeground(IConstants.PLAY_NOTIFICATION_ID, playNotificationBuilder.build());
-                }
-            } else if(intent.getAction().equals(ACTION_STOP)) {
-                if(mPlayer != null)
-                    mPlayer.release();
-                Intent songStatusIntent = new Intent(IConstants.SONG_STATUS_BROADCAST);
-                songStatusIntent.putExtra(IDetailsConstants.CURRENT_SONG_STATUS, IDetailsConstants.CURRENT_SONG_STATUS_STOP);
-                sendBroadcast(new Intent(IConstants.SONG_STATUS_BROADCAST));
-                stopSelf();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return super.onStartCommand(intent, flags, startId);
     }

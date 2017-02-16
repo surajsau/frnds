@@ -101,7 +101,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         @OnClick(R.id.btnPlayPause)
         public void onPlayPauseClicked() {
             int position = getAdapterPosition();
-            listener.onPlayClick(mMessages.get(position).getMessageTrackUrl(),
+            listener.onPlayClick(mMessages.get(position).getMessageTrackId(),
+                    mMessages.get(position).getMessageTrackUrl(),
                     mMessages.get(position).getMessage(),
                     position);
         }
@@ -139,14 +140,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
         @OnClick(R.id.btnPlayPause)
         public void onPlayPauseClicked() {
             int position = getAdapterPosition();
-            listener.onPlayClick(mMessages.get(position).getMessageTrackUrl(),
-                    mMessages.get(position).getMessage(),getAdapterPosition());
+            listener.onPlayClick(mMessages.get(position).getMessageTrackId(),
+                    mMessages.get(position).getMessageTrackUrl(),
+                    mMessages.get(position).getMessage(),
+                    getAdapterPosition());
         }
 
     }
 
     public interface OnPlayClickListener {
-        void onPlayClick(String trackUrl, String message, int position);
+        void onPlayClick(String trackId, String trackUrl, String trackMessage, int position);
     }
 
 }

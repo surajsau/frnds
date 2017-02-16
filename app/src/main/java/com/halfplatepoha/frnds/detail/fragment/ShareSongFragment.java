@@ -1,6 +1,8 @@
 package com.halfplatepoha.frnds.detail.fragment;
 
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,9 +13,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.detail.adapter.FrndsShareSuggestionListAdapter;
+import com.halfplatepoha.frnds.detail.model.SongModel;
+import com.halfplatepoha.frnds.ui.GlideImageView;
+import com.halfplatepoha.frnds.ui.OpenSansTextView;
 import com.halfplatepoha.frnds.utils.AppUtil;
 
 import butterknife.Bind;
@@ -25,10 +31,18 @@ import butterknife.OnClick;
  */
 public class ShareSongFragment extends Fragment {
 
-    @Bind(R.id.rlFrndsSuggestion) RecyclerView rlFrndsSuggestion;
-    @Bind(R.id.ivAlbum) ImageView ivAlbum;
+    @Bind(R.id.ivAlbum)
+    GlideImageView ivAlbum;
 
-    private FrndsShareSuggestionListAdapter mAdapter;
+    @Bind(R.id.tvAlbumArtist)
+    OpenSansTextView tvAlbumArtist;
+
+    @Bind(R.id.tvAlbumTitle)
+    OpenSansTextView tvAlbumTitle;
+
+    private SongModel songModel;
+
+    private StringBuilder shareMsg;
 
     public ShareSongFragment() {
         // Required empty public constructor
@@ -45,18 +59,38 @@ public class ShareSongFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
-        initRecyclerView();
+        ivAlbum.setImageUrl(getActivity(), songModel.getTrackImageUrl());
+        tvAlbumArtist.setText(songModel.getTrackUser());
+        tvAlbumTitle.setText(songModel.getTrackName());
     }
 
-    private void initRecyclerView() {
-        mAdapter = new FrndsShareSuggestionListAdapter(getActivity());
-        rlFrndsSuggestion.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-        rlFrndsSuggestion.setAdapter(mAdapter);
+    public void setSongModel(SongModel songModel) {
+        this.songModel = songModel;
+
+        shareMsg = new StringBuilder("Check out ");
+        shareMsg.append(songModel.getTrackName())
+                .append(" on SoundCloud ")
+                .append(songModel.getTrackShareUrl())
+                .append("Sync with your friends, download from ")
+                .append("https://play.google.com/store/apps/details?id=com.whatsapp");
     }
 
     @OnClick(R.id.back)
     public void close() {
         AppUtil.hideSoftKeyboard(getActivity());
         getActivity().onBackPressed();
+    }
+
+    @OnClick(R.id.btnShare)
+    public void onShareClick() {
+        Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
+        whatsappIntent.setType("text/plain");
+        whatsappIntent.setPackage("com.whatsapp");
+        whatsappIntent.putExtra(Intent.EXTRA_TEXT, shareMsg.toString() );
+        try {
+            startActivity(whatsappIntent);
+        } catch (ActivityNotFoundException ex) {
+            Toast.makeText(getActivity(), "WhatsApp isn\'t installed", Toast.LENGTH_SHORT).show();
+        }
     }
 }

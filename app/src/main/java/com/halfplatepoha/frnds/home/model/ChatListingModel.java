@@ -13,18 +13,20 @@ public class ChatListingModel {
     private String frndId;
     private String lastMessage;
     private String frndImageUrl;
-    private boolean isMessageRead;
+    private long lastTimestamp;
+    private boolean isRead;
 
     public ChatListingModel(Chat chat) {
         this.frndName = chat.getFrndName();
         this.frndId = chat.getFrndId();
         this.frndPosition = chat.getFrndPosition();
 
-        if(chat.getFrndLastMessage() != null)
+        if(chat.getFrndLastMessage() != null) {
             this.lastMessage = chat.getFrndLastMessage().getMsgBody();
+        }
 
+        this.lastTimestamp = chat.getFrndLastMessageTimestamp();
         this.frndImageUrl = chat.getFrndImageUrl();
-        this.isMessageRead = chat.isMsgRead();
     }
 
     public String getFrndName() {
@@ -67,11 +69,20 @@ public class ChatListingModel {
         this.frndImageUrl = frndImageUrl;
     }
 
-    public boolean isMessageRead() {
-        return isMessageRead;
+    public long getLastTimestamp() {
+        return lastTimestamp;
     }
 
-    public void setMessageRead(boolean messageRead) {
-        isMessageRead = messageRead;
+    public void setLastTimestamp(long lastTimestamp) {
+        this.lastTimestamp = lastTimestamp;
     }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public void setRead(boolean read) {
+        isRead = read;
+    }
+
 }

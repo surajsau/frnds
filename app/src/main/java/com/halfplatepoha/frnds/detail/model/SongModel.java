@@ -9,10 +9,12 @@ import com.halfplatepoha.frnds.detail.IDetailsConstants;
 
 public class SongModel {
     private String trackUrl;
+    private String trackShareUrl;
     private String trackName;
     private long trackTimeStamp;
     private String trackUser;
     private String trackImageUrl;
+    private String frndName;
 
     public String getTrackUrl() {
         return trackUrl;
@@ -51,7 +53,22 @@ public class SongModel {
     }
 
     public void setTrackImageUrl(String trackImageUrl) {
-        this.trackImageUrl = trackImageUrl.replace(IDetailsConstants.STRING_HTTPS, IDetailsConstants.STRING_HTTP)
-                .replace(IDetailsConstants.IMG_LARGE_SUFFIX, IDetailsConstants.IMG_500_X_500_SUFFIX);
+        this.trackImageUrl = trackImageUrl;
+    }
+
+    public String getFrndName() {
+        return frndName;
+    }
+
+    public void setFrndName(String frndName) {
+        this.frndName = frndName;
+    }
+
+    public String getTrackShareUrl() {
+        return trackShareUrl;
+    }
+
+    public void setTrackShareUrl(String trackShareUrl) {
+        this.trackShareUrl = trackShareUrl;
     }
 }

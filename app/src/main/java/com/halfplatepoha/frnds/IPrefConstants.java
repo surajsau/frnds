@@ -14,4 +14,10 @@ public interface IPrefConstants {
 
     String CURRENT_SONG_STATUS = "current_song_status";
     String CURRENT_SONG_FRND_ID = "current_song_frnd_id";
+
+    String LATEST_SONG_NAME = "latest_song_name";
+    String LATEST_SONG_URL = "latest_song_url";
+    String LATEST_SONG_IMAGE_URL = "latest_song_image_url";
+    String LATEST_FRND_NAME = "latest_frnd_name";
+    String LATEST_FRND_ID = "latest_frnd_id";
 }

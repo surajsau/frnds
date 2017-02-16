@@ -33,6 +33,7 @@ import com.halfplatepoha.frnds.IPrefConstants;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Chat;
+import com.halfplatepoha.frnds.db.models.User;
 import com.halfplatepoha.frnds.home.activity.HomeActivity;
 import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
@@ -118,6 +119,7 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
     @Override
     public void onSuccess(LoginResult loginResult) {
         FrndsLog.d(loginResult.getAccessToken().getToken());
+        createUser();
         getFacebookName(loginResult.getAccessToken());
         getFriendsWhoInstalledApp(loginResult.getAccessToken());
         handleAccessToken(loginResult.getAccessToken());
@@ -157,6 +159,18 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
             FrndsLog.e("signInWithCredential " + task.getException());
         } else {
             FrndsLog.d("signInWithCredential " + task.isSuccessful());
+        }
+    }
+
+    private void createUser() {
+        try {
+            mRealm.beginTransaction();
+            User user = mRealm.createObject(User.class);
+            user.setUserFbId(fbId);
+            mRealm.commitTransaction();
+        } catch (Exception e) {
+            e.printStackTrace();
+            mRealm.cancelTransaction();
         }
     }
 
@@ -262,6 +276,8 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
             mRealm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
+                    User user = realm.where(User.class).findFirst();
+
                     for(InstalledFrnds.Frnd frnd : frnds.getData()) {
                         if(realm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, frnd.getId()).findFirst() == null) {
                             Chat chat = new Chat();
@@ -269,6 +285,8 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
                             chat.setFrndName(frnd.getName());
                             chat.setFrndImageUrl(frnd.getPicture().getData().getUrl());
                             realm.insert(chat);
+
+                            user.getUserChats().add(chat);
                         }
                     }
                 }

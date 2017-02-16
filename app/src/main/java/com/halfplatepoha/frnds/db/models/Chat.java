@@ -24,6 +24,8 @@ public class Chat extends RealmObject {
 
     public Message          frndLastMessage;
 
+    public long             frndLastMessageTimestamp;
+
     public String getFrndId() {
         return frndId;
     }
@@ -95,5 +97,13 @@ public class Chat extends RealmObject {
 
     public void setMsgRead(boolean msgRead) {
         this.msgRead = msgRead;
+    }
+
+    public long getFrndLastMessageTimestamp() {
+        return frndLastMessageTimestamp;
+    }
+
+    public void setFrndLastMessageTimestamp(long frndLastMessageTimestamp) {
+        this.frndLastMessageTimestamp = frndLastMessageTimestamp;
     }
 }

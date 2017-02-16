@@ -45,14 +45,17 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
     private Context mContext;
     private ArrayList<ChatListingModel> mFriends;
-    private FragmentManager mFragmentManager;
+
+    private OnFriendRowClickListener listener;
 
     public FriendsListAdapter(Context context) {
         mContext = context;
 
         mFriends = new ArrayList<>();
+    }
 
-        mFragmentManager = ((HomeActivity)mContext).getSupportFragmentManager();
+    public void setOnFriendRowClickListener(OnFriendRowClickListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -73,7 +76,8 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
 
             holder.tvFrndStatus.setText(mFriends.get(position).getLastMessage());
 
-            holder.ivIndicator.setVisibility(mFriends.get(position).isMessageRead() ? View.GONE: View.VISIBLE);
+            holder.ivIndicator.setVisibility(mFriends.get(position).isRead()?
+                    View.GONE: View.VISIBLE);
         }
     }
 
@@ -90,26 +94,25 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         return mFriends.size();
     }
 
-    public void refreshChat(String frndId, String lastMessage) {
-        int position = getPositionFromId(frndId);
+    public void refreshChat(int position, String lastMessage, long lastTimestamp) {
         if(position != -1) {
-            ChatListingModel chat = mFriends.remove(position);
-            chat.setFrndPosition(0);
+            ChatListingModel chat = mFriends.get(position);
             chat.setLastMessage(lastMessage);
-            chat.setMessageRead(false);
+            notifyItemChanged(position);
 
-            mFriends.add(chat.getFrndPosition(), chat);
-            notifyItemMoved(position, 0);
-            notifyItemChanged(0);
-        }
-    }
+            if (chat.getLastTimestamp() != lastTimestamp) {
+                mFriends.remove(position);
 
-    public int getPositionFromId(String frndId) {
-        for(int i=0; i<mFriends.size(); i++) {
-            if(mFriends.get(i).getFrndId().equalsIgnoreCase(frndId))
-                return i;
+                chat.setLastTimestamp(lastTimestamp);
+                chat.setFrndPosition(0);
+
+                mFriends.add(0, chat);
+
+                notifyItemMoved(position, 0);
+                notifyItemChanged(0);
+            }
         }
-        return -1;
+
     }
 
     public class FriendViewHolder extends RecyclerView.ViewHolder{
@@ -127,28 +130,30 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         @OnClick(R.id.rowFriend)
         public void openSongDetails() {
             ChatListingModel frnd = mFriends.get(getAdapterPosition());
-            Intent songDetailsIntent = new Intent(mContext, SongDetailActivity.class);
+            frnd.setRead(true);
+
+            notifyItemChanged(getAdapterPosition());
+
             Pair<View, String> avatarTransition = Pair.create((View)ivFrndAvatar, mContext.getString(R.string.frnd_avatar_transition));
             Pair<View, String> nameTransition = Pair.create((View)tvFrndName, mContext.getString(R.string.frnd_name_transition));
 
             ActivityOptionsCompat options = ActivityOptionsCompat
                     .makeSceneTransitionAnimation((Activity) mContext, avatarTransition, nameTransition);
 
-            songDetailsIntent.putExtra(IDetailsConstants.FRND_ID, frnd.getFrndId());
-            ((HomeActivity)mContext).startActivityForResult(songDetailsIntent, IFrndsConstants.FRIEND_LIST_REQUEST, options.toBundle());
+            listener.onFriendRowClicked(options, frnd.getFrndId(), getAdapterPosition());
         }
 
         @OnClick(R.id.ivFrndAvatar)
         public void openDetailDialog() {
             ChatListingModel frnd = mFriends.get(getAdapterPosition());
-            FriendDetailDialogFragment dlgDetail = new FriendDetailDialogFragment();
-            Bundle dlgBundle = new Bundle();
-            dlgBundle.putString(IFrndsConstants.FRIEND_NAME, frnd.getFrndName());
-            dlgBundle.putString(IFrndsConstants.FRIEND_IMAGE_URL, frnd.getFrndImageUrl());
-            dlgDetail.setArguments(dlgBundle);
-            dlgDetail.show(mFragmentManager, IFrndsConstants.DETAIL_DIALOG_TAG);
+            listener.openDetailDialog(frnd);
         }
 
+    }
+
+    public interface OnFriendRowClickListener {
+        void onFriendRowClicked(ActivityOptionsCompat options, String frndId, int position);
+        void openDetailDialog(ChatListingModel frnd);
     }
 
 }

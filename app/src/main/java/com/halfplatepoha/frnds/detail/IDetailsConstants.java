@@ -43,8 +43,11 @@ public interface IDetailsConstants {
     String TRACK_ARTIST = "track_artist";
     String FRND_ID = "friendId";
 
+    String CLICKED_POSITION = "clicked_position";
+
     String LATEST_IMAGE_URL = "latest_image_url";
     String LATEST_IMAGE_TRACK = "latest_image_track";
+    String LATEST_TRACK_ID = "latest_track_id";
     String LATEST_FRIEND_NAME = "latest_friend_name";
     String LATEST_MESSAGE = "latest_message";
     String LATEST_MESSAGE_TYPE = "latest_message_type";

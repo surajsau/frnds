@@ -18,7 +18,6 @@ import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
@@ -28,6 +27,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import com.bumptech.glide.Glide;
+import com.halfplatepoha.frnds.BaseActivity;
 import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.FrndsPreference;
 import com.halfplatepoha.frnds.IConstants;
@@ -43,6 +43,9 @@ import com.halfplatepoha.frnds.detail.IDetailsConstants;
 import com.halfplatepoha.frnds.detail.adapter.ChatAdapter.OnPlayClickListener;
 import com.halfplatepoha.frnds.detail.model.MessageModel;
 import com.halfplatepoha.frnds.detail.model.SongModel;
+import com.halfplatepoha.frnds.detail.presenter.SongDetailPresenter;
+import com.halfplatepoha.frnds.detail.presenter.SongDetailPresenterImpl;
+import com.halfplatepoha.frnds.detail.view.SongDetailView;
 import com.halfplatepoha.frnds.fcm.IFCMConstants;
 import com.halfplatepoha.frnds.mediaplayer.PlayerService;
 import com.halfplatepoha.frnds.db.models.Message;
@@ -59,7 +62,7 @@ import com.halfplatepoha.frnds.ui.OpenSansEditText;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 import com.halfplatepoha.frnds.utils.AppUtil;
 
-import java.util.ListIterator;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.Bind;
@@ -68,28 +71,25 @@ import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.codetail.animation.ViewAnimationUtils;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import static android.R.id.message;
 
 
-public class SongDetailActivity extends AppCompatActivity implements
+public class SongDetailActivity extends BaseActivity implements SongDetailView,
         View.OnFocusChangeListener, OnTouchListener, OnPlayClickListener{
 
     private static final String TAG = SongDetailActivity.class.getSimpleName();
 
-    private FrndsClient mFrndsClient;
-    private SoundCloudClient mSoundCloudClient;
-
-    private ChatDAO helper;
-
     private int deltaX;
+
+    private BroadcastReceiver songFinishedReceiver;
+    private BroadcastReceiver mNotificationReceiver;
+
+    private SongDetailPresenter presenter;
 
     @Bind(R.id.etMessage) OpenSansEditText etMessage;
     @Bind(R.id.rlAlbums) RecyclerView rlAlbums;
@@ -109,22 +109,10 @@ public class SongDetailActivity extends AppCompatActivity implements
 
     private int[] btnPlaylistCoordinates;
 
-    private String mFrndId;
-    private String mFbId;
-    private String mFrndImageUrl;
-    private String mFrndName;
-
-    private String latestSongTrackName;
-    private String latestSongAlbumUrl;
-
-    private String mSource;
-
     private AlbumListAdapter mAlbumListAdapter;
     private ChatAdapter mChatAdapter;
 
     private LinearLayoutManager mChatLayoutManager;
-
-    private Chat mChat;
 
     private Animation leftSlide, rightSlide;
 
@@ -136,21 +124,21 @@ public class SongDetailActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_song_detail);
         ButterKnife.bind(this);
 
-        helper = new ChatDAO(Realm.getDefaultInstance());
-
-        buildApiClients();
-
-        setupRecyclerViews();
+        presenter = new SongDetailPresenterImpl(this);
+        presenter.onCreate();
 
         getDataFromBundle();
-
-        setupToolbar();
 
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        presenter.onStart();
+    }
+
+    @Override
+    public void registerReceivers() {
         registerReceiver(mNotificationReceiver, new IntentFilter(IConstants.CHAT_BROADCAST));
         registerReceiver(songFinishedReceiver, new IntentFilter(IConstants.SONG_STATUS_BROADCAST));
     }
@@ -160,7 +148,7 @@ public class SongDetailActivity extends AppCompatActivity implements
         super.onResume();
         FrndsPreference.setInPref(IPrefConstants.SCREEN_TYPE, IConstants.SCREEN_CHAT);
 
-        addDataToAdapters();
+        presenter.onResume();
 
         if(btnPlaylistCoordinates == null) {
             btnPlaylistCoordinates = new int[2];
@@ -177,8 +165,6 @@ public class SongDetailActivity extends AppCompatActivity implements
         }
 
         rlChat.setOnTouchListener(this);
-
-        buildAnimations();
     }
 
     @Override
@@ -188,17 +174,13 @@ public class SongDetailActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try {
-            unregisterReceiver(mNotificationReceiver);
-            unregisterReceiver(songFinishedReceiver);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    protected void onStop() {
+        super.onStop();
+        presenter.onStop();
     }
 
-    private void buildAnimations() {
+    @Override
+    public void buildAnimations() {
         rotateAnimation = new RotateAnimation(0, 360,
                 Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF, 0.5f);
@@ -256,67 +238,100 @@ public class SongDetailActivity extends AppCompatActivity implements
         rightSlide.setDuration(300);
     }
 
-    private void addDataToAdapters() {
-        //--adding songs to adapter
+    @Override
+    public void smoothScrollToLast() {
+        if (mChatAdapter.getItemCount() != 0)
+            rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
+    }
+
+    @Override
+    public void addDataToAdapters(ArrayList<SongModel> songs, ArrayList<MessageModel> messages) {
         mAlbumListAdapter.refresh();
         mChatAdapter.refresh();
 
-        if(mChat != null) {
-            RealmResults<Song> songs = mChat.getFrndSongs().sort(IDbConstants.SONG_TIME_STAMP_KEY, Sort.ASCENDING);
+        //--adding songs to chat
+        for (int i = 0; i < songs.size(); i++) {
+            mAlbumListAdapter.addSong(songs.get(i));
+        }
 
-            if (songs != null) {
-                for (int i = 0; i < songs.size(); i++) {
-                    SongModel model = new SongModel();
-                    model.setTrackName(songs.get(i).getSongTitle());
-                    model.setTrackTimeStamp(songs.get(i).getSongTimestamp());
-                    model.setTrackImageUrl(songs.get(i).getSongImgUrl());
-                    model.setTrackUser(songs.get(i).getSongArtist());
-                    model.setTrackUrl(songs.get(i).getSongUrl());
+        if (songs.size() > 0) {
+            tvTrackTitle.setText(songs.get(songs.size() - 1).getTrackName());
+            tvTrackArtist.setText(songs.get(songs.size() - 1).getTrackUser());
+        } else {
+            tvTrackTitle.setVisibility(View.GONE);
+            tvTrackArtist.setVisibility(View.GONE);
+        }
 
-                    mAlbumListAdapter.addSong(model);
-                }
-
-                if (songs.size() > 0) {
-                    tvTrackTitle.setText(songs.last().getSongTitle());
-                    tvTrackArtist.setText(songs.last().getSongArtist());
-                }
-            }
-
-            //--adding messages to chat
-            RealmResults<Message> messages = mChat.getFrndMessages().sort(IDbConstants.MSG_TIME_STAMP_KEY, Sort.ASCENDING);
-
-            if (messages != null) {
-                for (int i = 0; i < messages.size(); i++) {
-                    MessageModel model = new MessageModel();
-                    model.setMessageType(messages.get(i).getMsgType());
-                    model.setMessage(messages.get(i).getMsgBody());
-                    model.setUserType(messages.get(i).getUserType());
-                    model.setMessageType(messages.get(i).getMsgType());
-                    model.setMessageTrackUrl(messages.get(i).getMsgTrackUrl());
-                    model.setMessageTimeStamp(messages.get(i).getMsgTimestamp());
-                    mChatAdapter.addMessage(model);
-                }
-
-                if (mChatAdapter.getItemCount() != 0)
-                    rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
-            }
+        //--adding messages to chat
+        for (int i = 0; i < messages.size(); i++) {
+            mChatAdapter.addMessage(messages.get(i));
         }
     }
 
-    private void getChatObjectFromDb() {
-        mChat = helper.getFrndWithFrndId(mFrndId);
-
-        mFrndImageUrl = mChat.getFrndImageUrl();
-        mFrndName = mChat.getFrndName();
+    @Override
+    public void unregisterReceivers() {
+        try {
+            unregisterReceiver(mNotificationReceiver);
+            unregisterReceiver(songFinishedReceiver);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private void startSearchActivity() {
-        Intent searchIntent = new Intent(this, SearchScreenActivity.class);
-        searchIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startActivityForResult(searchIntent, IDetailsConstants.SONG_DETAILS_REQUEST);
+    @Override
+    public void initReceivers() {
+        mNotificationReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if(intent != null) {
+                    presenter.onNotificationBroadcast(intent.getStringExtra(IConstants.FRND_TRACK_ID),
+                    intent.getIntExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MESSAGE),
+                                    intent.getStringExtra(IConstants.FRND_MESSAGE),
+                                    intent.getStringExtra(IConstants.FRND_ID),
+                                    intent.getStringExtra(IConstants.FRND_TRACK_URL),
+                                    intent.getStringExtra(IConstants.FRND_TRACK_TITLE),
+                                    intent.getLongExtra(IConstants.FRND_TIME_STAMP, 0L));
+                }
+            }
+        };
+
+        songFinishedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if(intent != null) {
+                    @IDetailsConstants.CurrentSongStatusType int currentPlayingStatus =
+                            intent.getIntExtra(IDetailsConstants.CURRENT_SONG_STATUS, IDetailsConstants.CURRENT_SONG_STATUS_STOP);
+                    FrndsLog.e(currentPlayingStatus + "");
+                    presenter.onSongBroadCastReceived(currentPlayingStatus);
+                }
+            }
+        };
     }
 
-    private void setupRecyclerViews() {
+    @Override
+    public void showPlayingIndicator() {
+        songPlayedIndicator.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hidePlayingIndicator() {
+        songPlayedIndicator.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void animatePlaylistButton() {
+        btnPlaylist.setAnimation(rotateAnimation);
+    }
+
+    @Override
+    public void stopAnimatePlaylistButton() {
+        if(btnPlaylist.getAnimation() != null) {
+            btnPlaylist.getAnimation().cancel();
+        }
+    }
+
+    @Override
+    public void setupRecyclerView() {
         mAlbumListAdapter = new AlbumListAdapter(this);
         mChatAdapter = new ChatAdapter(this);
 
@@ -335,152 +350,99 @@ public class SongDetailActivity extends AppCompatActivity implements
         rlAlbums.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
     }
 
-    private void setupToolbar() {
+    @Override
+    public void setupToolbar(String frndImageUrl, String frndName) {
         Glide.with(this)
-                .load(mFrndImageUrl)
+                .load(frndImageUrl)
                 .into(ivFrndAvatar);
 
-        tvTitle.setText(mFrndName);
-    }
-
-    private void callUpdateTracksApi(String trackId) {
-        UpdateTrackRequest req = new UpdateTrackRequest();
-        req.setFbId(mFbId);
-        req.setTo(mFrndId);
-        req.setTrackId(trackId);
-        mFrndsClient.updateTrack(req)
-            .subscribeOn(Schedulers.newThread())
-            .observeOn(Schedulers.newThread())
-            .subscribe(new BaseSubscriber<Void>() {
-                @Override
-                public void onObjectReceived(Void aVoid) {
-
-                }
-            });
-    }
-
-    private void callSendMessageApi(final Message message) {
-        SendMessageRequest req  = new SendMessageRequest();
-        req.setFbId(mFbId);
-        req.setMessage(message.getMsgBody());
-        req.setTo(mFrndId);
-
-        mFrndsClient.sendMessage(req)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new BaseSubscriber<Void>() {
-                    @Override
-                    public void onObjectReceived(Void aVoid) {
-                        helper.insertMessageToChat(mFrndId, message);
-                    }
-                });
-    }
-
-    private void buildApiClients() {
-        mFrndsClient = new ClientGenerator.Builder()
-                .setLoggingInterceptor()
-                .setBaseUrl(IConstants.FRNDS_BASE_URL)
-                .setClientClass(FrndsClient.class)
-                .setConnectTimeout(5, TimeUnit.MINUTES)
-                .setReadTimeout(5, TimeUnit.MINUTES)
-                .setHeader(IConstants.CONTENT_TYPE, IConstants.APPLICATION_JSON)
-                .buildClient();
-
-        mSoundCloudClient = new ClientGenerator.Builder()
-                .setLoggingInterceptor()
-                .setBaseUrl(IConstants.SOUNDCLOUD_BASE_URL)
-                .setApiKeyInterceptor(IConstants.API_KEY_PARAM, IConstants.API_KEY_VALUE)
-                .setClientClass(SoundCloudClient.class)
-                .buildClient();
+        tvTitle.setText(frndName);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         if(intent != null) {
-            mFrndId = intent.getStringExtra(IDetailsConstants.FRND_ID);
+            String frndId = intent.getStringExtra(IDetailsConstants.FRND_ID);
+            presenter.onNewIntent(frndId);
 
-            getChatObjectFromDb();
+            presenter.dataFromChat();
         }
     }
 
     private void getDataFromBundle() {
         if(getIntent() != null) {
-            mSource = getIntent().getStringExtra(IDetailsConstants.SOURCE_TYPE);
-            mFrndId = getIntent().getStringExtra(IDetailsConstants.FRND_ID);
+            String source = getIntent().getStringExtra(IDetailsConstants.SOURCE_TYPE);
+            presenter.dataFromBundle(getIntent().getIntExtra(IDetailsConstants.CLICKED_POSITION, 0),
+                    FrndsPreference.getFromPref(IPrefConstants.FB_USER_ID, ""),
+                    source, getIntent().getStringExtra(IDetailsConstants.FRND_ID),
+                    getString(R.string.current_user_placeholder),
+                    getString(R.string.music_chat_message));
 
-            if(IDetailsConstants.SOURCE_NOTIFICATION.equalsIgnoreCase(mSource)) {
-                mFrndName = getIntent().getStringExtra(IFCMConstants.NOTIF_FRIEND_NAME);
-                String trackTitle = getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_NAME);
-                String trackUrl = getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_URL);
-                String trackImageUrl = getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_IMAGE_URL);
-                String trackArtist = getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_ARTIST);
-                String message = getIntent().getStringExtra(IFCMConstants.NOTIF_MESSAGE);
-                String type = getIntent().getStringExtra(IFCMConstants.NOTIF_TYPE);
-                long timestamp = !TextUtils.isEmpty(getIntent().getStringExtra(IFCMConstants.NOTIF_TIMESTAMP)) ?
-                        Long.valueOf(getIntent().getStringExtra(IFCMConstants.NOTIF_TIMESTAMP)) : 0L;
-
-                if ("SONG".equalsIgnoreCase(type)) {
-                    addSongToPlaylist(trackUrl, trackImageUrl, trackTitle, trackArtist, timestamp, IDetailsConstants.TYPE_FRND);
-                } else {
-                    Message msg = new Message.Builder()
-                            .setMsgBody(message)
-                            .setMsgTimestamp(timestamp)
-                            .setMsgType(IDbConstants.TYPE_MESSAGE)
-                            .setUserType(IDetailsConstants.TYPE_FRND)
-                            .setFrndId(mFrndId)
-                            .build();
-
-                    helper.insertMessageToChat(mFrndId, msg);
-                }
+            if(IDetailsConstants.SOURCE_NOTIFICATION.equalsIgnoreCase(source)) {
+                presenter.dataFromNotification(getIntent().getStringExtra(IFCMConstants.NOTIF_FRIEND_NAME),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_ID),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_NAME),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_URL),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_IMAGE_URL),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_ARTIST),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_MESSAGE),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_TYPE),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_TIMESTAMP));
+            } else {
+                presenter.dataFromChat();
             }
-
-            getChatObjectFromDb();
         }
-
-        mFbId = FrndsPreference.getFromPref(IPrefConstants.FB_USER_ID, "");
     }
 
     @OnClick({R.id.btnMusic, R.id.btnMessageBoxMusic})
     public void addMusic() {
+        presenter.onAddMusicClicked();
+    }
+
+    @Override
+    public void startSongSearch() {
         Intent searchScreenIntent = new Intent(this, SearchScreenActivity.class);
         startActivityForResult(searchScreenIntent, IDetailsConstants.SONG_DETAILS_REQUEST);
     }
 
     @OnClick(R.id.back)
     public void back() {
+        presenter.onBackPress();
+        finish();
+    }
+
+    @Override
+    public void backPressed(int position, String latestSongTrackName, String latestSongAlbumUrl,
+                            String latestMessage, long latestTimestamp, String frndId) {
         Intent resultIntent = new Intent();
+        resultIntent.putExtra(IDetailsConstants.CLICKED_POSITION, position);
+        resultIntent.putExtra(IDetailsConstants.LATEST_MESSAGE, latestMessage);
         resultIntent.putExtra(IDetailsConstants.LATEST_IMAGE_TRACK, latestSongTrackName);
         resultIntent.putExtra(IDetailsConstants.LATEST_IMAGE_URL, latestSongAlbumUrl);
-        resultIntent.putExtra(IDetailsConstants.FRND_ID, mFrndId);
+        resultIntent.putExtra(IDetailsConstants.LATEST_MESSAGE_TIMESTAMP, latestTimestamp);
+        resultIntent.putExtra(IDetailsConstants.FRND_ID, frndId);
         setResult(RESULT_OK, resultIntent);
-        onBackPressed();
+    }
+
+    @Override
+    public void addSongToAlbumAdapter(SongModel song) {
+        mAlbumListAdapter.addSong(song);
     }
 
     @OnClick(R.id.btnSend)
     public void addMessage() {
         long timestamp = System.currentTimeMillis();
-        if(!TextUtils.isEmpty(etMessage.getText())) {
-            Message.Builder msgBuilder = new Message.Builder()
-                    .setMsgBody(etMessage.getText().toString())
-                    .setMsgTimestamp(timestamp)
-                    .setFrndId(mFrndId)
-                    .setMsgType(IDbConstants.TYPE_MESSAGE)
-                    .setUserType(IDetailsConstants.TYPE_ME);
+        presenter.onSendButtonClicked(etMessage.getText().toString(), timestamp);
+    }
 
-            MessageModel messageModel = new MessageModel();
-            messageModel.setMessageTimeStamp(timestamp);
-            messageModel.setMessage(etMessage.getText().toString());
-            messageModel.setMessageType(IDbConstants.TYPE_MESSAGE);
-            messageModel.setUserType(IDetailsConstants.TYPE_ME);
+    @Override
+    public void addMessageToAdapter(MessageModel model) {
+        mChatAdapter.addMessage(model);
+    }
 
-            mChatAdapter.addMessage(messageModel);
-
-            rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
-
-            callSendMessageApi(msgBuilder.build());
-
-            etMessage.setText("");
-        }
+    @Override
+    public void emptyMessageBox() {
+        etMessage.setText("");
     }
 
     @OnClick(R.id.btnPlaylist)
@@ -492,13 +454,15 @@ public class SongDetailActivity extends AppCompatActivity implements
         }
     }
 
-    private void circularCollapse() {
+    @Override
+    public void circularCollapse() {
         Animator anim = ViewAnimationUtils.createCircularReveal(playlist,
                 btnPlaylistCoordinates[0],
                 btnPlaylistCoordinates[1],
                 getfFinalRadius(playlist, btnPlaylistCoordinates[0], btnPlaylistCoordinates[1]),
                 0,
                 View.LAYER_TYPE_HARDWARE);
+
         anim.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {}
@@ -519,7 +483,8 @@ public class SongDetailActivity extends AppCompatActivity implements
         anim.start();
     }
 
-    private void circularReveal() {
+    @Override
+    public void circularReveal() {
         playlist.setVisibility(View.VISIBLE);
         Animator anim = ViewAnimationUtils.createCircularReveal(playlist,
                 btnPlaylistCoordinates[0],
@@ -549,31 +514,11 @@ public class SongDetailActivity extends AppCompatActivity implements
         switch (requestCode) {
             case IDetailsConstants.SONG_DETAILS_REQUEST:{
                 if(resultCode == RESULT_OK){
-                    String trackId = String.valueOf(data.getExtras().getLong(IDetailsConstants.TRACK_ID));
-                    String trackUrl = data.getExtras().getString(IDetailsConstants.TRACK_URL);
-
-                    String trackImageUrl = (data.getExtras().getString(IDetailsConstants.TRACK_IMAGE_URL))
-                            .replace(IDetailsConstants.STRING_HTTPS, IDetailsConstants.STRING_HTTP)
-                            .replace(IDetailsConstants.IMG_LARGE_SUFFIX, IDetailsConstants.IMG_500_X_500_SUFFIX);
-
-                    FrndsLog.e(trackImageUrl);
-
-                    String trackTitle = data.getExtras().getString(IDetailsConstants.TRACK_TITLE);
-                    String trackArtist = data.getExtras().getString(IDetailsConstants.TRACK_ARTIST);
-
-                    //--setting background image of activity
-                    ivAlbumBg.setImageUrl(this, trackImageUrl);
-                    tvTrackTitle.setText(trackTitle);
-                    tvTrackArtist.setText(trackArtist);
-
-                    addSongToPlaylist(trackUrl, trackImageUrl, trackTitle, trackArtist, System.currentTimeMillis(), IDetailsConstants.TYPE_ME);
-
-                    startPlayingTrack(trackTitle, trackUrl);
-
-                    callUpdateTracksApi(trackId);
-
-                    latestSongAlbumUrl = trackImageUrl.replace(IDetailsConstants.IMG_300_X_300_SUFFIX, IDetailsConstants.IMG_BADGE);
-                    latestSongTrackName = trackTitle;
+                    presenter.onSongSearchResultReceived(data.getExtras().getLong(IDetailsConstants.TRACK_ID),
+                            data.getExtras().getString(IDetailsConstants.TRACK_URL),
+                            data.getExtras().getString(IDetailsConstants.TRACK_IMAGE_URL),
+                            data.getExtras().getString(IDetailsConstants.TRACK_TITLE),
+                            data.getExtras().getString(IDetailsConstants.TRACK_ARTIST));
                 }
             }
             break;
@@ -581,180 +526,44 @@ public class SongDetailActivity extends AppCompatActivity implements
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void startPlayingTrack(String trackTitle, String trackUrl) {
+    @Override
+    public void setBackGroundImage(String trackImageUrl) {
+        ivAlbumBg.setImageUrl(this, trackImageUrl);
+    }
+
+    @Override
+    public void setTrackTitle(String trackTitle) {
+        tvTrackTitle.setText(trackTitle);
+    }
+
+    @Override
+    public void setTrackArtist(String trackArtist) {
+        tvTrackArtist.setText(trackArtist);
+    }
+
+    @Override
+    public void startPlayingTrack(String trackTitle, String trackUrl, String frndId) {
         Intent playerServiceIntent = new Intent(this, PlayerService.class);
         playerServiceIntent.setAction(PlayerService.ACTION_PLAY);
         playerServiceIntent.putExtra(IDetailsConstants.NOTIFICATION_SERVICE_TRACK_TITLE, trackTitle);
         playerServiceIntent.putExtra(IDetailsConstants.SERVICE_STREAM_URL, trackUrl);
-        playerServiceIntent.putExtra(IDetailsConstants.FRND_ID, mFrndId);
+        playerServiceIntent.putExtra(IDetailsConstants.FRND_ID, frndId);
         startService(playerServiceIntent);
-    }
-
-    private void addSongToPlaylist(String trackUrl, String trackImageUrl, String trackTitle, String trackArtist, long timestamp, @IDetailsConstants.UserType int userType) {
-
-        trackImageUrl = trackImageUrl.replace(IDetailsConstants.IMG_500_X_500_SUFFIX, IDetailsConstants.IMG_300_X_300_SUFFIX);
-
-        Song song = new Song();
-        song.setSongArtist(trackArtist);
-        song.setSongImgUrl(trackImageUrl);
-        song.setSongTimestamp(timestamp);
-        song.setSongTitle(trackTitle);
-        song.setSongUrl(trackUrl);
-        song.setFrndId(mFrndId);
-
-        String user = (IDetailsConstants.TYPE_ME == userType) ? getString(R.string.current_user_placeholder) : mFrndName;
-
-        Message message = new Message.Builder()
-                .setMsgBody(String.format(getString(R.string.music_chat_message), user, trackTitle))
-                .setMsgTimestamp(timestamp)
-                .setMsgTrackUrl(trackUrl)
-                .setMsgType(IDbConstants.TYPE_MUSIC)
-                .setUserType(userType)
-                .build();
-
-        SongModel songModel = new SongModel();
-        songModel.setTrackUrl(trackUrl);
-        songModel.setTrackUser(trackArtist);
-        songModel.setTrackImageUrl(trackImageUrl);
-        songModel.setTrackTimeStamp(timestamp);
-        songModel.setTrackName(trackTitle);
-
-        MessageModel messageModel = new MessageModel();
-        messageModel.setMessage(String.format(getString(R.string.music_chat_message), "You", trackTitle));
-        messageModel.setUserType(userType);
-        messageModel.setMessageType(IDbConstants.TYPE_MUSIC);
-        messageModel.setMessageTrackUrl(trackUrl);
-
-
-        mAlbumListAdapter.addSong(songModel);
-        mChatAdapter.addMessage(messageModel);
-
-        rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
-
-        helper.insertSongToChat(mFrndId, song);
-        helper.insertMessageToChat(mFrndId, message);
-    }
-
-    private BroadcastReceiver mNotificationReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(intent != null) {
-                String trackId = intent.getStringExtra(IConstants.FRND_TRACK_ID);
-                @IDbConstants.MessageType int messageType = intent.getIntExtra(IConstants.FRND_MESSAGE_TYPE, IDbConstants.TYPE_MESSAGE);
-                String messageBody = intent.getStringExtra(IConstants.FRND_MESSAGE);
-                String trackUrl = intent.getStringExtra(IConstants.FRND_TRACK_URL);
-                String frndId = intent.getStringExtra(IConstants.FRND_ID);
-                String trackTitle = intent.getStringExtra(IConstants.FRND_TRACK_TITLE);
-                long timestamp = intent.getLongExtra(IConstants.FRND_TIME_STAMP, 0L);
-
-                Message message = new Message();
-                message.setMsgBody(messageBody);
-                message.setMsgTimestamp(timestamp);
-                message.setUserType(IDetailsConstants.TYPE_FRND);
-                message.setMsgType(messageType);
-                message.setMsgTrackUrl(trackUrl);
-
-                if(messageType == IDbConstants.TYPE_MUSIC) {
-                    Song song = new Song();
-                    song.setSongUrl(trackUrl);
-                    song.setFrndId(frndId);
-                    song.setSongTitle(trackTitle);
-                    song.setSongTimestamp(timestamp);
-
-                    helper.insertSongToChat(frndId, song);
-                }
-
-                helper.insertMessageToChat(frndId, message);
-
-                refreshChatDetails(frndId, messageType, messageBody, trackId, trackTitle, trackUrl, timestamp);
-            }
-        }
-    };
-
-    private BroadcastReceiver songFinishedReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(intent != null) {
-                @IDetailsConstants.CurrentSongStatusType int currentPlayingStatus =
-                        intent.getIntExtra(IDetailsConstants.CURRENT_SONG_STATUS, IDetailsConstants.CURRENT_SONG_STATUS_PLAYING);
-                FrndsPreference.setInPref(IPrefConstants.CURRENT_SONG_STATUS, currentPlayingStatus);
-                FrndsPreference.setInPref(IPrefConstants.CURRENT_SONG_FRND_ID, mFrndId);
-
-                songPlayedIndicator.setVisibility(currentPlayingStatus == IDetailsConstants.CURRENT_SONG_STATUS_PLAYING ?
-                                                                                View.VISIBLE : View.GONE);
-
-                btnPlaylist.setAnimation(currentPlayingStatus == IDetailsConstants.CURRENT_SONG_STATUS_PLAYING ?
-                                                                                rotateAnimation :  null);
-            }
-        }
-    };
-
-    private void refreshChatDetails(String frndId, int messageType, String message, String trackId,
-                                    final String trackTitle, final String trackUrl, final long timestamp) {
-        if(mFrndId.equalsIgnoreCase(frndId)) {
-            if(messageType == IDbConstants.TYPE_MUSIC) {
-
-                //--getting song artist & image url
-                mSoundCloudClient.getTrackDetails(trackId)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeOn(Schedulers.newThread())
-                        .subscribe(new BaseSubscriber<TrackDetails>() {
-                            @Override
-                            public void onObjectReceived(TrackDetails trackDetails) {
-                                SongModel songModel = new SongModel();
-                                songModel.setTrackName(trackTitle);
-                                songModel.setTrackImageUrl(trackDetails.getArtwork_url());
-                                songModel.setTrackTimeStamp(timestamp);
-                                songModel.setTrackUser(trackDetails.getUser().getUsername());
-                                songModel.setTrackUrl(trackUrl);
-
-                                Song song = new Song();
-                                song.setSongImgUrl(trackDetails.getArtwork_url()
-                                        .replace(IDetailsConstants.STRING_HTTPS, IDetailsConstants.STRING_HTTP)
-                                        .replace(IDetailsConstants.IMG_LARGE_SUFFIX, IDetailsConstants.IMG_500_X_500_SUFFIX));
-                                song.setSongTimestamp(timestamp);
-                                song.setFrndId(mFrndId);
-                                if(trackDetails.getUser() != null) {
-                                    song.setSongArtist(trackDetails.getUser().getUsername());
-                                }
-                                helper.updateSong(song);
-
-                                mAlbumListAdapter.addSong(songModel);
-                            }
-                        });
-            }
-
-            Message msg = new Message();
-            msg.setMsgTimestamp(timestamp);
-            msg.setMsgType(messageType);
-            msg.setUserType(IDetailsConstants.TYPE_FRND);
-            msg.setMsgBody(message);
-
-            MessageModel messageModel = new MessageModel();
-            messageModel.setMessageType(messageType);
-            messageModel.setMessage(message);
-            messageModel.setMessageTrackUrl(trackUrl);
-            messageModel.setUserType(IDetailsConstants.TYPE_FRND);
-            messageModel.setMessageType(messageType);
-
-            mChatAdapter.addMessage(messageModel);
-
-            rlChat.smoothScrollToPosition(mChatAdapter.getItemCount() - 1);
-
-        } else {
-            pendingChat.setVisibility(View.VISIBLE);
-        }
     }
 
     @Override
     public void onFocusChange(View view, boolean isFocus) {
-        if(isFocus) {
-            messageContainer.startAnimation(leftSlide);
-            circularCollapse();
-        } else {
-            if(TextUtils.isEmpty(((EditText)view).getText()))
-                messageContainer.startAnimation(rightSlide);
-        }
+        presenter.onFocusChange(isFocus);
+    }
+
+    @Override
+    public void messageContainerLeftSlide() {
+        messageContainer.startAnimation(leftSlide);
+    }
+
+    @Override
+    public void messageContainerRightSide() {
+        messageContainer.startAnimation(leftSlide);
     }
 
     @Override
@@ -773,9 +582,17 @@ public class SongDetailActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onPlayClick(String trackUrl, String message, int position) {
-        String trackName = message.split(" played ")[1];
-        startPlayingTrack(trackName, trackUrl);
+    public void scrollToAlbumPosition(int position) {
         rlAlbums.smoothScrollToPosition(position);
+    }
+
+    @Override
+    public void showPendingChat() {
+        pendingChat.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onPlayClick(String trackId, String trackUrl, String trackMessage, int position) {
+        presenter.onChatRowPlayClick(trackId, trackUrl, trackMessage, position);
     }
 }

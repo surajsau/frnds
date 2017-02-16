@@ -4,14 +4,15 @@ import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.db.models.Chat;
 import com.halfplatepoha.frnds.db.models.Message;
 import com.halfplatepoha.frnds.db.models.Song;
+import com.halfplatepoha.frnds.db.models.User;
 import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.network.BaseSubscriber;
 
 import java.util.ArrayList;
 
 import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmModel;
+import io.realm.RealmResults;
+import io.realm.Sort;
 import rx.Observable;
 import rx.functions.Func1;
 
@@ -37,7 +38,7 @@ public class ChatDAO {
         mRealm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                if(getFrndWithFrndId(frndId) == null)
+                if(getChatWithFrndId(frndId) == null)
                     realm.insert(chat);
             }
         });
@@ -45,12 +46,13 @@ public class ChatDAO {
 
     public void insertMessageToChat(String chatId, Message message) {
         try{
-            Chat chatResult = getFrndWithFrndId(chatId);
+            Chat chatResult = getChatWithFrndId(chatId);
 
             mRealm.beginTransaction();
             Message msg = mRealm.copyToRealm(message);
             chatResult.getFrndMessages().add(msg);
             chatResult.setFrndLastMessage(msg);
+            chatResult.setFrndLastMessageTimestamp(msg.getMsgTimestamp());
             mRealm.commitTransaction();
         }catch (Exception e) {
             FrndsLog.e("Message Transaction cancelled : " + e.getMessage());
@@ -60,10 +62,12 @@ public class ChatDAO {
 
     public void insertSongToChat(String chatId, Song song) {
         try {
-            Chat chatResult = getFrndWithFrndId(chatId);
+            Chat chatResult = getChatWithFrndId(chatId);
+            User user = mRealm.where(User.class).findFirst();
 
             mRealm.beginTransaction();
             Song sng = mRealm.copyToRealm(song);
+            user.getUserFavSongs().add(song);
             chatResult.getFrndSongs().add(sng);
             mRealm.commitTransaction();
         } catch (Exception e) {
@@ -72,7 +76,7 @@ public class ChatDAO {
         }
     }
 
-    public Chat getFrndWithFrndId(String frndId) {
+    public Chat getChatWithFrndId(String frndId) {
         return mRealm.where(Chat.class).equalTo(IDbConstants.FRND_ID_KEY, frndId).findFirst();
     }
 
@@ -157,6 +161,27 @@ public class ChatDAO {
                 .equalTo(IDbConstants.FRND_ID_KEY, frndId)
                 .equalTo(IDbConstants.MSG_TIME_STAMP_KEY, timestamp)
                 .count() == 1);
+    }
+
+    public RealmResults<Song> getAllSongs() {
+        User result = mRealm.where(User.class).findFirst();
+        if(result != null)
+            return result.getUserFavSongs().sort(IDbConstants.SONG_TIME_STAMP_KEY, Sort.DESCENDING);
+        return null;
+    }
+
+    public RealmResults<Chat> getAllChats() {
+        return mRealm.where(Chat.class).findAll();
+    }
+
+    public void updateChatPosition(Chat chat, int position) {
+        try {
+            mRealm.beginTransaction();
+            chat.setFrndPosition(position);
+            mRealm.commitTransaction();
+        } catch (Exception e) {
+            mRealm.cancelTransaction();
+        }
     }
 
     public void close() {

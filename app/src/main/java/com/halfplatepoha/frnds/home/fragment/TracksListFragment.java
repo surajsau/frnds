@@ -3,20 +3,44 @@ package com.halfplatepoha.frnds.home.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSnapHelper;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.halfplatepoha.frnds.R;
+import com.halfplatepoha.frnds.db.ChatDAO;
+import com.halfplatepoha.frnds.db.models.Song;
+import com.halfplatepoha.frnds.home.adapter.TracksListAdapter;
+import com.halfplatepoha.frnds.home.model.TracksModel;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 /**
  * Created by surajkumarsau on 15/09/16.
  */
 public class TracksListFragment extends Fragment {
 
+    @Bind(R.id.rlTracks)
+    RecyclerView rlTracks;
+
+    private TracksListAdapter mAdapter;
+
+    private ChatDAO helper;
+
     public TracksListFragment(){}
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        helper = new ChatDAO(Realm.getDefaultInstance());
+    }
 
     @Nullable
     @Override
@@ -28,5 +52,35 @@ public class TracksListFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+
+        setupRecycler();
+
+        addDataToTracks();
+    }
+
+    private void addDataToTracks() {
+        RealmResults<Song> songs = helper.getAllSongs();
+        if(songs != null) {
+            for (int i = 0; i < songs.size(); i++) {
+                TracksModel model = new TracksModel();
+                model.setTrackImageUrl(songs.get(i).getSongImgUrl());
+                model.setTrackUrl(songs.get(i).getSongUrl());
+                model.setTrackName(songs.get(i).getSongTitle());
+                model.setTrackUser(songs.get(i).getSongArtist());
+                model.setFrndImageUrl(helper.getChatWithFrndId(songs.get(i).getFrndId()).getFrndImageUrl());
+
+                mAdapter.addSongs(model);
+            }
+        }
+    }
+
+    private void setupRecycler() {
+        rlTracks.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
+
+        SnapHelper snapHelper = new LinearSnapHelper();
+
+        mAdapter = new TracksListAdapter(getActivity());
+        rlTracks.setAdapter(mAdapter);
+        snapHelper.attachToRecyclerView(rlTracks);
     }
 }

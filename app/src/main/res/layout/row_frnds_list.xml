@@ -22,7 +22,8 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:src="@drawable/unread_indicator"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            tools:visibility="visible"/>
     </FrameLayout>
 
     <LinearLayout

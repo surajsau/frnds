@@ -1,8 +1,11 @@
 package com.halfplatepoha.frnds.home.fragment;
 
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -25,10 +28,12 @@ import com.halfplatepoha.frnds.TokenTracker;
 import com.halfplatepoha.frnds.db.ChatDAO;
 import com.halfplatepoha.frnds.db.IDbConstants;
 import com.halfplatepoha.frnds.db.models.Chat;
-import com.halfplatepoha.frnds.db.models.Message;
+import com.halfplatepoha.frnds.detail.IDetailsConstants;
+import com.halfplatepoha.frnds.detail.activity.SongDetailActivity;
+import com.halfplatepoha.frnds.home.IFrndsConstants;
 import com.halfplatepoha.frnds.home.adapter.FriendsListAdapter;
+import com.halfplatepoha.frnds.home.model.ChatListingModel;
 import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
-import com.halfplatepoha.frnds.network.BaseSubscriber;
 
 import java.io.IOException;
 
@@ -36,18 +41,14 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmResults;
-import rx.Observable;
-import rx.functions.Func1;
 
 public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
-        ChatDAO.OnTransactionCompletedListener{
+        ChatDAO.OnTransactionCompletedListener, FriendsListAdapter.OnFriendRowClickListener{
 
     @Bind(R.id.rlFrnds) RecyclerView rlFrnds;
     @Bind(R.id.refreshLayout) SwipeRefreshLayout refreshLayout;
 
     private FriendsListAdapter mAdapter;
-
-    private Realm mRealm;
 
     private ChatDAO helper;
 
@@ -58,8 +59,7 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRealm = Realm.getDefaultInstance();
-        helper = new ChatDAO(mRealm);
+        helper = new ChatDAO(Realm.getDefaultInstance());
         helper.setOnTransactionCompletedListener(this);
     }
 
@@ -80,23 +80,17 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
     }
 
     private void getListFromDb() {
-        RealmResults<Chat> chats = mRealm.where(Chat.class).findAll();
+        RealmResults<Chat> chats = helper.getAllChats();
         for(int i=0; i<chats.size(); i++) {
-            try {
-                if(chats.get(i).getFrndPosition() == null ) {
-                    mRealm.beginTransaction();
-                    chats.get(i).setFrndPosition(i);
-                    mRealm.commitTransaction();
-                }
-            } catch (Exception e) {
-                mRealm.cancelTransaction();
-            }
+            if(chats.get(i).getFrndPosition() == null)
+                helper.updateChatPosition(chats.get(i), i);
             mAdapter.addChat(chats.get(i));
         }
     }
 
     private void setupRecyclerView() {
         mAdapter = new FriendsListAdapter(getActivity());
+        mAdapter.setOnFriendRowClickListener(this);
         rlFrnds.setLayoutManager(new LinearLayoutManager(getActivity()));
         rlFrnds.setAdapter(mAdapter);
 
@@ -105,13 +99,6 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
                 , ContextCompat.getColor(getActivity(), R.color.soundCloud));
         refreshLayout.setOnRefreshListener(this);
     }
-
-    private BaseSubscriber<Chat> chatSubscriber = new BaseSubscriber<Chat>() {
-        @Override
-        public void onObjectReceived(Chat chat) {
-            mAdapter.addChat(chat);
-        }
-    };
 
     @Override
     public void onRefresh() {
@@ -163,7 +150,43 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
         }
     }
 
-    public void refreshChatDetails(String frndId, String message) {
-        mAdapter.refreshChat(frndId, message);
+    public void refreshChatDetails(int position, String message, long timestamp) {
+        mAdapter.refreshChat(position, message, timestamp);
     }
+
+    @Override
+    public void onFriendRowClicked(ActivityOptionsCompat options, String frndId, int position) {
+        Intent songDetailsIntent = new Intent(getActivity(), SongDetailActivity.class);
+        songDetailsIntent.putExtra(IDetailsConstants.FRND_ID, frndId);
+        songDetailsIntent.putExtra(IDetailsConstants.CLICKED_POSITION, position);
+        startActivityForResult(songDetailsIntent, IFrndsConstants.FRIEND_LIST_REQUEST, options.toBundle());
+    }
+
+    @Override
+    public void openDetailDialog(ChatListingModel frnd) {
+        FriendDetailDialogFragment dlgDetail = new FriendDetailDialogFragment();
+        Bundle dlgBundle = new Bundle();
+        dlgBundle.putString(IFrndsConstants.FRIEND_NAME, frnd.getFrndName());
+        dlgBundle.putString(IFrndsConstants.FRIEND_IMAGE_URL, frnd.getFrndImageUrl());
+        dlgDetail.setArguments(dlgBundle);
+        dlgDetail.show(getFragmentManager(), IFrndsConstants.DETAIL_DIALOG_TAG);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case IFrndsConstants.FRIEND_LIST_REQUEST: {
+                if (data != null && resultCode == Activity.RESULT_OK) {
+                    String latestMessage = data.getStringExtra(IDetailsConstants.LATEST_MESSAGE);
+                    String frndId = data.getStringExtra(IDetailsConstants.FRND_ID);
+                    int position = data.getIntExtra(IDetailsConstants.CLICKED_POSITION, 0);
+                    long latestTimestamp = data.getLongExtra(IDetailsConstants.LATEST_MESSAGE_TIMESTAMP, 0L);
+
+                    refreshChatDetails(position, latestMessage, latestTimestamp);
+                }
+            }
+            break;
+        }
+    }
+
 }
