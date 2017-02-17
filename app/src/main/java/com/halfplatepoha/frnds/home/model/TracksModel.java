@@ -10,6 +10,7 @@ public class TracksModel {
     private String trackImageUrl;
     private String frndImageUrl;
     private String trackUser;
+    private String trackShareUrl;
 
     public String getTrackUrl() {
         return trackUrl;
@@ -49,5 +50,13 @@ public class TracksModel {
 
     public void setTrackUser(String trackUser) {
         this.trackUser = trackUser;
+    }
+
+    public String getTrackShareUrl() {
+        return trackShareUrl;
+    }
+
+    public void setTrackShareUrl(String trackShareUrl) {
+        this.trackShareUrl = trackShareUrl;
     }
 }

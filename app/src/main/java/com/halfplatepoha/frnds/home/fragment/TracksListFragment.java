@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.db.ChatDAO;
 import com.halfplatepoha.frnds.db.models.Song;
+import com.halfplatepoha.frnds.detail.IDetailsConstants;
+import com.halfplatepoha.frnds.detail.fragment.ShareSongFragment;
 import com.halfplatepoha.frnds.home.adapter.TracksListAdapter;
 import com.halfplatepoha.frnds.home.model.TracksModel;
 
@@ -25,7 +27,7 @@ import io.realm.RealmResults;
 /**
  * Created by surajkumarsau on 15/09/16.
  */
-public class TracksListFragment extends Fragment {
+public class TracksListFragment extends Fragment implements TracksListAdapter.OnAlbumClickListener{
 
     @Bind(R.id.rlTracks)
     RecyclerView rlTracks;
@@ -54,11 +56,17 @@ public class TracksListFragment extends Fragment {
         ButterKnife.bind(this, view);
 
         setupRecycler();
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
         addDataToTracks();
     }
 
     private void addDataToTracks() {
+        mAdapter.clearList();
+
         RealmResults<Song> songs = helper.getAllSongs();
         if(songs != null) {
             for (int i = 0; i < songs.size(); i++) {
@@ -67,6 +75,7 @@ public class TracksListFragment extends Fragment {
                 model.setTrackUrl(songs.get(i).getSongUrl());
                 model.setTrackName(songs.get(i).getSongTitle());
                 model.setTrackUser(songs.get(i).getSongArtist());
+                model.setTrackShareUrl(songs.get(i).getSongShareUrl());
                 model.setFrndImageUrl(helper.getChatWithFrndId(songs.get(i).getFrndId()).getFrndImageUrl());
 
                 mAdapter.addSongs(model);
@@ -80,7 +89,18 @@ public class TracksListFragment extends Fragment {
         SnapHelper snapHelper = new LinearSnapHelper();
 
         mAdapter = new TracksListAdapter(getActivity());
+        mAdapter.setListener(this);
         rlTracks.setAdapter(mAdapter);
         snapHelper.attachToRecyclerView(rlTracks);
+    }
+
+    @Override
+    public void onAlbumClick(TracksModel model) {
+        ShareSongFragment shareSong = new ShareSongFragment();
+        shareSong.setSongModel(model);
+        getFragmentManager().beginTransaction()
+                .replace(R.id.home, shareSong)
+                .addToBackStack(IDetailsConstants.SONG_SHARE_TAG)
+                .commit();
     }
 }

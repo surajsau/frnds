@@ -12,6 +12,7 @@ public class TrackDetails {
     private String title;
     private String artwork_url;
     private User user;
+    private String permalink_url;
 
     public long getId() {
         return id;
@@ -51,6 +52,14 @@ public class TrackDetails {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getPermalink_url() {
+        return permalink_url;
+    }
+
+    public void setPermalink_url(String permalink_url) {
+        this.permalink_url = permalink_url;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

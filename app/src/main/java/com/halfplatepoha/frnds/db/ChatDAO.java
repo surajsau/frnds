@@ -171,7 +171,7 @@ public class ChatDAO {
     }
 
     public RealmResults<Chat> getAllChats() {
-        return mRealm.where(Chat.class).findAll();
+        return mRealm.where(Chat.class).findAll().sort(IDbConstants.CHAT_POSITION_KEY, Sort.ASCENDING);
     }
 
     public void updateChatPosition(Chat chat, int position) {

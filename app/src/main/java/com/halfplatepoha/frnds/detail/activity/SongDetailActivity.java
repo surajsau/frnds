@@ -257,9 +257,8 @@ public class SongDetailActivity extends BaseActivity implements SongDetailView,
         if (songs.size() > 0) {
             tvTrackTitle.setText(songs.get(songs.size() - 1).getTrackName());
             tvTrackArtist.setText(songs.get(songs.size() - 1).getTrackUser());
-        } else {
-            tvTrackTitle.setVisibility(View.GONE);
-            tvTrackArtist.setVisibility(View.GONE);
+            tvTrackTitle.setVisibility(View.VISIBLE);
+            tvTrackArtist.setVisibility(View.VISIBLE);
         }
 
         //--adding messages to chat
@@ -384,6 +383,7 @@ public class SongDetailActivity extends BaseActivity implements SongDetailView,
                         getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_NAME),
                         getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_URL),
                         getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_IMAGE_URL),
+                        getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_SHARE_URL),
                         getIntent().getStringExtra(IFCMConstants.NOTIF_TRACK_ARTIST),
                         getIntent().getStringExtra(IFCMConstants.NOTIF_MESSAGE),
                         getIntent().getStringExtra(IFCMConstants.NOTIF_TYPE),
@@ -517,6 +517,7 @@ public class SongDetailActivity extends BaseActivity implements SongDetailView,
                     presenter.onSongSearchResultReceived(data.getExtras().getLong(IDetailsConstants.TRACK_ID),
                             data.getExtras().getString(IDetailsConstants.TRACK_URL),
                             data.getExtras().getString(IDetailsConstants.TRACK_IMAGE_URL),
+                            data.getExtras().getString(IDetailsConstants.TRACK_SHARE_URL),
                             data.getExtras().getString(IDetailsConstants.TRACK_TITLE),
                             data.getExtras().getString(IDetailsConstants.TRACK_ARTIST));
                 }
@@ -543,7 +544,7 @@ public class SongDetailActivity extends BaseActivity implements SongDetailView,
 
     @Override
     public void startPlayingTrack(String trackTitle, String trackUrl, String frndId) {
-        Intent playerServiceIntent = new Intent(this, PlayerService.class);
+        Intent playerServiceIntent = new Intent(getApplicationContext(), PlayerService.class);
         playerServiceIntent.setAction(PlayerService.ACTION_PLAY);
         playerServiceIntent.putExtra(IDetailsConstants.NOTIFICATION_SERVICE_TRACK_TITLE, trackTitle);
         playerServiceIntent.putExtra(IDetailsConstants.SERVICE_STREAM_URL, trackUrl);

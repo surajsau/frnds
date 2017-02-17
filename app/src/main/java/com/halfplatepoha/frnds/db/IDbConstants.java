@@ -12,6 +12,7 @@ public interface IDbConstants {
 
     String SONG_ID_KEY = "songId";
     String FRND_ID_KEY = "frndId";
+    String CHAT_POSITION_KEY = "frndPosition";
     String MSG_TIME_STAMP_KEY = "msgTimestamp";
     String SONG_TIME_STAMP_KEY = "songTimestamp";
     String USER_FB_ID_KEY = "userFbId";

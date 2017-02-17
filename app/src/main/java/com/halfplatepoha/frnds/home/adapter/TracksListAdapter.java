@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
@@ -28,6 +29,8 @@ public class TracksListAdapter extends RecyclerView.Adapter<TracksListAdapter.Tr
 
     private Context context;
 
+    private OnAlbumClickListener listener;
+
     public TracksListAdapter(Context context) {
         this.context = context;
     }
@@ -36,6 +39,10 @@ public class TracksListAdapter extends RecyclerView.Adapter<TracksListAdapter.Tr
     public TracksViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View row = LayoutInflater.from(context).inflate(R.layout.row_tracks, parent, false);
         return new TracksViewHolder(row);
+    }
+
+    public void setListener(OnAlbumClickListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -66,6 +73,11 @@ public class TracksListAdapter extends RecyclerView.Adapter<TracksListAdapter.Tr
         notifyItemInserted(songs.size() - 1);
     }
 
+    public void clearList() {
+        if(songs != null)
+            songs.clear();
+    }
+
     public class TracksViewHolder extends RecyclerView.ViewHolder {
 
         @Bind(R.id.tvPlayerTrackTitle)
@@ -84,6 +96,15 @@ public class TracksListAdapter extends RecyclerView.Adapter<TracksListAdapter.Tr
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
+
+        @OnClick(R.id.ivPlayerAlbum)
+        public void onAlbumClick() {
+            listener.onAlbumClick(songs.get(getAdapterPosition()));
+        }
+    }
+
+    public interface OnAlbumClickListener {
+        void onAlbumClick(TracksModel model);
     }
 
 }

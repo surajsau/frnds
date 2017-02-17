@@ -14,7 +14,8 @@ public interface SongDetailPresenter extends BasePresenter {
                         String musicChatMessage);
 
     void dataFromNotification(String frndName, String trackId, String trackTitle,
-                              String trackUrl, String trackImageUrl, String trackArtist, String message,
+                              String trackUrl, String trackImageUrl, String trackShareUrl,
+                              String trackArtist, String message,
                               String type, String timestamp);
 
     void onNotificationBroadcast(String trackId,
@@ -26,7 +27,7 @@ public interface SongDetailPresenter extends BasePresenter {
                                  long timestamp);
 
     void onSongSearchResultReceived(long trackId,
-                               String trackUrl, String trackImageUrl,
+                               String trackUrl, String trackImageUrl, String trackShareUrl,
                                String trackTitle, String trackArtist);
 
     void dataFromChat();

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.halfplatepoha.frnds.FrndsLog;
+import com.halfplatepoha.frnds.LytMgr;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.TokenTracker;
 import com.halfplatepoha.frnds.db.ChatDAO;
@@ -36,11 +37,14 @@ import com.halfplatepoha.frnds.home.model.ChatListingModel;
 import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
 import io.realm.RealmResults;
+
+import static com.halfplatepoha.frnds.R.drawable.chat;
 
 public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener,
         ChatDAO.OnTransactionCompletedListener, FriendsListAdapter.OnFriendRowClickListener{
@@ -52,6 +56,8 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
 
     private ChatDAO helper;
 
+    private ArrayList<ChatListingModel> mChats;
+
     public FriendsListFragment() {
         // Required empty public constructor
     }
@@ -61,6 +67,8 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
         super.onCreate(savedInstanceState);
         helper = new ChatDAO(Realm.getDefaultInstance());
         helper.setOnTransactionCompletedListener(this);
+
+        getListFromDb();
     }
 
     @Override
@@ -75,16 +83,16 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
         ButterKnife.bind(this, view);
 
         setupRecyclerView();
-
-        getListFromDb();
     }
 
     private void getListFromDb() {
         RealmResults<Chat> chats = helper.getAllChats();
+        mChats = new ArrayList<>();
+//        mAdapter.clearList();
         for(int i=0; i<chats.size(); i++) {
             if(chats.get(i).getFrndPosition() == null)
                 helper.updateChatPosition(chats.get(i), i);
-            mAdapter.addChat(chats.get(i));
+            mChats.add(new ChatListingModel(chats.get(i)));
         }
     }
 
@@ -94,10 +102,20 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
         rlFrnds.setLayoutManager(new LinearLayoutManager(getActivity()));
         rlFrnds.setAdapter(mAdapter);
 
+        for(ChatListingModel model : mChats) {
+            mAdapter.addChat(model);
+        }
+
         refreshLayout.setEnabled(true);
         refreshLayout.setColorSchemeColors(ContextCompat.getColor(getActivity(), R.color.colorAccent)
                 , ContextCompat.getColor(getActivity(), R.color.soundCloud));
         refreshLayout.setOnRefreshListener(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getListFromDb();
     }
 
     @Override
@@ -152,6 +170,7 @@ public class FriendsListFragment extends Fragment implements SwipeRefreshLayout.
 
     public void refreshChatDetails(int position, String message, long timestamp) {
         mAdapter.refreshChat(position, message, timestamp);
+//        getListFromDb();
     }
 
     @Override

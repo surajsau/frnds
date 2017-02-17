@@ -104,6 +104,7 @@ public class SongDetailPresenterImpl implements SongDetailPresenter {
             model.setTrackImageUrl(sngs.get(i).getSongImgUrl());
             model.setTrackUser(sngs.get(i).getSongArtist());
             model.setTrackUrl(sngs.get(i).getSongUrl());
+            model.setTrackShareUrl(sngs.get(i).getSongShareUrl());
 
             songs.add(model);
         }
@@ -118,6 +119,11 @@ public class SongDetailPresenterImpl implements SongDetailPresenter {
             model.setMessageTimeStamp(msgs.get(i).getMsgTimestamp());
 
             messages.add(model);
+        }
+
+        if(messages.size() > 0) {
+            latestMessage = messages.get(messages.size() - 1).getMessage();
+            latestTimestamp = messages.get(messages.size() - 1).getMessageTimeStamp();
         }
 
         view.buildAnimations();
@@ -210,12 +216,12 @@ public class SongDetailPresenterImpl implements SongDetailPresenter {
 
     @Override
     public void dataFromNotification(String frndName, String trackId, String trackTitle,
-                                     String trackUrl, String trackImageUrl, String trackArtist, String message,
+                                     String trackUrl, String trackImageUrl, String trackShareUrl, String trackArtist, String message,
                                      String type, String timestamp) {
         long ts = !TextUtils.isEmpty(timestamp) ? Long.valueOf(timestamp) : 0L;
         
         if ("SONG".equalsIgnoreCase(type)) {
-            addSongToPlaylist(trackId, trackUrl, trackImageUrl, trackTitle, trackArtist, ts, IDetailsConstants.TYPE_FRND);
+            addSongToPlaylist(trackId, trackUrl, trackImageUrl, trackShareUrl, trackTitle, trackArtist, ts, IDetailsConstants.TYPE_FRND);
         } else {
             Message msg = new Message.Builder()
                     .setMsgBody(message)
@@ -255,10 +261,10 @@ public class SongDetailPresenterImpl implements SongDetailPresenter {
     }
 
     @Override
-    public void onSongSearchResultReceived(long trackId, String trackUrl, String trackImageUrl, String trackTitle, String trackArtist) {
+    public void onSongSearchResultReceived(long trackId, String trackUrl, String trackImageUrl, String tracKShareUrl, String trackTitle, String trackArtist) {
         String id = String.valueOf(trackId);
 
-        addSongToPlaylist(id, trackUrl, trackImageUrl, trackTitle, trackArtist, System.currentTimeMillis(), IDetailsConstants.TYPE_ME);
+        addSongToPlaylist(id, trackUrl, trackImageUrl, tracKShareUrl, trackTitle, trackArtist, System.currentTimeMillis(), IDetailsConstants.TYPE_ME);
 
         view.startPlayingTrack(trackTitle, trackUrl, frndId);
 
@@ -316,7 +322,8 @@ public class SongDetailPresenterImpl implements SongDetailPresenter {
                 });
     }
 
-    private void addSongToPlaylist(String trackId, String trackUrl, String trackImageUrl, String trackTitle, String trackArtist,
+    private void addSongToPlaylist(String trackId, String trackUrl, String trackImageUrl, String trackShareUrl,
+                                   String trackTitle, String trackArtist,
                                    long timestamp, @IDetailsConstants.UserType int userType) {
 
         if(trackImageUrl != null) {
@@ -329,6 +336,7 @@ public class SongDetailPresenterImpl implements SongDetailPresenter {
         song.setSongTimestamp(timestamp);
         song.setSongTitle(trackTitle);
         song.setSongUrl(trackUrl);
+        song.setSongShareUrl(trackShareUrl);
         song.setFrndId(frndId);
 
         String user = (IDetailsConstants.TYPE_ME == userType) ? currentUserPlaceholder : frndName;
@@ -347,6 +355,7 @@ public class SongDetailPresenterImpl implements SongDetailPresenter {
         songModel.setTrackImageUrl(trackImageUrl);
         songModel.setTrackTimeStamp(timestamp);
         songModel.setTrackName(trackTitle);
+        songModel.setTrackShareUrl(trackShareUrl);
 
         MessageModel messageModel = new MessageModel();
         messageModel.setMessage(String.format(musicChatMessage, user, trackTitle));
@@ -410,12 +419,14 @@ public class SongDetailPresenterImpl implements SongDetailPresenter {
                                 songModel.setTrackTimeStamp(timestamp);
                                 songModel.setTrackUser(trackDetails.getUser().getUsername());
                                 songModel.setTrackUrl(trackUrl);
+                                songModel.setTrackShareUrl(trackDetails.getPermalink_url());
 
                                 Song song = new Song();
                                 song.setSongImgUrl(trackDetails.getArtwork_url()
                                         .replace(IDetailsConstants.STRING_HTTPS, IDetailsConstants.STRING_HTTP)
                                         .replace(IDetailsConstants.IMG_LARGE_SUFFIX, IDetailsConstants.IMG_500_X_500_SUFFIX));
                                 song.setSongTimestamp(timestamp);
+                                song.setSongShareUrl(trackDetails.getPermalink_url());
                                 song.setFrndId(frndId);
                                 if(trackDetails.getUser() != null) {
                                     song.setSongArtist(trackDetails.getUser().getUsername());

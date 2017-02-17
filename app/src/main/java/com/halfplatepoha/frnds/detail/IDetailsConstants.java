@@ -5,6 +5,7 @@ import android.support.annotation.IntDef;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import static com.halfplatepoha.frnds.IConstants.TRACK_TITLE;
 import static com.halfplatepoha.frnds.detail.IDetailsConstants.CURRENT_SONG_STATUS_PLAYING;
 import static com.halfplatepoha.frnds.detail.IDetailsConstants.CURRENT_SONG_STATUS_STOP;
 
@@ -39,6 +40,7 @@ public interface IDetailsConstants {
     String TRACK_ID = "track_id";
     String TRACK_URL = "track_url";
     String TRACK_IMAGE_URL = "track_image_url";
+    String TRACK_SHARE_URL = "track_share_url";
     String TRACK_TITLE = "track_title";
     String TRACK_ARTIST = "track_artist";
     String FRND_ID = "friendId";

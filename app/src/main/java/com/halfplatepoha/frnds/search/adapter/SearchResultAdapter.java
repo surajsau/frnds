@@ -110,6 +110,7 @@ public class SearchResultAdapter extends AutoLoadingRecyclerAdapter<TrackDetails
         songDetail.putExtra(IDetailsConstants.TRACK_URL, trackDetails.getStream_url());
         songDetail.putExtra(IDetailsConstants.TRACK_IMAGE_URL, trackDetails.getArtwork_url());
         songDetail.putExtra(IDetailsConstants.TRACK_TITLE, trackDetails.getTitle());
+        songDetail.putExtra(IDetailsConstants.TRACK_SHARE_URL, trackDetails.getPermalink_url());
         ((SearchScreenActivity)mContext).setResult(Activity.RESULT_OK, songDetail);
         ((SearchScreenActivity)mContext).onBackPressed();
     }

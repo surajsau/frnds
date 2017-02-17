@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:layout_marginBottom="?android:actionBarSize"
     android:background="@color/colorPrimaryVeryDark">
 
     <android.support.v7.widget.RecyclerView
@@ -17,30 +16,12 @@
         android:layout_weight="1"
         tools:listitem="@layout/row_tracks"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <ImageButton android:id="@+id/btnPrev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/music_prev"
-            android:background="@null"/>
-
-        <ImageButton android:id="@+id/btnPlayPause"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/play"
-            android:background="@null"/>
-
-        <ImageButton android:id="@+id/btnNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/music_next"
-            android:background="@null"/>
-
-    </LinearLayout>
+    <com.halfplatepoha.frnds.ui.OpenSansTextView
+        android:layout_width="wrap_content"
+        android:layout_height="?android:actionBarSize"
+        android:gravity="center_vertical"
+        android:layout_marginTop="20dp"
+        android:textColor="@color/colorPrimaryLight_b0"
+        android:text="Click on a track to Sync on Whatsapp" />
 
 </LinearLayout>

@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.TabLayout;
 import android.support.v4.content.ContextCompat;
@@ -135,6 +138,7 @@ public class HomeActivity extends BaseActivity implements HomeView {
         });
 
         tabs.getTabAt(0).select();
+        tabs.getTabAt(0).setIcon(ContextCompat.getDrawable(this, IFrndsConstants.tabSelectedDrawables[0]));
     }
 
     @Override
@@ -236,11 +240,11 @@ public class HomeActivity extends BaseActivity implements HomeView {
     @OnClick(R.id.btnPlayNext)
     public void onPlayPauseClick() {
         if(status == IDetailsConstants.CURRENT_SONG_STATUS_PLAYING) {
-            stopService(new Intent(this, PlayerService.class));
+            stopService(new Intent(getApplicationContext(), PlayerService.class));
             btnPlayNext.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.pause_circle));
             status = IDetailsConstants.CURRENT_SONG_STATUS_STOP;
         } else {
-            Intent playerServiceIntent = new Intent(this, PlayerService.class);
+            Intent playerServiceIntent = new Intent(getApplicationContext(), PlayerService.class);
             playerServiceIntent.setAction(PlayerService.ACTION_PLAY);
             playerServiceIntent.putExtra(IDetailsConstants.NOTIFICATION_SERVICE_TRACK_TITLE, FrndsPreference.getFromPref(IPrefConstants.LATEST_SONG_NAME, ""));
             playerServiceIntent.putExtra(IDetailsConstants.SERVICE_STREAM_URL, FrndsPreference.getFromPref(IPrefConstants.LATEST_SONG_URL, ""));

@@ -29,6 +29,7 @@ import com.halfplatepoha.frnds.models.fb.InstalledFrnds;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -81,9 +82,8 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
         }
     }
 
-    public void addChat(Chat chat) {
-        ChatListingModel chatModel = new ChatListingModel(chat);
-        mFriends.add(chat.getFrndPosition(), chatModel);
+    public void addChat(ChatListingModel chat) {
+        mFriends.add(chat);
         notifyItemInserted(mFriends.size() - 1);
     }
 
@@ -95,24 +95,19 @@ public class FriendsListAdapter extends RecyclerView.Adapter<FriendsListAdapter.
     }
 
     public void refreshChat(int position, String lastMessage, long lastTimestamp) {
-        if(position != -1) {
+        if(position != -1 && lastTimestamp != mFriends.get(position).getLastTimestamp()) {
             ChatListingModel chat = mFriends.get(position);
             chat.setLastMessage(lastMessage);
-            notifyItemChanged(position);
 
-            if (chat.getLastTimestamp() != lastTimestamp) {
-                mFriends.remove(position);
+            mFriends.remove(position);
+            mFriends.add(0, chat);
 
-                chat.setLastTimestamp(lastTimestamp);
-                chat.setFrndPosition(0);
-
-                mFriends.add(0, chat);
-
-                notifyItemMoved(position, 0);
-                notifyItemChanged(0);
-            }
+            notifyDataSetChanged();
         }
+    }
 
+    public void clearList() {
+        mFriends.clear();
     }
 
     public class FriendViewHolder extends RecyclerView.ViewHolder{

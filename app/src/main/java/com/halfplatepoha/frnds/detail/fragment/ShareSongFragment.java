@@ -15,9 +15,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.halfplatepoha.frnds.FrndsLog;
 import com.halfplatepoha.frnds.R;
 import com.halfplatepoha.frnds.detail.adapter.FrndsShareSuggestionListAdapter;
 import com.halfplatepoha.frnds.detail.model.SongModel;
+import com.halfplatepoha.frnds.home.model.TracksModel;
 import com.halfplatepoha.frnds.ui.GlideImageView;
 import com.halfplatepoha.frnds.ui.OpenSansTextView;
 import com.halfplatepoha.frnds.utils.AppUtil;
@@ -25,6 +27,8 @@ import com.halfplatepoha.frnds.utils.AppUtil;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.T;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -41,6 +45,7 @@ public class ShareSongFragment extends Fragment {
     OpenSansTextView tvAlbumTitle;
 
     private SongModel songModel;
+    private TracksModel tracksModel;
 
     private StringBuilder shareMsg;
 
@@ -75,6 +80,17 @@ public class ShareSongFragment extends Fragment {
                 .append("https://play.google.com/store/apps/details?id=com.whatsapp");
     }
 
+    public void setSongModel(TracksModel trackModel) {
+        this.tracksModel = trackModel;
+
+        shareMsg = new StringBuilder("Check out ");
+        shareMsg.append(tracksModel.getTrackName())
+                .append(" on SoundCloud ")
+                .append(tracksModel.getTrackShareUrl())
+                .append("Sync with your friends, download from ")
+                .append("https://play.google.com/store/apps/details?id=com.whatsapp");
+    }
+
     @OnClick(R.id.back)
     public void close() {
         AppUtil.hideSoftKeyboard(getActivity());
@@ -83,6 +99,7 @@ public class ShareSongFragment extends Fragment {
 
     @OnClick(R.id.btnShare)
     public void onShareClick() {
+        FrndsLog.e(shareMsg.toString());
         Intent whatsappIntent = new Intent(Intent.ACTION_SEND);
         whatsappIntent.setType("text/plain");
         whatsappIntent.setPackage("com.whatsapp");

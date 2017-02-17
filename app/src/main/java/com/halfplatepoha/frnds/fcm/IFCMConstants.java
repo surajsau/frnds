@@ -13,6 +13,7 @@ public interface IFCMConstants {
     String NOTIF_TRACK_URL = "trackUrl";
     String NOTIF_TRACK_ID = "trackId";
     String NOTIF_MESSAGE = "message";
+    String NOTIF_TRACK_SHARE_URL = "trackShareUrl";
     String NOTIF_TIMESTAMP = "timestamp";
     String NOTIF_TRACK_IMAGE_URL = "trackImageUrl";
     String NOTIF_TRACK_ARTIST = "trackArtist";

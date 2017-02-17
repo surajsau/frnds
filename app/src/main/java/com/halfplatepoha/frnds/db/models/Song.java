@@ -14,6 +14,7 @@ public class Song extends RealmObject {
     private String      songArtist;
     private String      frndId;
     private long        songTimestamp;
+    private String      songShareUrl;
 
     public String getSongUrl() {
         return songUrl;
@@ -61,5 +62,13 @@ public class Song extends RealmObject {
 
     public void setSongTimestamp(long songTimestamp) {
         this.songTimestamp = songTimestamp;
+    }
+
+    public String getSongShareUrl() {
+        return songShareUrl;
+    }
+
+    public void setSongShareUrl(String songShareUrl) {
+        this.songShareUrl = songShareUrl;
     }
 }
